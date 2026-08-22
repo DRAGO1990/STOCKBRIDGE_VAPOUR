@@ -35,7 +35,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-fuchsia-50 text-slate-900 flex flex-col selection:bg-pink-300 selection:text-purple-950">
+      <div className="min-h-screen bg-[#0f1329] text-[#e8eaf0] flex flex-col selection:bg-teal-500 selection:text-navy-950">
         <Navbar />
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <Routes>
