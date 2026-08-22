@@ -32,9 +32,9 @@ export const CreateListingPage: React.FC = () => {
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Groceries');
-  const [quantity, setQuantity] = useState<number>(100);
+  const [quantity, setQuantity] = useState<number>(0);
   const [unit, setUnit] = useState('packets');
-  const [pricePerUnit, setPricePerUnit] = useState<number>(150);
+  const [pricePerUnit, setPricePerUnit] = useState<number>(0);
   const [expiryDate, setExpiryDate] = useState('');
   const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('low');
 
@@ -48,8 +48,8 @@ export const CreateListingPage: React.FC = () => {
       return;
     }
 
-    if (!title.trim() || quantity <= 0 || pricePerUnit <= 0) {
-      setError('Please fill in all required fields with valid quantities and prices.');
+    if (!title.trim() || quantity <= 0 || pricePerUnit <= 0 || !expiryDate) {
+      setError('Please fill in all required fields including a valid expiry date, quantity, and price.');
       return;
     }
 
@@ -63,7 +63,7 @@ export const CreateListingPage: React.FC = () => {
         quantity: Number(quantity),
         unit,
         pricePerUnit: Number(pricePerUnit),
-        expiryDate: expiryDate ? new Date(expiryDate).toISOString() : null,
+        expiryDate: new Date(expiryDate).toISOString(),
         urgency,
       });
 
@@ -138,7 +138,7 @@ export const CreateListingPage: React.FC = () => {
                 </label>
                 <input
                   type="number"
-                  min="1"
+                  min="0"
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
                   required
@@ -175,7 +175,7 @@ export const CreateListingPage: React.FC = () => {
                 </span>
                 <input
                   type="number"
-                  min="0.1"
+                  min="0"
                   step="0.01"
                   value={pricePerUnit}
                   onChange={(e) => setPricePerUnit(Number(e.target.value))}
@@ -192,12 +192,13 @@ export const CreateListingPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                  Expiry Date (Optional)
+                  Expiry Date *
                 </label>
                 <input
                   type="date"
                   value={expiryDate}
                   onChange={(e) => setExpiryDate(e.target.value)}
+                  required
                   className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
                 />
               </div>

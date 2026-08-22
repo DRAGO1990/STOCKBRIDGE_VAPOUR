@@ -22,7 +22,7 @@ export const listingSchema = z.object({
   quantity: z.number().positive(),
   unit: z.string().min(1).max(50),
   pricePerUnit: z.number().positive(),
-  expiryDate: z.string().optional().nullable(),
+  expiryDate: z.string().min(1, 'Expiry date is required'),
   urgency: z.enum(['low', 'medium', 'high']).default('low'),
 });
 
