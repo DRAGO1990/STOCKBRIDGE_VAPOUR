@@ -111,10 +111,10 @@ export const HomePage: React.FC = () => {
             Empowering Zero Waste & High Velocity B2B Commerce
           </div>
           <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
-            Turn Dead Stock & Near-Expiry Batches Into <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-300 to-amber-300">Instant Working Capital</span>
+            Turn Excess Inventory Into <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-300 to-amber-300">Revenue Before It Becomes Dead Stock</span>
           </h1>
           <p className="text-slate-300 text-sm md:text-base leading-relaxed">
-            StockBridge connects manufacturers, wholesalers, and retail chains to liquidate surplus lots directly to local business buyers at verified discount rates.
+            StockBridge connects businesses with excess inventory to nearby businesses facing stockouts—enabling fast, trusted B2B inventory exchange at competitive prices.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-3">
