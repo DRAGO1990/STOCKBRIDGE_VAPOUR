@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  phone        String   @default("")
+  email        String   @unique
+  passwordHash String
+  businessName String   @default("")
+  lat          Float    @default(0)
+  lng          Float    @default(0)
+  address      String   @default("")
+  rating       Float    @default(0)
+  verified     Boolean  @default(false)
+  isAdmin      Boolean  @default(false)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  listings     Listing[]
+  reservations Reservation[]
+  sentMessages Message[]
+  ratingsGiven Rating[]      @relation("RatingFrom")
+  ratingsReceived Rating[]   @relation("RatingTo")
+
+  @@index([email])
+}
+
+model Listing {
+  id           String   @id @default(uuid())
+  sellerId     String
+  title        String
+  category     String
+  quantity     Float
+  unit         String
+  pricePerUnit Float
+  expiryDate   DateTime?
+  urgency      String   @default("low") // low, medium, high
+  status       String   @default("active") // active, reserved, sold, expired
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  seller       User     @relation(fields: [sellerId], references: [id])
+  reservations Reservation[]
+
+  @@index([sellerId])
+  @@index([category])
+  @@index([status])
+}
+
+model Reservation {
+  id          String   @id @default(uuid())
+  listingId   String
+  buyerId     String
+  status      String   @default("pending") // pending, confirmed, completed, cancelled
+  agreedPrice Float    @default(0)
+  agreedQty   Float    @default(0)
+  proofPhoto  String?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  listing     Listing  @relation(fields: [listingId], references: [id])
+  buyer       User     @relation(fields: [buyerId], references: [id])
+  messages    Message[]
+  ratings     Rating[]
+
+  @@index([listingId])
+  @@index([buyerId])
+  @@index([status])
+}
+
+model Message {
+  id            String   @id @default(uuid())
+  reservationId String
+  senderId      String
+  text          String
+  read          Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  sender        User        @relation(fields: [senderId], references: [id])
+
+  @@index([reservationId])
+  @@index([senderId])
+}
+
+model Rating {
+  id            String   @id @default(uuid())
+  fromUserId    String
+  toUserId      String
+  reservationId String
+  score         Int
+  comment       String   @default("")
+  createdAt     DateTime @default(now())
+
+  fromUser      User        @relation("RatingFrom", fields: [fromUserId], references: [id])
+  toUser        User        @relation("RatingTo", fields: [toUserId], references: [id])
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+
+  @@unique([fromUserId, reservationId])
+  @@index([toUserId])
+}

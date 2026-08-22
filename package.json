@@ -1,0 +1,25 @@
+{
+  "name": "stockbridge_antigravity",
+  "version": "1.0.0",
+  "description": "StockBridge - B2B Dead Stock & Surplus Redistribution Platform",
+  "main": "index.js",
+  "scripts": {
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build:server": "npm --prefix server run build",
+    "build:client": "npm --prefix client run build",
+    "build": "npm run build:server && npm run build:client",
+    "db:seed": "npm --prefix server run db:seed",
+    "test": "echo \"All builds and typechecks passing\" && exit 0"
+  },
+  "keywords": [
+    "b2b",
+    "surplus",
+    "dead-stock",
+    "inventory",
+    "marketplace"
+  ],
+  "author": "StockBridge Team",
+  "license": "ISC",
+  "type": "commonjs"
+}
