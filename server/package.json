@@ -11,6 +11,7 @@
     "db:push": "npx prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "npx prisma studio",
+    "generate:random": "tsx src/scripts/random_generator.ts",
     "seed": "tsx prisma/seed.ts"
   },
   "prisma": {

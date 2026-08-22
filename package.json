@@ -10,6 +10,9 @@
     "build:client": "npm --prefix client run build",
     "build": "npm run build:server && npm run build:client",
     "db:seed": "npm --prefix server run db:seed",
+    "generate": "npm --prefix server run generate:random",
+    "generate:py": "python scripts/random_generator.py",
+    "generate:stream": "python scripts/random_generator.py --mode stream",
     "test": "echo \"All builds and typechecks passing\" && exit 0"
   },
   "keywords": [
