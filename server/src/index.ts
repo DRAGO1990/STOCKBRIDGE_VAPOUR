@@ -16,6 +16,7 @@ import reservationRoutes from './routes/reservations';
 import ratingRoutes from './routes/ratings';
 import messageRoutes from './routes/messages';
 import adminRoutes from './routes/admin';
+import voiceRoutes from './routes/voice';
 
 const app = express();
 const server = http.createServer(app);
@@ -40,6 +41,7 @@ app.use('/api/reservations', reservationRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/voice', voiceRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

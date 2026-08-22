@@ -64,3 +64,19 @@ export const matchQuerySchema = z.object({
   lat: z.number().optional().default(19.076),
   lng: z.number().optional().default(72.877),
 });
+
+export const SUPPORTED_VOICE_LANGUAGES = [
+  { code: 'hi-IN', name: 'Hindi', nativeName: 'हिन्दी' },
+  { code: 'en-IN', name: 'English', nativeName: 'English' },
+  { code: 'bn-IN', name: 'Bengali', nativeName: 'বাংলা' },
+  { code: 'mr-IN', name: 'Marathi', nativeName: 'मराठी' },
+  { code: 'ta-IN', name: 'Tamil', nativeName: 'தமிழ்' },
+  { code: 'te-IN', name: 'Telugu', nativeName: 'తెలుగు' },
+] as const;
+
+const validLanguageCodes = SUPPORTED_VOICE_LANGUAGES.map((l) => l.code) as unknown as [string, ...string[]];
+
+export const voiceParseSchema = z.object({
+  transcript: z.string().min(3, 'Transcript is too short'),
+  language: z.enum(validLanguageCodes),
+});

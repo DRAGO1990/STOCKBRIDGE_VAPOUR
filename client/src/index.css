@@ -106,3 +106,12 @@
 .animate-pulse-glow {
   animation: pulse-glow 2s infinite;
 }
+
+@keyframes pulse-glow-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+}
+
+.animate-pulse-glow-red {
+  animation: pulse-glow-red 1.5s infinite;
+}

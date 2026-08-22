@@ -9,9 +9,13 @@ import {
   Info,
   DollarSign,
   ArrowRight,
+  Mic,
+  Pencil,
 } from 'lucide-react';
 import api from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
+import { VoiceListingPanel } from '../components/VoiceListingPanel';
+import type { ExtractedFields } from '../components/VoiceListingPanel';
 
 const CATEGORIES = [
   'Groceries',
@@ -26,10 +30,13 @@ const CATEGORIES = [
 
 const UNITS = ['kg', 'pieces', 'packets', 'bags', 'cans', 'litres', 'boxes', 'reams', 'cartons'];
 
+type ListingMode = 'manual' | 'voice';
+
 export const CreateListingPage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
 
+  const [mode, setMode] = useState<ListingMode>('manual');
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Groceries');
   const [quantity, setQuantity] = useState<number>(0);
@@ -45,6 +52,27 @@ export const CreateListingPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [voiceAutoFilled, setVoiceAutoFilled] = useState(false);
+
+  // Handle voice extraction → auto-fill form fields → switch to manual mode for review
+  const handleVoiceFieldsExtracted = (fields: ExtractedFields) => {
+    setTitle(fields.title || '');
+    if (CATEGORIES.includes(fields.category)) {
+      setCategory(fields.category);
+    }
+    setQuantity(fields.quantity || 0);
+    if (UNITS.includes(fields.unit)) {
+      setUnit(fields.unit);
+    }
+    setPricePerUnit(fields.pricePerUnit || 0);
+    if (fields.expiryDate) {
+      setExpiryDate(fields.expiryDate);
+    }
+    setUrgency(fields.urgency || 'low');
+    setVoiceAutoFilled(true);
+    setMode('manual'); // Switch to manual for review & edit
+    setError('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,155 +133,204 @@ export const CreateListingPage: React.FC = () => {
         </p>
       </div>
 
+      {/* ─── Mode Toggle Tabs ─────────────────────────────────────────────── */}
+      <div className="flex bg-[#1b2151] rounded-2xl p-1 border border-[#3f4b81]/60">
+        <button
+          type="button"
+          onClick={() => setMode('manual')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+            mode === 'manual'
+              ? 'bg-teal-500/25 text-teal-300 border border-teal-500/50 shadow-lg shadow-teal-500/10'
+              : 'text-slate-400 hover:text-white hover:bg-[#293264]'
+          }`}
+        >
+          <Pencil size={16} />
+          Manual Entry
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('voice')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+            mode === 'voice'
+              ? 'bg-violet-500/25 text-violet-300 border border-violet-500/50 shadow-lg shadow-violet-500/10'
+              : 'text-slate-400 hover:text-white hover:bg-[#293264]'
+          }`}
+        >
+          <Mic size={16} />
+          Voice Listing
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/30 text-violet-300 border border-violet-500/40 font-bold">
+            AI
+          </span>
+        </button>
+      </div>
+
+      {/* Voice auto-filled notification */}
+      {voiceAutoFilled && mode === 'manual' && (
+        <div className="text-xs text-emerald-400 bg-emerald-950/40 p-3 rounded-xl border border-emerald-800/60 flex items-center gap-2 animate-fade-in">
+          <Sparkles size={14} className="text-emerald-400 flex-shrink-0" />
+          <span>
+            <strong>AI auto-filled your listing!</strong> Review and edit the fields below, then publish when ready.
+          </span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Form Column */}
+        {/* Form / Voice Column */}
         <div className="lg:col-span-2">
-          <form
-            onSubmit={handleSubmit}
-            className="bg-[#1b2151] border border-[#3f4b81] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6"
-          >
-            {/* Title */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                Surplus Batch Title *
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Basmati Rice Premium 25kg bags, USB-C Cables 1m lot..."
-                required
-                className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-400 transition-colors"
-              />
+          {mode === 'voice' ? (
+            /* ─── Voice Listing Panel ──────────────────────────────────── */
+            <div className="bg-[#1b2151] border border-[#3f4b81] rounded-3xl p-6 sm:p-8 shadow-2xl">
+              <VoiceListingPanel onFieldsExtracted={handleVoiceFieldsExtracted} />
             </div>
-
-            {/* Category */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                Category *
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat} className="bg-[#1b2151]">
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Quantity & Unit */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          ) : (
+            /* ─── Manual Form ──────────────────────────────────────────── */
+            <form
+              onSubmit={handleSubmit}
+              className="bg-[#1b2151] border border-[#3f4b81] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6"
+            >
+              {/* Title */}
               <div>
                 <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                  Available Quantity *
+                  Surplus Batch Title *
                 </label>
                 <input
-                  type="number"
-                  min="0"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Basmati Rice Premium 25kg bags, USB-C Cables 1m lot..."
                   required
-                  className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-teal-400 transition-colors"
+                  className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-400 transition-colors"
                 />
               </div>
 
+              {/* Category */}
               <div>
                 <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                  Unit of Measure *
+                  Category *
                 </label>
                 <select
-                  value={unit}
-                  onChange={(e) => setUnit(e.target.value)}
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
                   className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
                 >
-                  {UNITS.map((u) => (
-                    <option key={u} value={u} className="bg-[#1b2151]">
-                      {u}
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat} className="bg-[#1b2151]">
+                      {cat}
                     </option>
                   ))}
                 </select>
               </div>
-            </div>
 
-            {/* Price per Unit */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                Liquidation Price Per Unit (₹) *
-              </label>
-              <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
-                  ₹
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={pricePerUnit}
-                  onChange={(e) => setPricePerUnit(Number(e.target.value))}
-                  required
-                  className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl pl-8 pr-4 py-2.5 text-sm text-emerald-400 font-extrabold focus:outline-none focus:border-teal-400 transition-colors"
-                />
-              </div>
-              <span className="text-[11px] text-slate-400 mt-1 block">
-                Discounted price to attract fast liquidations.
-              </span>
-            </div>
+              {/* Quantity & Unit */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+                    Available Quantity *
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Number(e.target.value))}
+                    required
+                    className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-teal-400 transition-colors"
+                  />
+                </div>
 
-            {/* Expiry Date & Urgency */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-200 mb-1.5 flex items-center justify-between">
-                  <span>Expiry Date *</span>
-                  <span className="text-[10px] text-teal-400 font-normal">Min. 10 days duration</span>
-                </label>
-                <input
-                  type="date"
-                  min={minExpiryDate}
-                  value={expiryDate}
-                  onChange={(e) => setExpiryDate(e.target.value)}
-                  required
-                  className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
-                />
-                <span className="text-[11px] text-slate-400 mt-1 block">
-                  Must be at least 10 days from today to ensure an adequate liquidation window.
-                </span>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+                    Unit of Measure *
+                  </label>
+                  <select
+                    value={unit}
+                    onChange={(e) => setUnit(e.target.value)}
+                    className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
+                  >
+                    {UNITS.map((u) => (
+                      <option key={u} value={u} className="bg-[#1b2151]">
+                        {u}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
+              {/* Price per Unit */}
               <div>
                 <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                  Urgency Level *
+                  Liquidation Price Per Unit (₹) *
                 </label>
-                <select
-                  value={urgency}
-                  onChange={(e) => setUrgency(e.target.value as any)}
-                  className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
-                >
-                  <option value="low" className="bg-[#1b2151]">Low — Standard Pace</option>
-                  <option value="medium" className="bg-[#1b2151]">Medium — Within 1-2 Weeks</option>
-                  <option value="high" className="bg-[#1b2151]">High 🔥 — Immediate Clearance</option>
-                </select>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={pricePerUnit}
+                    onChange={(e) => setPricePerUnit(Number(e.target.value))}
+                    required
+                    className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl pl-8 pr-4 py-2.5 text-sm text-emerald-400 font-extrabold focus:outline-none focus:border-teal-400 transition-colors"
+                  />
+                </div>
+                <span className="text-[11px] text-slate-400 mt-1 block">
+                  Discounted price to attract fast liquidations.
+                </span>
               </div>
-            </div>
 
-            {error && (
-              <p className="text-xs text-rose-400 bg-rose-950/40 p-3 rounded-xl border border-rose-800/60 flex items-center gap-2">
-                <AlertCircle size={16} /> {error}
-              </p>
-            )}
+              {/* Expiry Date & Urgency */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-200 mb-1.5 flex items-center justify-between">
+                    <span>Expiry Date *</span>
+                    <span className="text-[10px] text-teal-400 font-normal">Min. 10 days duration</span>
+                  </label>
+                  <input
+                    type="date"
+                    min={minExpiryDate}
+                    value={expiryDate}
+                    onChange={(e) => setExpiryDate(e.target.value)}
+                    required
+                    className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
+                  />
+                  <span className="text-[11px] text-slate-400 mt-1 block">
+                    Must be at least 10 days from today to ensure an adequate liquidation window.
+                  </span>
+                </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-teal-500/25 transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2"
-            >
-              <PlusCircle size={18} />
-              {loading ? 'Publishing Lot...' : 'Publish Surplus Lot'}
-            </button>
-          </form>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+                    Urgency Level *
+                  </label>
+                  <select
+                    value={urgency}
+                    onChange={(e) => setUrgency(e.target.value as any)}
+                    className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
+                  >
+                    <option value="low" className="bg-[#1b2151]">Low — Standard Pace</option>
+                    <option value="medium" className="bg-[#1b2151]">Medium — Within 1-2 Weeks</option>
+                    <option value="high" className="bg-[#1b2151]">High 🔥 — Immediate Clearance</option>
+                  </select>
+                </div>
+              </div>
+
+              {error && (
+                <p className="text-xs text-rose-400 bg-rose-950/40 p-3 rounded-xl border border-rose-800/60 flex items-center gap-2">
+                  <AlertCircle size={16} /> {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 px-4 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-teal-500/25 transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2"
+              >
+                <PlusCircle size={18} />
+                {loading ? 'Publishing Lot...' : 'Publish Surplus Lot'}
+              </button>
+            </form>
+          )}
         </div>
 
         {/* Live Preview Card */}
