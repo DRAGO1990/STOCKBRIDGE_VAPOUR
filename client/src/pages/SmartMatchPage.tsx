@@ -20,7 +20,11 @@ const CATEGORIES = [
   'Stationery',
   'Electronics',
   'Packaging',
+  'Cleaning',
   'Textiles',
+  'Food & Beverages',
+  'Dairy & Beverages',
+  'Prepared Food & Bakery',
   'Hardware',
 ];
 
@@ -35,9 +39,9 @@ const CITIES = [
 export const SmartMatchPage: React.FC = () => {
   const [category, setCategory] = useState('All Categories');
   const [search, setSearch] = useState('');
-  const [maxPrice, setMaxPrice] = useState<number>(500);
-  const [minQuantity, setMinQuantity] = useState<number>(10);
-  const [maxDistanceKm, setMaxDistanceKm] = useState<number>(50);
+  const [maxPrice, setMaxPrice] = useState<number>(3000);
+  const [minQuantity, setMinQuantity] = useState<number>(1);
+  const [maxDistanceKm, setMaxDistanceKm] = useState<number>(100);
   const [selectedCity, setSelectedCity] = useState(CITIES[1]);
 
   const [matches, setMatches] = useState<any[]>([]);
@@ -80,7 +84,7 @@ export const SmartMatchPage: React.FC = () => {
           </div>
           <h1 className="text-3xl font-extrabold text-white">Smart Inventory Match Finder</h1>
           <p className="text-sm text-slate-300 leading-relaxed">
-            Enter your sourcing criteria. Our algorithm evaluates geographical distance, lot discount, and merchant reliability to score the highest yield liquidation matches.
+            Enter your sourcing criteria. Our multi-token algorithm evaluates keywords, synonyms, geographic distance, budget targets, urgency, and merchant reliability to find the best surplus liquidation lots.
           </p>
         </div>
       </div>
@@ -102,7 +106,7 @@ export const SmartMatchPage: React.FC = () => {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="e.g. Rice, Paper, Cable, Oil..."
+                placeholder="e.g. Basmati Rice, USB Cables, Oil 5L, Paper..."
                 className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-400 transition-colors"
               />
             </div>
@@ -157,9 +161,9 @@ export const SmartMatchPage: React.FC = () => {
             </div>
             <input
               type="range"
-              min="10"
-              max="2000"
-              step="10"
+              min="50"
+              max="5000"
+              step="50"
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               className="w-full accent-teal-400 cursor-pointer"
@@ -175,7 +179,7 @@ export const SmartMatchPage: React.FC = () => {
               type="range"
               min="1"
               max="500"
-              step="5"
+              step="1"
               value={minQuantity}
               onChange={(e) => setMinQuantity(Number(e.target.value))}
               className="w-full accent-teal-400 cursor-pointer"
@@ -190,8 +194,8 @@ export const SmartMatchPage: React.FC = () => {
             <input
               type="range"
               min="5"
-              max="2000"
-              step="10"
+              max="500"
+              step="5"
               value={maxDistanceKm}
               onChange={(e) => setMaxDistanceKm(Number(e.target.value))}
               className="w-full accent-cyan-400 cursor-pointer"
@@ -229,21 +233,35 @@ export const SmartMatchPage: React.FC = () => {
           ) : matches.length === 0 ? (
             <div className="bg-[#1b2151] border border-[#3f4b81] rounded-2xl p-12 text-center max-w-md mx-auto space-y-3">
               <Search size={36} className="text-slate-400 mx-auto" />
-              <h3 className="text-lg font-bold text-white">No strict matches found</h3>
+              <h3 className="text-lg font-bold text-white">No relevant matches found</h3>
               <p className="text-xs text-slate-400">
-                Try widening your price ceiling or search radius to find nearby surplus batches.
+                Try searching with broader keywords, changing the category, or expanding your radius.
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {matches.map((item) => (
-                <div key={item.id} className="relative group">
+                <div key={item.id} className="relative group space-y-2">
                   {/* Match Score Badge */}
                   <div className="absolute -top-3 right-4 z-20 bg-gradient-to-r from-teal-500 to-emerald-400 text-navy-950 text-[11px] font-extrabold px-3 py-0.5 rounded-full shadow-lg flex items-center gap-1">
                     <Sparkles size={12} />
                     {item.matchScore ? `${Math.round(item.matchScore)}% Match` : 'Top Match'}
                   </div>
                   <ListingCard listing={item} distanceKm={item.distanceKm} />
+
+                  {/* Match Reason Badges */}
+                  {item.reasons && item.reasons.length > 0 && (
+                    <div className="flex flex-wrap gap-1 px-1">
+                      {item.reasons.slice(0, 3).map((r: string, idx: number) => (
+                        <span
+                          key={idx}
+                          className="text-[10px] bg-[#161a3f] text-teal-300 border border-[#3f4b81]/60 px-2 py-0.5 rounded-md font-medium"
+                        >
+                          ✓ {r}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

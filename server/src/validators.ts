@@ -22,7 +22,20 @@ export const listingSchema = z.object({
   quantity: z.number().positive(),
   unit: z.string().min(1).max(50),
   pricePerUnit: z.number().positive(),
-  expiryDate: z.string().min(1, 'Expiry date is required'),
+  expiryDate: z
+    .string()
+    .min(1, 'Expiry date is required')
+    .refine(
+      (val) => {
+        const expiry = new Date(val);
+        if (isNaN(expiry.getTime())) return false;
+        const minDate = new Date();
+        minDate.setDate(minDate.getDate() + 10);
+        minDate.setHours(0, 0, 0, 0);
+        return expiry.getTime() >= minDate.getTime();
+      },
+      { message: 'Expiry date must be at least 10 days in the future' }
+    ),
   urgency: z.enum(['low', 'medium', 'high']).default('low'),
 });
 

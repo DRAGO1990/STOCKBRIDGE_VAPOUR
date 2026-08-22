@@ -38,6 +38,11 @@ export const CreateListingPage: React.FC = () => {
   const [expiryDate, setExpiryDate] = useState('');
   const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('low');
 
+  // Minimum required expiry date is at least 10 days from today
+  const minExpiryDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -50,6 +55,16 @@ export const CreateListingPage: React.FC = () => {
 
     if (!title.trim() || quantity <= 0 || pricePerUnit <= 0 || !expiryDate) {
       setError('Please fill in all required fields including a valid expiry date, quantity, and price.');
+      return;
+    }
+
+    const selectedExpiry = new Date(expiryDate);
+    const minRequiredTime = new Date();
+    minRequiredTime.setDate(minRequiredTime.getDate() + 10);
+    minRequiredTime.setHours(0, 0, 0, 0);
+
+    if (selectedExpiry.getTime() < minRequiredTime.getTime()) {
+      setError('Expiry date must be at least 10 days from today to ensure an adequate liquidation window.');
       return;
     }
 
@@ -191,16 +206,21 @@ export const CreateListingPage: React.FC = () => {
             {/* Expiry Date & Urgency */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                  Expiry Date *
+                <label className="block text-xs font-semibold text-slate-200 mb-1.5 flex items-center justify-between">
+                  <span>Expiry Date *</span>
+                  <span className="text-[10px] text-teal-400 font-normal">Min. 10 days duration</span>
                 </label>
                 <input
                   type="date"
+                  min={minExpiryDate}
                   value={expiryDate}
                   onChange={(e) => setExpiryDate(e.target.value)}
                   required
                   className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
                 />
+                <span className="text-[11px] text-slate-400 mt-1 block">
+                  Must be at least 10 days from today to ensure an adequate liquidation window.
+                </span>
               </div>
 
               <div>
