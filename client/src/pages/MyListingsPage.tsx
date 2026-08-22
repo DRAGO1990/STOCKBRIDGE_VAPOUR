@@ -66,7 +66,7 @@ export const MyListingsPage: React.FC = () => {
             My Surplus Listings
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Track and manage your posted dead stock lots and trade reservations.
+            Track your surplus inventory, manage active listings, and monitor reservations from one place.
           </p>
         </div>
 
