@@ -74,20 +74,20 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0f1329]/90 backdrop-blur-md border-b border-[#3f4b81]/60">
+    <header className="sticky top-0 z-40 bg-[#0F0B1A]/90 backdrop-blur-md border-b border-[#2B1F4D]/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-cyan-400 p-0.5 shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-[#0f1329] rounded-[10px] flex items-center justify-center">
-                <Compass className="text-teal-400 w-5 h-5 animate-pulse" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-400 p-0.5 shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform">
+              <div className="w-full h-full bg-[#0F0B1A] rounded-[10px] flex items-center justify-center">
+                <Compass className="text-purple-400 w-5 h-5 animate-pulse" />
               </div>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-lg text-white tracking-tight">Stock<span className="text-teal-400">Bridge</span></span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded border border-teal-500/30">
+                <span className="font-bold text-lg text-white tracking-tight">Stock<span className="text-purple-400">Bridge</span></span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/30">
                   B2B
                 </span>
               </div>
@@ -110,11 +110,11 @@ export const Navbar: React.FC = () => {
                   to={link.path}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30 shadow-sm'
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30 shadow-sm'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                   }`}
                 >
-                  <Icon size={16} className={isActive ? 'text-teal-400' : 'text-slate-400'} />
+                  <Icon size={16} className={isActive ? 'text-purple-400' : 'text-slate-400'} />
                   <span>{link.name}</span>
                   {Boolean(link.badge) && link.badge! > 0 && (
                     <span className="ml-1 px-1.5 py-0.2 bg-rose-500 text-white text-[10px] font-bold rounded-full animate-bounce">
@@ -132,15 +132,15 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center gap-2">
                 {/* Demo Quick Switcher Dropdown */}
                 <div className="relative group">
-                  <button className="flex items-center gap-1.5 text-xs bg-[#1b2151] hover:bg-[#293264] border border-[#3f4b81] px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white transition-colors cursor-pointer">
+                  <button className="flex items-center gap-1.5 text-xs bg-[#1A1330] hover:bg-[#2B1F4D] border border-[#2B1F4D] px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white transition-colors cursor-pointer">
                     <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span className="max-w-[110px] truncate">{user.businessName || user.name}</span>
                     <ChevronDown size={12} className="text-slate-400" />
                   </button>
 
-                  <div className="absolute right-0 mt-1 w-56 bg-[#1b2151] border border-[#3f4b81] rounded-xl shadow-xl p-2 hidden group-hover:block group-focus-within:block z-50 animate-fade-in">
-                    <div className="px-2 py-1.5 border-b border-[#3f4b81]/60 mb-1">
-                      <p className="text-[11px] font-semibold text-teal-400 uppercase tracking-wider">Quick Switch Demo User</p>
+                  <div className="absolute right-0 mt-1 w-56 bg-[#1A1330] border border-[#2B1F4D] rounded-xl shadow-xl p-2 hidden group-hover:block group-focus-within:block z-50 animate-fade-in">
+                    <div className="px-2 py-1.5 border-b border-[#2B1F4D]/60 mb-1">
+                      <p className="text-[11px] font-semibold text-purple-400 uppercase tracking-wider">Quick Switch Demo User</p>
                     </div>
                     {DEMO_ACCOUNTS.map((acc) => (
                       <button
@@ -149,8 +149,8 @@ export const Navbar: React.FC = () => {
                         disabled={switchingUser || user.email === acc.email}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex flex-col transition-colors ${
                           user.email === acc.email
-                            ? 'bg-teal-500/20 text-teal-300 font-semibold cursor-default'
-                            : 'text-slate-300 hover:bg-[#293264] hover:text-white cursor-pointer'
+                            ? 'bg-purple-500/20 text-purple-300 font-semibold cursor-default'
+                            : 'text-slate-300 hover:bg-[#2B1F4D] hover:text-white cursor-pointer'
                         }`}
                       >
                         <span>{acc.name}</span>
@@ -191,7 +191,7 @@ export const Navbar: React.FC = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-1.5 text-sm font-semibold bg-teal-500 hover:bg-teal-400 text-navy-950 rounded-xl transition-all shadow-md shadow-teal-500/20"
+                  className="px-4 py-1.5 text-sm font-semibold bg-purple-500 hover:bg-purple-400 text-navy-950 rounded-xl transition-all shadow-md shadow-purple-500/20"
                 >
                   Register Business
                 </Link>
@@ -213,7 +213,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#151a41] border-b border-[#3f4b81] px-4 pt-2 pb-6 space-y-3">
+        <div className="md:hidden bg-[#1A1330] border-b border-[#2B1F4D] px-4 pt-2 pb-6 space-y-3">
           <nav className="space-y-1">
             {navLinks.map((link) => {
               if (link.authOnly && !user) return null;
@@ -229,7 +229,7 @@ export const Navbar: React.FC = () => {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium ${
                     isActive
-                      ? 'bg-teal-500/20 text-teal-300 font-semibold'
+                      ? 'bg-purple-500/20 text-purple-300 font-semibold'
                       : 'text-slate-300 hover:bg-slate-800/60'
                   }`}
                 >
@@ -247,7 +247,7 @@ export const Navbar: React.FC = () => {
             })}
           </nav>
 
-          <div className="pt-3 border-t border-[#3f4b81]/60">
+          <div className="pt-3 border-t border-[#2B1F4D]/60">
             {user ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-xs text-slate-300">
@@ -263,14 +263,14 @@ export const Navbar: React.FC = () => {
                     Logout
                   </button>
                 </div>
-                <div className="bg-[#0f1329] p-2 rounded-xl border border-[#3f4b81]">
-                  <p className="text-[10px] text-teal-400 font-semibold uppercase mb-1.5">Switch Demo Account</p>
+                <div className="bg-[#0F0B1A] p-2 rounded-xl border border-[#2B1F4D]">
+                  <p className="text-[10px] text-purple-400 font-semibold uppercase mb-1.5">Switch Demo Account</p>
                   <div className="grid grid-cols-2 gap-1.5">
                     {DEMO_ACCOUNTS.map((acc) => (
                       <button
                         key={acc.email}
                         onClick={() => handleQuickSwitch(acc.email)}
-                        className="text-left text-[11px] p-1.5 rounded bg-[#1b2151] hover:bg-[#293264] text-slate-300 truncate"
+                        className="text-left text-[11px] p-1.5 rounded bg-[#1A1330] hover:bg-[#2B1F4D] text-slate-300 truncate"
                       >
                         {acc.name}
                       </button>
@@ -283,14 +283,14 @@ export const Navbar: React.FC = () => {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-2 text-sm text-slate-200 bg-[#1b2151] rounded-xl"
+                  className="w-full text-center py-2 text-sm text-slate-200 bg-[#1A1330] rounded-xl"
                 >
                   Log In
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-2 text-sm font-semibold bg-teal-500 text-navy-950 rounded-xl"
+                  className="w-full text-center py-2 text-sm font-semibold bg-purple-500 text-navy-950 rounded-xl"
                 >
                   Register Business
                 </Link>

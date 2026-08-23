@@ -13,6 +13,7 @@ import {
   ArrowRight,
   ShieldCheck,
   FileImage,
+  Package,
 } from 'lucide-react';
 import api from '../lib/api';
 import type { Reservation } from '../types';
@@ -92,7 +93,7 @@ export const ReservationsPage: React.FC = () => {
     <div className="space-y-6 pb-16 max-w-6xl mx-auto">
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5">
-          <CalendarCheck className="text-teal-400" />
+          <CalendarCheck className="text-purple-400" />
           Trade Reservations & Orders
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
@@ -101,13 +102,13 @@ export const ReservationsPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-3 border-b border-[#3f4b81]/60 pb-3">
+      <div className="flex items-center gap-3 border-b border-[#2B1F4D]/60 pb-3">
         <button
           onClick={() => setTab('buying')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
             tab === 'buying'
-              ? 'bg-teal-500 text-navy-950 shadow-md shadow-teal-500/20'
-              : 'bg-[#1b2151] text-slate-300 hover:text-white border border-[#3f4b81]'
+              ? 'bg-purple-500 text-navy-950 shadow-md shadow-purple-500/20'
+              : 'bg-[#1A1330] text-slate-300 hover:text-white border border-[#2B1F4D]'
           }`}
         >
           <span>Orders Placed (Buying)</span>
@@ -120,8 +121,8 @@ export const ReservationsPage: React.FC = () => {
           onClick={() => setTab('selling')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
             tab === 'selling'
-              ? 'bg-teal-500 text-navy-950 shadow-md shadow-teal-500/20'
-              : 'bg-[#1b2151] text-slate-300 hover:text-white border border-[#3f4b81]'
+              ? 'bg-purple-500 text-navy-950 shadow-md shadow-purple-500/20'
+              : 'bg-[#1A1330] text-slate-300 hover:text-white border border-[#2B1F4D]'
           }`}
         >
           <span>Orders Received (Selling)</span>
@@ -134,11 +135,11 @@ export const ReservationsPage: React.FC = () => {
       {/* Content */}
       {loading ? (
         <div className="py-20 flex justify-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-teal-400"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-400"></div>
         </div>
       ) : currentList.length === 0 ? (
-        <div className="bg-[#1b2151] border border-[#3f4b81] rounded-2xl p-12 text-center max-w-md mx-auto space-y-3">
-          <CalendarCheck size={36} className="text-teal-400/50 mx-auto" />
+        <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-12 text-center max-w-md mx-auto space-y-3">
+          <CalendarCheck size={36} className="text-purple-400/50 mx-auto" />
           <h3 className="text-lg font-bold text-white">No reservations in this tab</h3>
           <p className="text-xs text-slate-400">
             {tab === 'buying'
@@ -148,7 +149,7 @@ export const ReservationsPage: React.FC = () => {
           {tab === 'buying' && (
             <Link
               to="/"
-              className="inline-block px-4 py-2 bg-teal-500 text-navy-950 font-bold text-xs rounded-xl mt-2"
+              className="inline-block px-4 py-2 bg-purple-500 text-navy-950 font-bold text-xs rounded-xl mt-2"
             >
               Browse Surplus Marketplace
             </Link>
@@ -167,18 +168,18 @@ export const ReservationsPage: React.FC = () => {
             return (
               <div
                 key={res.id}
-                className="bg-[#1b2151] border border-[#3f4b81] hover:border-teal-400/40 rounded-2xl p-5 sm:p-6 shadow-xl transition-all space-y-4"
+                className="bg-[#1A1330] border border-[#2B1F4D] hover:border-purple-400/40 rounded-2xl p-5 sm:p-6 shadow-xl transition-all space-y-4"
               >
                 {/* Header Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#3f4b81]/60">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2B1F4D]/60">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 font-bold text-sm">
-                      #{res.id.substring(0, 5)}
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                      <Package size={20} />
                     </div>
                     <div>
                       <Link
                         to={`/listings/${res.listingId}`}
-                        className="font-bold text-white text-base hover:text-teal-300 transition-colors"
+                        className="font-bold text-white text-base hover:text-purple-300 transition-colors"
                       >
                         {res.listing?.title || 'Surplus Item'}
                       </Link>
@@ -194,13 +195,13 @@ export const ReservationsPage: React.FC = () => {
                 </div>
 
                 {/* Body Row: Details Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#0f1329]/60 p-4 rounded-xl border border-[#3f4b81]/40 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#0F0B1A]/60 p-4 rounded-xl border border-[#2B1F4D]/40 text-xs">
                   <div>
                     <span className="text-slate-400 block uppercase font-semibold text-[10px]">
                       Agreed Reserved Quantity
                     </span>
                     <span className="text-sm font-bold text-white flex items-center gap-1 mt-0.5">
-                      <Layers size={14} className="text-teal-400" />
+                      <Layers size={14} className="text-purple-400" />
                       {res.agreedQty} {res.listing?.unit || 'units'}
                     </span>
                   </div>
@@ -218,7 +219,7 @@ export const ReservationsPage: React.FC = () => {
                     <span className="text-slate-400 block uppercase font-semibold text-[10px]">
                       {tab === 'buying' ? 'Seller Merchant' : 'Buyer Merchant'}
                     </span>
-                    <span className="text-sm font-bold text-cyan-300 mt-0.5 block truncate">
+                    <span className="text-sm font-bold text-pink-300 mt-0.5 block truncate">
                       {counterparty.businessName || counterparty.name}
                     </span>
                   </div>
@@ -245,7 +246,7 @@ export const ReservationsPage: React.FC = () => {
                   {/* Left: Direct Chat CTA */}
                   <button
                     onClick={() => setActiveChatRes(res)}
-                    className="px-4 py-2 bg-[#293264] hover:bg-teal-500 text-teal-300 hover:text-navy-950 border border-teal-500/40 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2 bg-[#2B1F4D] hover:bg-purple-500 text-purple-300 hover:text-navy-950 border border-purple-500/40 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <MessageSquare size={15} />
                     <span>Open Direct Trade Chat</span>
@@ -267,7 +268,7 @@ export const ReservationsPage: React.FC = () => {
                     {res.status === 'confirmed' && (
                       <button
                         onClick={() => setActiveProofRes(res)}
-                        className="px-3.5 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-navy-950 text-xs font-bold rounded-xl transition-all shadow-md shadow-teal-500/20 flex items-center gap-1 cursor-pointer"
+                        className="px-3.5 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-navy-950 text-xs font-bold rounded-xl transition-all shadow-md shadow-purple-500/20 flex items-center gap-1 cursor-pointer"
                       >
                         <CheckCircle2 size={14} /> Complete Handover
                       </button>
@@ -306,7 +307,7 @@ export const ReservationsPage: React.FC = () => {
           reservationId={activeChatRes.id}
           isOpen={Boolean(activeChatRes)}
           onClose={() => setActiveChatRes(null)}
-          title={`Order #${activeChatRes.id.substring(0, 5)}: ${activeChatRes.listing?.title}`}
+          title={`Listing #SB-${(activeChatRes.listingId || activeChatRes.id).substring(0, 5).toUpperCase()}: ${activeChatRes.listing?.title || 'Surplus Item'}`}
           counterpartyName={
             tab === 'buying'
               ? activeChatRes.listing?.seller?.businessName || 'Seller'

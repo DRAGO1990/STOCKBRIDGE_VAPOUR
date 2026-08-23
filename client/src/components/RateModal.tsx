@@ -51,8 +51,8 @@ export const RateModal: React.FC<RateModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-[#1b2151] border border-[#3f4b81] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#3f4b81] flex items-center justify-between bg-[#151a41]">
+      <div className="bg-[#1A1330] border border-[#2B1F4D] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#2B1F4D] flex items-center justify-between bg-[#1A1330]">
           <div className="flex items-center gap-2 text-amber-400">
             <Star size={20} className="fill-amber-400" />
             <h3 className="font-semibold text-white">Rate Transaction</h3>
@@ -67,10 +67,10 @@ export const RateModal: React.FC<RateModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <p className="text-sm text-slate-300">
-            How was your transaction experience with <span className="font-semibold text-teal-300">{toUserName}</span>?
+            How was your transaction experience with <span className="font-semibold text-purple-300">{toUserName}</span>?
           </p>
 
-          <div className="flex flex-col items-center justify-center py-3 bg-[#0f1329]/60 rounded-xl border border-[#3f4b81]/50 gap-2">
+          <div className="flex flex-col items-center justify-center py-3 bg-[#0F0B1A]/60 rounded-xl border border-[#2B1F4D]/50 gap-2">
             <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Select Star Rating</span>
             <div className="flex items-center gap-2">
               <RatingStars
@@ -80,7 +80,7 @@ export const RateModal: React.FC<RateModalProps> = ({
                 onChange={(newRating) => setScore(newRating)}
               />
             </div>
-            <span className="text-xs text-teal-300 font-semibold">
+            <span className="text-xs text-purple-300 font-semibold">
               {score === 5 && '🌟 Excellent — Highly Recommended'}
               {score === 4 && '👍 Good — Smooth Transaction'}
               {score === 3 && '👌 Average — Acceptable'}
@@ -91,7 +91,7 @@ export const RateModal: React.FC<RateModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1">
-              <MessageSquare size={14} className="text-teal-400" />
+              <MessageSquare size={14} className="text-purple-400" />
               Feedback / Review Notes (Optional)
             </label>
             <textarea
@@ -99,7 +99,7 @@ export const RateModal: React.FC<RateModalProps> = ({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="e.g., Quick pickup, genuine goods as described in lot..."
-              className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-400 transition-colors"
+              className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition-colors"
             />
           </div>
 

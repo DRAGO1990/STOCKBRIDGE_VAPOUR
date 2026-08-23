@@ -93,10 +93,10 @@ export const ProfilePage: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-16">
       {/* Header Info */}
-      <div className="bg-[#1b2151] border border-[#3f4b81] rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-teal-600 to-cyan-400 p-0.5 shadow-lg shadow-teal-500/20">
-            <div className="w-full h-full bg-[#0f1329] rounded-[14px] flex items-center justify-center text-teal-400 text-2xl font-black">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-400 p-0.5 shadow-lg shadow-purple-500/20">
+            <div className="w-full h-full bg-[#0F0B1A] rounded-[14px] flex items-center justify-center text-purple-400 text-2xl font-black">
               {user.name.charAt(0).toUpperCase()}
             </div>
           </div>
@@ -113,7 +113,7 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-[#0f1329]/60 px-5 py-3 rounded-2xl border border-[#3f4b81]/50 text-right sm:text-right w-full sm:w-auto">
+        <div className="bg-[#0F0B1A]/60 px-5 py-3 rounded-2xl border border-[#2B1F4D]/50 text-right sm:text-right w-full sm:w-auto">
           <span className="text-[10px] text-slate-400 uppercase font-semibold block">Merchant Trust Score</span>
           <div className="flex items-center gap-2 mt-0.5">
             <RatingStars rating={user.rating || 5} size={18} />
@@ -127,10 +127,10 @@ export const ProfilePage: React.FC = () => {
         <div className="lg:col-span-2">
           <form
             onSubmit={handleSubmit}
-            className="bg-[#1b2151] border border-[#3f4b81] rounded-3xl p-6 sm:p-8 shadow-xl space-y-5"
+            className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 sm:p-8 shadow-xl space-y-5"
           >
             <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Building2 size={18} className="text-teal-400" />
+              <Building2 size={18} className="text-purple-400" />
               Business & Location Settings
             </h2>
 
@@ -142,7 +142,7 @@ export const ProfilePage: React.FC = () => {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
+                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
                 />
               </div>
 
@@ -152,7 +152,7 @@ export const ProfilePage: React.FC = () => {
                   type="text"
                   value={formData.businessName}
                   onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                  className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
+                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
                 />
               </div>
             </div>
@@ -165,7 +165,7 @@ export const ProfilePage: React.FC = () => {
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="e.g. 9876543210"
-                  className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
+                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
                 />
               </div>
 
@@ -175,7 +175,7 @@ export const ProfilePage: React.FC = () => {
                   type="email"
                   disabled
                   value={user.email}
-                  className="w-full bg-[#0f1329]/50 border border-[#3f4b81]/40 rounded-xl px-4 py-2 text-sm text-slate-400 cursor-not-allowed"
+                  className="w-full bg-[#0F0B1A]/50 border border-[#2B1F4D]/40 rounded-xl px-4 py-2 text-sm text-slate-400 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -187,11 +187,11 @@ export const ProfilePage: React.FC = () => {
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 placeholder="e.g. Unit 4, Wholesale Market Road, Andheri West, Mumbai"
-                className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl p-3 text-sm text-white focus:outline-none focus:border-teal-400 transition-colors"
+                className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl p-3 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[#3f4b81]/50">
+            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[#2B1F4D]/50">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">GPS Latitude</label>
                 <input
@@ -199,7 +199,7 @@ export const ProfilePage: React.FC = () => {
                   step="any"
                   value={formData.lat}
                   onChange={(e) => setFormData({ ...formData, lat: Number(e.target.value) })}
-                  className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2 text-sm text-white font-mono focus:outline-none focus:border-teal-400 transition-colors"
+                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white font-mono focus:outline-none focus:border-purple-400 transition-colors"
                 />
               </div>
 
@@ -210,7 +210,7 @@ export const ProfilePage: React.FC = () => {
                   step="any"
                   value={formData.lng}
                   onChange={(e) => setFormData({ ...formData, lng: Number(e.target.value) })}
-                  className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2 text-sm text-white font-mono focus:outline-none focus:border-teal-400 transition-colors"
+                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white font-mono focus:outline-none focus:border-purple-400 transition-colors"
                 />
               </div>
             </div>
@@ -229,7 +229,7 @@ export const ProfilePage: React.FC = () => {
             <button
               type="submit"
               disabled={saving}
-              className="w-full py-3 px-4 bg-teal-500 hover:bg-teal-400 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-purple-500 hover:bg-purple-400 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <Save size={16} />
               {saving ? 'Saving...' : 'Save Profile Changes'}
@@ -245,7 +245,7 @@ export const ProfilePage: React.FC = () => {
           </h2>
 
           {ratings.length === 0 ? (
-            <div className="bg-[#1b2151] border border-[#3f4b81] rounded-2xl p-6 text-center text-xs text-slate-400">
+            <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-6 text-center text-xs text-slate-400">
               No ratings recorded yet. Complete handovers to earn ratings.
             </div>
           ) : (
@@ -253,7 +253,7 @@ export const ProfilePage: React.FC = () => {
               {ratings.map((r) => (
                 <div
                   key={r.id}
-                  className="bg-[#1b2151] border border-[#3f4b81] rounded-2xl p-4 space-y-2 shadow-md"
+                  className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-4 space-y-2 shadow-md"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white">
@@ -262,7 +262,7 @@ export const ProfilePage: React.FC = () => {
                     <RatingStars rating={r.score} size={12} />
                   </div>
                   {r.comment && (
-                    <p className="text-xs text-slate-300 italic bg-[#0f1329]/50 p-2.5 rounded-xl border border-[#3f4b81]/30">
+                    <p className="text-xs text-slate-300 italic bg-[#0F0B1A]/50 p-2.5 rounded-xl border border-[#2B1F4D]/30">
                       "{r.comment}"
                     </p>
                   )}

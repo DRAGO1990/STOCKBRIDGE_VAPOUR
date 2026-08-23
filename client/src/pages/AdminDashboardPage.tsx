@@ -99,8 +99,8 @@ export const AdminDashboardPage: React.FC = () => {
       {/* KPI Cards */}
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[#1b2151] border border-[#3f4b81] p-5 rounded-2xl shadow-xl flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400">
+          <div className="bg-[#1A1330] border border-[#2B1F4D] p-5 rounded-2xl shadow-xl flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
               <Users size={24} />
             </div>
             <div>
@@ -109,17 +109,17 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-[#1b2151] border border-[#3f4b81] p-5 rounded-2xl shadow-xl flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+          <div className="bg-[#1A1330] border border-[#2B1F4D] p-5 rounded-2xl shadow-xl flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400">
               <Package size={24} />
             </div>
             <div>
               <span className="text-xs text-slate-400 font-semibold uppercase">Active Lots</span>
-              <p className="text-2xl font-extrabold text-cyan-300 mt-0.5">{stats.listings}</p>
+              <p className="text-2xl font-extrabold text-pink-300 mt-0.5">{stats.listings}</p>
             </div>
           </div>
 
-          <div className="bg-[#1b2151] border border-[#3f4b81] p-5 rounded-2xl shadow-xl flex items-center gap-4">
+          <div className="bg-[#1A1330] border border-[#2B1F4D] p-5 rounded-2xl shadow-xl flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
               <CalendarCheck size={24} />
             </div>
@@ -129,7 +129,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-[#1b2151] border border-[#3f4b81] p-5 rounded-2xl shadow-xl flex items-center gap-4">
+          <div className="bg-[#1A1330] border border-[#2B1F4D] p-5 rounded-2xl shadow-xl flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
               <CheckCircle size={24} />
             </div>
@@ -142,15 +142,15 @@ export const AdminDashboardPage: React.FC = () => {
       )}
 
       {/* Tabs & Search */}
-      <div className="bg-[#1b2151] border border-[#3f4b81] rounded-3xl p-6 shadow-xl space-y-5">
+      <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 shadow-xl space-y-5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab('users')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'users'
-                  ? 'bg-teal-500 text-navy-950 shadow-md'
-                  : 'bg-[#0f1329] text-slate-300 hover:text-white border border-[#3f4b81]'
+                  ? 'bg-purple-500 text-navy-950 shadow-md'
+                  : 'bg-[#0F0B1A] text-slate-300 hover:text-white border border-[#2B1F4D]'
               }`}
             >
               Merchant Accounts ({users.length})
@@ -159,8 +159,8 @@ export const AdminDashboardPage: React.FC = () => {
               onClick={() => setActiveTab('listings')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'listings'
-                  ? 'bg-teal-500 text-navy-950 shadow-md'
-                  : 'bg-[#0f1329] text-slate-300 hover:text-white border border-[#3f4b81]'
+                  ? 'bg-purple-500 text-navy-950 shadow-md'
+                  : 'bg-[#0F0B1A] text-slate-300 hover:text-white border border-[#2B1F4D]'
               }`}
             >
               Surplus Listings ({listings.length})
@@ -174,7 +174,7 @@ export const AdminDashboardPage: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Filter table..."
-              className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-400"
+              className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-400"
             />
           </div>
         </div>
@@ -182,12 +182,12 @@ export const AdminDashboardPage: React.FC = () => {
         {/* Content Tables */}
         {loading ? (
           <div className="py-16 flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-400"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-400"></div>
           </div>
         ) : activeTab === 'users' ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-[#0f1329] text-slate-400 uppercase font-semibold text-[10px] border-b border-[#3f4b81]">
+              <thead className="bg-[#0F0B1A] text-slate-400 uppercase font-semibold text-[10px] border-b border-[#2B1F4D]">
                 <tr>
                   <th className="py-3 px-4">Merchant / Contact</th>
                   <th className="py-3 px-4">Email / Phone</th>
@@ -197,9 +197,9 @@ export const AdminDashboardPage: React.FC = () => {
                   <th className="py-3 px-4 text-right">Moderation</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#3f4b81]/40">
+              <tbody className="divide-y divide-[#2B1F4D]/40">
                 {filteredUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-[#20275e]/40 transition-colors">
+                  <tr key={u.id} className="hover:bg-[#231845]/40 transition-colors">
                     <td className="py-3.5 px-4">
                       <span className="font-bold text-white block">{u.businessName || u.name}</span>
                       <span className="text-[10px] text-slate-400">{u.name} {u.isAdmin && '(Admin)'}</span>
@@ -245,7 +245,7 @@ export const AdminDashboardPage: React.FC = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-[#0f1329] text-slate-400 uppercase font-semibold text-[10px] border-b border-[#3f4b81]">
+              <thead className="bg-[#0F0B1A] text-slate-400 uppercase font-semibold text-[10px] border-b border-[#2B1F4D]">
                 <tr>
                   <th className="py-3 px-4">Batch Title</th>
                   <th className="py-3 px-4">Category</th>
@@ -254,15 +254,15 @@ export const AdminDashboardPage: React.FC = () => {
                   <th className="py-3 px-4 text-right">Moderation</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#3f4b81]/40">
+              <tbody className="divide-y divide-[#2B1F4D]/40">
                 {filteredListings.map((l) => (
-                  <tr key={l.id} className="hover:bg-[#20275e]/40 transition-colors">
+                  <tr key={l.id} className="hover:bg-[#231845]/40 transition-colors">
                     <td className="py-3.5 px-4">
                       <span className="font-bold text-white block">{l.title}</span>
-                      <span className="text-[10px] text-slate-400">ID: {l.id.substring(0, 8)}</span>
+                      <span className="text-[10px] text-slate-400">Listing #SB-{l.id.substring(0, 8).toUpperCase()}</span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/30 text-[10px] font-semibold">
+                      <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-[10px] font-semibold">
                         {l.category}
                       </span>
                     </td>

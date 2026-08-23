@@ -98,20 +98,20 @@ export const ListingDetailPage: React.FC = () => {
   if (loading) {
     return (
       <div className="py-20 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-teal-400"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-400"></div>
       </div>
     );
   }
 
   if (error || !listing) {
     return (
-      <div className="bg-[#1b2151] border border-[#3f4b81] rounded-2xl p-12 text-center max-w-lg mx-auto space-y-4 my-10">
+      <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-12 text-center max-w-lg mx-auto space-y-4 my-10">
         <AlertTriangle className="text-rose-400 mx-auto" size={36} />
         <h2 className="text-xl font-bold text-white">Listing Unavailable</h2>
         <p className="text-sm text-slate-400">{error || 'This listing does not exist.'}</p>
         <Link
           to="/"
-          className="inline-block px-5 py-2.5 bg-teal-500 text-navy-950 font-bold text-sm rounded-xl shadow-md"
+          className="inline-block px-5 py-2.5 bg-purple-500 text-navy-950 font-bold text-sm rounded-xl shadow-md"
         >
           Return to Marketplace
         </Link>
@@ -134,7 +134,7 @@ export const ListingDetailPage: React.FC = () => {
       <div>
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white bg-[#1b2151] border border-[#3f4b81] px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white bg-[#1A1330] border border-[#2B1F4D] px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
         >
           <ArrowLeft size={14} /> Back to Listings
         </button>
@@ -144,9 +144,9 @@ export const ListingDetailPage: React.FC = () => {
         {/* Left 2 Columns: Main Listing Info & Seller Profile */}
         <div className="lg:col-span-2 space-y-6">
           {/* Main Card */}
-          <div className="bg-[#1b2151] border border-[#3f4b81] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+          <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/20 text-teal-300 border border-teal-500/40">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
                 {listing.category}
               </span>
               <div className="flex items-center gap-2">
@@ -160,16 +160,16 @@ export const ListingDetailPage: React.FC = () => {
                 {listing.title}
               </h1>
               <p className="text-xs text-slate-400 mt-1">
-                Listed on {new Date(listing.createdAt).toLocaleDateString()} • Lot Reference #{listing.id.substring(0, 8)}
+                Listed on {new Date(listing.createdAt).toLocaleDateString()} • Listing #SB-{listing.id.substring(0, 8).toUpperCase()}
               </p>
             </div>
 
             {/* Inventory Lot Highlight Box */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-[#0f1329]/70 p-5 rounded-2xl border border-[#3f4b81]/50">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-[#0F0B1A]/70 p-5 rounded-2xl border border-[#2B1F4D]/50">
               <div>
                 <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider">Lot Quantity</span>
                 <p className="text-xl font-bold text-white flex items-center gap-1.5 mt-1">
-                  <Layers size={18} className="text-teal-400" />
+                  <Layers size={18} className="text-purple-400" />
                   {listing.quantity} <span className="text-xs font-normal text-slate-400">{listing.unit}</span>
                 </p>
               </div>
@@ -184,7 +184,7 @@ export const ListingDetailPage: React.FC = () => {
 
               <div className="col-span-2 sm:col-span-1">
                 <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider">Total Lot Valuation</span>
-                <p className="text-xl font-bold text-cyan-300 mt-1">
+                <p className="text-xl font-bold text-pink-300 mt-1">
                   ₹{(listing.quantity * listing.pricePerUnit).toLocaleString('en-IN')}
                 </p>
               </div>
@@ -210,7 +210,7 @@ export const ListingDetailPage: React.FC = () => {
 
             {/* Deactivate Button for Owner */}
             {isMine && (
-              <div className="pt-4 border-t border-[#3f4b81]/60 flex items-center justify-between">
+              <div className="pt-4 border-t border-[#2B1F4D]/60 flex items-center justify-between">
                 <span className="text-xs text-indigo-300 font-semibold bg-indigo-500/20 px-2.5 py-1 rounded-lg border border-indigo-500/30">
                   You own this listing
                 </span>
@@ -225,13 +225,13 @@ export const ListingDetailPage: React.FC = () => {
           </div>
 
           {/* Seller Profile Card */}
-          <div className="bg-[#1b2151] border border-[#3f4b81] rounded-3xl p-6 shadow-xl space-y-4">
+          <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 shadow-xl space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-              <Building2 size={16} className="text-teal-400" />
+              <Building2 size={16} className="text-purple-400" />
               Verified Seller Information
             </h3>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0f1329]/50 p-4 rounded-2xl border border-[#3f4b81]/40">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0F0B1A]/50 p-4 rounded-2xl border border-[#2B1F4D]/40">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h4 className="font-bold text-white text-base">
@@ -242,7 +242,7 @@ export const ListingDetailPage: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 flex items-center gap-1">
-                  <MapPin size={13} className="text-teal-400" />
+                  <MapPin size={13} className="text-purple-400" />
                   {listing.seller?.address || 'Address provided upon reservation confirmation'}
                 </p>
               </div>
@@ -259,10 +259,10 @@ export const ListingDetailPage: React.FC = () => {
 
         {/* Right 1 Column: Immediate Reservation Action Widget */}
         <div className="space-y-6">
-          <div className="bg-[#1b2151] border border-[#3f4b81] rounded-3xl p-6 shadow-2xl sticky top-24 space-y-5">
-            <div className="border-b border-[#3f4b81]/60 pb-4">
+          <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 shadow-2xl sticky top-24 space-y-5">
+            <div className="border-b border-[#2B1F4D]/60 pb-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Sparkles size={18} className="text-teal-400" />
+                <Sparkles size={18} className="text-purple-400" />
                 Reserve Inventory
               </h3>
               <p className="text-xs text-slate-400 mt-1">
@@ -298,7 +298,7 @@ export const ListingDetailPage: React.FC = () => {
                     value={reserveQty}
                     onChange={(e) => setReserveQty(Number(e.target.value))}
                     required
-                    className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-teal-400 transition-colors"
+                    className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-purple-400 transition-colors"
                   />
                   <span className="text-[10px] text-slate-400 mt-1 block">
                     Max available in this batch: {listing.quantity} {listing.unit}
@@ -306,7 +306,7 @@ export const ListingDetailPage: React.FC = () => {
                 </div>
 
                 {/* Price Breakdown */}
-                <div className="bg-[#0f1329]/60 p-3.5 rounded-xl border border-[#3f4b81]/40 space-y-2 text-xs">
+                <div className="bg-[#0F0B1A]/60 p-3.5 rounded-xl border border-[#2B1F4D]/40 space-y-2 text-xs">
                   <div className="flex items-center justify-between text-slate-300">
                     <span>Agreed Unit Price:</span>
                     <span>₹{listing.pricePerUnit}</span>
@@ -315,7 +315,7 @@ export const ListingDetailPage: React.FC = () => {
                     <span>Reserved Volume:</span>
                     <span>{reserveQty} {listing.unit}</span>
                   </div>
-                  <div className="pt-2 border-t border-[#3f4b81]/60 flex items-center justify-between text-sm font-extrabold text-teal-300">
+                  <div className="pt-2 border-t border-[#2B1F4D]/60 flex items-center justify-between text-sm font-extrabold text-purple-300">
                     <span>Total Valuation:</span>
                     <span>₹{totalPrice.toLocaleString('en-IN')}</span>
                   </div>
@@ -330,7 +330,7 @@ export const ListingDetailPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isReserving}
-                  className="w-full py-3.5 px-4 bg-gradient-to-r from-teal-500 to-cyan-400 hover:from-teal-400 hover:to-cyan-300 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-teal-500/25 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-purple-500 to-pink-400 hover:from-purple-400 hover:to-pink-300 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-purple-500/25 transition-all transform hover:-translate-y-0.5 cursor-pointer"
                 >
                   {isReserving ? 'Confirming Reservation...' : 'Lock Reservation Now'}
                 </button>

@@ -31,10 +31,10 @@ export const listingSchema = z.object({
         if (isNaN(expiry.getTime())) return false;
         const minDate = new Date();
         minDate.setDate(minDate.getDate() + 10);
-        minDate.setHours(0, 0, 0, 0);
-        return expiry.getTime() >= minDate.getTime();
+        minDate.setHours(23, 59, 59, 999);
+        return expiry.getTime() > minDate.getTime();
       },
-      { message: 'Expiry date must be at least 10 days in the future' }
+      { message: 'Expiry date must be more than 10 days in the future' }
     ),
   urgency: z.enum(['low', 'medium', 'high']).default('low'),
 });

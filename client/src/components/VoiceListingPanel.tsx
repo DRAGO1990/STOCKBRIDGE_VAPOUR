@@ -61,7 +61,7 @@ const SAMPLE_PROMPTS = [
   {
     label: 'English Notebooks',
     lang: 'en-IN',
-    text: 'We have 200 boxes of Classmate A4 long notebooks surplus stock, selling at 85 rupees per box, clean condition ready for bulk pickup.',
+    text: 'We have 200 boxes of Classmate A4 long notebooks surplus stock, selling at 85 rupees per box, expiry 6 months from now, clean condition ready for bulk pickup.',
   },
   {
     label: 'Hinglish Atta Lot',
@@ -242,6 +242,50 @@ const CLIENT_CATEGORIES = [
 
 const CLIENT_UNITS = ['kg', 'pieces', 'packets', 'bags', 'cans', 'litres', 'boxes', 'reams', 'cartons'];
 
+function cleanProductName(raw: string): string {
+  if (!raw) return '';
+
+  let t = raw.trim();
+
+  // Strip brackets / parenthetical notes if any (e.g. "(Lot of 40)")
+  t = t.replace(/\s*[\(\[\{].*?[\)\]\}]/g, ' ');
+
+  // Strip conversational introductory phrases (English & Hindi/Hinglish)
+  t = t.replace(/^(?:i\s+have|we\s+have|i\s+want\s+to\s+sell|want\s+to\s+sell|selling|available|surplus\s+stock\s+of|stock\s+of|lot\s+of|there\s+are|there\s+is|mere\s+paas|hamare\s+paas|apne\s+paas|hum\s+bechna\s+chahte\s+hain|main\s+bechna\s+chahta\s+hoon|bechna\s+hai|हमारे\s*पास|मेरे\s*पास|बेचना\s*है|उपलब्ध\s*है)\s+/i, '');
+
+  // Strip leading numbers & units (e.g. "40 units of ", "20 packets ", "50 bori ke ")
+  t = t.replace(/^\d+(?:\.\d+)?\s*(?:kg|kilos?|kilograms?|bags?|bori|boriyaan|katta|katte|bora|thaili|packets?|packs?|pauchi|pouch|pouches?|pieces?|pcs|boxes?|box|peti|petiyaan|dabba|dabbey|cans?|tin|tins?|litres?|liters?|ltr|reams?|rim|cartons?|khokha|bottles?|units?|पैकेट|कट्टे|बोरी|पेटी|डिब्बा|पीस|यूनिट|लीटर|किलो)?\s*(?:of|ka|ki|ke|wale|wali|valey|vali|का|की|के|वाले|वाली)?\s*/i, '');
+
+  // Strip trailing price / rate mentions (e.g. "at ₹15 each", "rate 110 rupees per packet", "selling at 85", "₹15 me")
+  t = t.replace(/\s+(?:at|for|@|₹|rs\.?|inr|rupaye|rupees|rate|price|bhav|रुपये|रुपए|प्रति|दर|भाव|में|me|mein)\s*.*$/i, '');
+  t = t.replace(/\s+\d+(?:\.\d+)?\s*(?:rupees?|rupaye|rs\.?|₹|रुपये|रुपए|per|each|\/|me|mein|का|की|के|में).*$/i, '');
+
+  // Strip trailing conversational / status clauses
+  t = t.replace(/\s+(?:surplus(?:\s+stock)?|stock|ready\s+for\s+pickup|available|urgent|emergency|fast\s+sale|bacha\s+hai|bache\s+hain|rakha\s+hai|hai|hain|है|हैं|बचा\s*है|बचे\s*हैं).*$/i, '');
+
+  // Strip dangling prepositions & conjunctions
+  t = t.replace(/\s+(?:of|for|at|in|with|and|ka|ki|ke|me|mein|se|per|each|का|की|के|में|से)$/i, '');
+  t = t.replace(/^(?:of|for|at|in|with|and|ka|ki|ke|का|की|के)\s+/i, '');
+
+  t = t.replace(/^[^\w\u0900-\u097F]+|[^\w\u0900-\u097F]+$/g, '').trim();
+
+  if (!t || t.length < 2) {
+    return '';
+  }
+
+  // Capitalize words nicely
+  return t
+    .split(/\s+/)
+    .slice(0, 6)
+    .map((w) => {
+      if (/^(?:a4|led|usb|pvc|1l|2l|5l|10kg|25kg|500g)$/i.test(w)) {
+        return w.toUpperCase();
+      }
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    })
+    .join(' ');
+}
+
 function extractClientSideFallback(transcript: string): ExtractedFields {
   const lower = transcript.toLowerCase();
   const missingFields: string[] = [];
@@ -376,20 +420,12 @@ function extractClientSideFallback(transcript: string): ExtractedFields {
     missingFields.push('expiryDate');
   }
 
-  // Title formatting
-  let title = transcript
-    .replace(/[^\w\s\u0900-\u097F]/g, ' ')
-    .trim()
-    .split(/\s+/)
-    .slice(0, 6)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
+  // Title formatting - extract only the actual product name
+  let title = cleanProductName(transcript);
 
   if (!title) {
     title = 'Surplus Lot';
     missingFields.push('title');
-  } else {
-    title = `${title} (${quantity || 1} ${unit})`;
   }
 
   // Distance / delivery mentions
@@ -825,7 +861,11 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       });
 
       if (res.data.success && res.data.extraction) {
-        setExtraction(res.data.extraction);
+        const extracted = { ...res.data.extraction };
+        if (extracted.title) {
+          extracted.title = cleanProductName(extracted.title) || extracted.title;
+        }
+        setExtraction(extracted);
       } else {
         const fallback = extractClientSideFallback(textToParse);
         setExtraction(fallback);

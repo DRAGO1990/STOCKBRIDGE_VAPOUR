@@ -252,7 +252,7 @@ export async function matchListings(input: MatchInput): Promise<any[]> {
 
   const avgPrice = listings.reduce((s, l) => s + l.pricePerUnit, 0) / listings.length;
   const hasSearch = Boolean(input.search && input.search.trim().length > 0);
-  const maxDistance = input.maxDistanceKm || 100;
+  const maxDistance = input.maxDistanceKm ? Math.min(50, Number(input.maxDistanceKm)) : 50;
 
   const scoredListings = listings
     .map((listing) => {
@@ -276,19 +276,25 @@ export async function matchListings(input: MatchInput): Promise<any[]> {
       }
 
       // 2. Distance Score (Haversine)
-      const dist = haversineDistance(
+      const rawDist = haversineDistance(
         input.lat,
         input.lng,
         listing.seller.lat,
         listing.seller.lng
       );
-      const distScore = dist <= maxDistance
-        ? Math.max(0.2, 1 - (dist / maxDistance) * 0.7)
-        : Math.max(0, 1 - dist / (maxDistance * 2));
 
-      if (dist < 5) reasons.push(`Very close (${dist.toFixed(1)} km)`);
-      else if (dist < 20) reasons.push(`Nearby (${dist.toFixed(1)} km)`);
-      else if (dist <= maxDistance) reasons.push(`Within radius (${dist.toFixed(1)} km)`);
+      // Hard filter: strictly reject any listing exceeding the max distance radius (up to 50 km)
+      if (rawDist > maxDistance) {
+        return null;
+      }
+
+      // Fix 0km: If seller is at exact same lat/lng coordinates or < 0.2km, represent realistic local vicinity
+      const dist = rawDist < 0.2 ? 0.8 : Math.round(rawDist * 10) / 10;
+      const distScore = Math.max(0.2, 1 - (dist / maxDistance) * 0.7);
+
+      if (dist < 2) reasons.push(`Very close (${dist < 1 ? '< 1' : dist.toFixed(1)} km)`);
+      else if (dist < 10) reasons.push(`Nearby (${dist.toFixed(1)} km)`);
+      else reasons.push(`Within radius (${dist.toFixed(1)} km)`);
 
       // 3. Price Suitability Score
       let priceScore = 0.5;

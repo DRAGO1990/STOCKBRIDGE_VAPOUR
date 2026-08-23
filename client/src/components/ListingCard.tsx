@@ -15,7 +15,7 @@ import { useAuthStore } from '../stores/authStore';
 const CATEGORY_COLORS: Record<string, string> = {
   Groceries: 'from-amber-500/20 to-orange-500/20 text-amber-300 border-amber-500/40',
   Stationery: 'from-blue-500/20 to-indigo-500/20 text-blue-300 border-blue-500/40',
-  Electronics: 'from-cyan-500/20 to-teal-500/20 text-cyan-300 border-cyan-500/40',
+  Electronics: 'from-fuchsia-500/20 to-violet-500/20 text-fuchsia-300 border-fuchsia-500/40',
   Packaging: 'from-emerald-500/20 to-green-500/20 text-emerald-300 border-emerald-500/40',
   Textiles: 'from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/40',
   Hardware: 'from-slate-500/20 to-zinc-500/20 text-slate-300 border-slate-500/40',
@@ -29,7 +29,7 @@ export const ListingCard: React.FC<{ listing: Listing; distanceKm?: number }> = 
   const isMine = user?.id === listing.sellerId;
   const categoryStyle =
     CATEGORY_COLORS[listing.category] ||
-    'from-teal-500/20 to-cyan-500/20 text-teal-300 border-teal-500/40';
+    'from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/40';
 
   const totalBatchPrice = listing.quantity * listing.pricePerUnit;
 
@@ -40,9 +40,9 @@ export const ListingCard: React.FC<{ listing: Listing; distanceKm?: number }> = 
   }
 
   return (
-    <div className="group bg-[#1b2151] hover:bg-[#20275e] border border-[#3f4b81] hover:border-teal-400/50 rounded-2xl p-5 shadow-xl transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
+    <div className="group bg-[#1A1330] hover:bg-[#231845] border border-[#2B1F4D] hover:border-purple-400/50 rounded-2xl p-5 shadow-xl transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
       {/* Top Accent Gradient Bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 via-cyan-400 to-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-400 to-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
 
       <div>
         {/* Header Tags */}
@@ -59,14 +59,14 @@ export const ListingCard: React.FC<{ listing: Listing; distanceKm?: number }> = 
         </div>
 
         {/* Title */}
-        <Link to={`/listings/${listing.id}`} className="block group-hover:text-teal-300 transition-colors">
+        <Link to={`/listings/${listing.id}`} className="block group-hover:text-purple-300 transition-colors">
           <h3 className="font-bold text-white text-lg leading-snug line-clamp-2">
             {listing.title}
           </h3>
         </Link>
 
         {/* Seller Info */}
-        <div className="mt-2.5 flex items-center justify-between text-xs text-slate-300 pb-3 border-b border-[#3f4b81]/60">
+        <div className="mt-2.5 flex items-center justify-between text-xs text-slate-300 pb-3 border-b border-[#2B1F4D]/60">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="font-medium text-slate-200 truncate">
               {listing.seller?.businessName || listing.seller?.name || 'Verified Merchant'}
@@ -83,11 +83,11 @@ export const ListingCard: React.FC<{ listing: Listing; distanceKm?: number }> = 
         </div>
 
         {/* Inventory Details Grid */}
-        <div className="grid grid-cols-2 gap-3 my-4 bg-[#0f1329]/60 p-3 rounded-xl border border-[#3f4b81]/40">
+        <div className="grid grid-cols-2 gap-3 my-4 bg-[#0F0B1A]/60 p-3 rounded-xl border border-[#2B1F4D]/40">
           <div>
             <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">Available Lot</span>
             <p className="text-sm font-bold text-white flex items-center gap-1 mt-0.5">
-              <Layers size={14} className="text-teal-400" />
+              <Layers size={14} className="text-purple-400" />
               {listing.quantity} <span className="text-xs font-normal text-slate-400">{listing.unit}</span>
             </p>
           </div>
@@ -128,16 +128,21 @@ export const ListingCard: React.FC<{ listing: Listing; distanceKm?: number }> = 
             </div>
           )}
 
-          {(distanceKm !== undefined || listing.distanceKm !== undefined) && (
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1">
-                <MapPin size={13} className="text-cyan-400" /> Proximity:
-              </span>
-              <span className="font-semibold text-cyan-300">
-                {(distanceKm ?? listing.distanceKm)?.toFixed(1)} km away
-              </span>
-            </div>
-          )}
+          {(distanceKm !== undefined || listing.distanceKm !== undefined) && (() => {
+            const rawDist = distanceKm ?? listing.distanceKm;
+            if (rawDist === undefined || rawDist === null) return null;
+            const displayDist = rawDist < 0.8 ? '< 1 km away' : `${rawDist.toFixed(1)} km away`;
+            return (
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <MapPin size={13} className="text-pink-400" /> Proximity:
+                </span>
+                <span className="font-semibold text-pink-300">
+                  {displayDist}
+                </span>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -145,7 +150,7 @@ export const ListingCard: React.FC<{ listing: Listing; distanceKm?: number }> = 
       <div className="pt-2">
         <Link
           to={`/listings/${listing.id}`}
-          className="w-full py-2.5 px-4 bg-teal-500/10 hover:bg-teal-500 border border-teal-500/30 hover:border-teal-500 text-teal-300 hover:text-navy-950 font-semibold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm group/btn"
+          className="w-full py-2.5 px-4 bg-purple-500/10 hover:bg-purple-500 border border-purple-500/30 hover:border-purple-500 text-purple-300 hover:text-navy-950 font-semibold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm group/btn"
         >
           <span>{isMine ? 'Manage Listing' : 'View & Reserve'}</span>
           <ArrowUpRight size={16} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />

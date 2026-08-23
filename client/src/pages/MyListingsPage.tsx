@@ -62,7 +62,7 @@ export const MyListingsPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5">
-            <Package className="text-teal-400" />
+            <Package className="text-purple-400" />
             My Surplus Listings
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
@@ -72,7 +72,7 @@ export const MyListingsPage: React.FC = () => {
 
         <Link
           to="/create-listing"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-teal-500/20 transition-all"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-purple-500/20 transition-all"
         >
           <PlusCircle size={18} />
           Post New Lot
@@ -81,27 +81,27 @@ export const MyListingsPage: React.FC = () => {
 
       {/* Metrics Summary Row */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-[#1b2151] border border-[#3f4b81] p-4 rounded-2xl">
+        <div className="bg-[#1A1330] border border-[#2B1F4D] p-4 rounded-2xl">
           <span className="text-[11px] text-slate-400 uppercase font-semibold block">Active Marketplace Lots</span>
-          <p className="text-2xl font-extrabold text-teal-400 mt-1">{activeCount}</p>
+          <p className="text-2xl font-extrabold text-purple-400 mt-1">{activeCount}</p>
         </div>
-        <div className="bg-[#1b2151] border border-[#3f4b81] p-4 rounded-2xl">
+        <div className="bg-[#1A1330] border border-[#2B1F4D] p-4 rounded-2xl">
           <span className="text-[11px] text-slate-400 uppercase font-semibold block">Under Reservation</span>
           <p className="text-2xl font-extrabold text-sky-400 mt-1">{reservedCount}</p>
         </div>
-        <div className="bg-[#1b2151] border border-[#3f4b81] p-4 rounded-2xl">
+        <div className="bg-[#1A1330] border border-[#2B1F4D] p-4 rounded-2xl">
           <span className="text-[11px] text-slate-400 uppercase font-semibold block">Completed / Liquidated</span>
           <p className="text-2xl font-extrabold text-emerald-400 mt-1">{soldCount}</p>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#3f4b81]/60 pb-3">
+      <div className="flex items-center gap-2 border-b border-[#2B1F4D]/60 pb-3">
         <button
           onClick={() => setFilter('all')}
           className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
             filter === 'all'
-              ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
               : 'text-slate-400 hover:text-white'
           }`}
         >
@@ -111,7 +111,7 @@ export const MyListingsPage: React.FC = () => {
           onClick={() => setFilter('active')}
           className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
             filter === 'active'
-              ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
               : 'text-slate-400 hover:text-white'
           }`}
         >
@@ -121,7 +121,7 @@ export const MyListingsPage: React.FC = () => {
           onClick={() => setFilter('other')}
           className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
             filter === 'other'
-              ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
               : 'text-slate-400 hover:text-white'
           }`}
         >
@@ -132,18 +132,18 @@ export const MyListingsPage: React.FC = () => {
       {/* Listings Table / Cards */}
       {loading ? (
         <div className="py-16 flex justify-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-teal-400"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-400"></div>
         </div>
       ) : filteredListings.length === 0 ? (
-        <div className="bg-[#1b2151] border border-[#3f4b81] rounded-2xl p-12 text-center max-w-md mx-auto space-y-3">
-          <Package size={36} className="text-teal-400/50 mx-auto" />
+        <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-12 text-center max-w-md mx-auto space-y-3">
+          <Package size={36} className="text-purple-400/50 mx-auto" />
           <h3 className="text-lg font-bold text-white">No listings found</h3>
           <p className="text-xs text-slate-400">
             You don't have any surplus listings in this view.
           </p>
           <Link
             to="/create-listing"
-            className="inline-block px-4 py-2 bg-teal-500 text-navy-950 font-bold text-xs rounded-xl mt-2"
+            className="inline-block px-4 py-2 bg-purple-500 text-navy-950 font-bold text-xs rounded-xl mt-2"
           >
             Post Your First Lot
           </Link>
@@ -153,11 +153,11 @@ export const MyListingsPage: React.FC = () => {
           {filteredListings.map((listing) => (
             <div
               key={listing.id}
-              className="bg-[#1b2151] border border-[#3f4b81] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4"
+              className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/40">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40">
                     {listing.category}
                   </span>
                   <div className="flex items-center gap-1.5">
@@ -170,7 +170,7 @@ export const MyListingsPage: React.FC = () => {
                   {listing.title}
                 </h3>
 
-                <div className="grid grid-cols-2 gap-2 bg-[#0f1329]/60 p-3 rounded-xl border border-[#3f4b81]/40 text-xs my-3">
+                <div className="grid grid-cols-2 gap-2 bg-[#0F0B1A]/60 p-3 rounded-xl border border-[#2B1F4D]/40 text-xs my-3">
                   <div>
                     <span className="text-slate-400 block text-[10px] uppercase font-semibold">Available Lot</span>
                     <span className="font-bold text-white">{listing.quantity} {listing.unit}</span>
@@ -189,7 +189,7 @@ export const MyListingsPage: React.FC = () => {
                     </span>
                   </div>
                   {listing._count?.reservations !== undefined && (
-                    <div className="flex justify-between text-cyan-300">
+                    <div className="flex justify-between text-pink-300">
                       <span>Buyer Inquiries / Reservations:</span>
                       <span className="font-bold">{listing._count.reservations}</span>
                     </div>
@@ -197,10 +197,10 @@ export const MyListingsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-[#3f4b81]/60 flex items-center justify-between gap-2">
+              <div className="pt-2 border-t border-[#2B1F4D]/60 flex items-center justify-between gap-2">
                 <Link
                   to={`/listings/${listing.id}`}
-                  className="flex-1 py-2 px-3 bg-[#293264] hover:bg-[#313b6e] text-slate-200 text-xs font-semibold rounded-xl text-center flex items-center justify-center gap-1 transition-colors"
+                  className="flex-1 py-2 px-3 bg-[#2B1F4D] hover:bg-[#2B1F4D] text-slate-200 text-xs font-semibold rounded-xl text-center flex items-center justify-center gap-1 transition-colors"
                 >
                   <Eye size={14} /> View Details
                 </Link>

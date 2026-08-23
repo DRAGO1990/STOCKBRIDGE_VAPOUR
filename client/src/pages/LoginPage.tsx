@@ -50,9 +50,9 @@ export const LoginPage: React.FC = () => {
     <div className="max-w-md mx-auto py-8 space-y-6">
       {/* Brand Icon */}
       <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-600 to-cyan-400 p-0.5 mx-auto shadow-lg shadow-teal-500/20">
-          <div className="w-full h-full bg-[#0f1329] rounded-[14px] flex items-center justify-center">
-            <Compass className="text-teal-400 w-6 h-6" />
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-400 p-0.5 mx-auto shadow-lg shadow-purple-500/20">
+          <div className="w-full h-full bg-[#0F0B1A] rounded-[14px] flex items-center justify-center">
+            <Compass className="text-purple-400 w-6 h-6" />
           </div>
         </div>
         <h1 className="text-2xl font-extrabold text-white">Sign In to StockBridge</h1>
@@ -60,7 +60,7 @@ export const LoginPage: React.FC = () => {
       </div>
 
       {/* Main Login Form */}
-      <div className="bg-[#1b2151] border border-[#3f4b81] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
+      <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
@@ -72,7 +72,7 @@ export const LoginPage: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="e.g. rajesh@demo.com"
               required
-              className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-400 transition-colors"
+              className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition-colors"
             />
           </div>
 
@@ -86,7 +86,7 @@ export const LoginPage: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-400 transition-colors"
+              className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition-colors"
             />
           </div>
 
@@ -99,7 +99,7 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 bg-teal-500 hover:bg-teal-400 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-teal-500/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 bg-purple-500 hover:bg-purple-400 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-purple-500/25 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <LogIn size={16} />
             {loading ? 'Authenticating...' : 'Sign In'}
@@ -107,8 +107,8 @@ export const LoginPage: React.FC = () => {
         </form>
 
         {/* 1-Click Demo Accounts Selector */}
-        <div className="pt-4 border-t border-[#3f4b81]/60 space-y-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-teal-400 flex items-center gap-1">
+        <div className="pt-4 border-t border-[#2B1F4D]/60 space-y-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1">
             <Sparkles size={13} /> 1-Click Demo Accounts (password: password123)
           </span>
 
@@ -118,9 +118,9 @@ export const LoginPage: React.FC = () => {
                 key={user.email}
                 onClick={() => executeLogin(user.email, 'password123')}
                 disabled={loading}
-                className="p-2.5 bg-[#0f1329] hover:bg-[#20275e] border border-[#3f4b81] rounded-xl text-left transition-all text-xs cursor-pointer group"
+                className="p-2.5 bg-[#0F0B1A] hover:bg-[#231845] border border-[#2B1F4D] rounded-xl text-left transition-all text-xs cursor-pointer group"
               >
-                <span className="font-semibold text-white group-hover:text-teal-300 block truncate">
+                <span className="font-semibold text-white group-hover:text-purple-300 block truncate">
                   {user.name}
                 </span>
                 <span className="text-[10px] text-slate-400 truncate block">
@@ -134,7 +134,7 @@ export const LoginPage: React.FC = () => {
 
       <div className="text-center text-xs text-slate-400">
         New merchant business?{' '}
-        <Link to="/register" className="text-teal-400 font-semibold hover:underline">
+        <Link to="/register" className="text-purple-400 font-semibold hover:underline">
           Register for an account
         </Link>
       </div>

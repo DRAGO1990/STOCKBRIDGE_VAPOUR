@@ -19,7 +19,7 @@ export const UrgencyBadge: React.FC<{ urgency: 'low' | 'medium' | 'high' }> = ({
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-500/20 text-teal-300 border border-teal-500/40">
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/40">
       Normal
     </span>
   );
@@ -58,8 +58,8 @@ export const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     case 'completed':
     case 'sold':
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/40">
-          <CheckCircle size={12} className="text-teal-400" />
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40">
+          <CheckCircle size={12} className="text-purple-400" />
           {status === 'sold' ? 'Sold' : 'Completed'}
         </span>
       );

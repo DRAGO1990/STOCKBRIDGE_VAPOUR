@@ -85,11 +85,11 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-[#1b2151] border border-[#3f4b81] w-full max-w-lg rounded-2xl shadow-2xl flex flex-col h-[550px] overflow-hidden">
+      <div className="bg-[#1A1330] border border-[#2B1F4D] w-full max-w-lg rounded-2xl shadow-2xl flex flex-col h-[550px] overflow-hidden">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#3f4b81] flex items-center justify-between bg-[#151a41]">
+        <div className="px-5 py-4 border-b border-[#2B1F4D] flex items-center justify-between bg-[#1A1330]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
+            <div className="w-9 h-9 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
               <MessageSquare size={18} />
             </div>
             <div>
@@ -106,10 +106,10 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         </div>
 
         {/* Messages Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#0f1329]/50">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#0F0B1A]/50">
           {loading ? (
             <div className="h-full flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-400"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-400"></div>
             </div>
           ) : error ? (
             <div className="flex items-center gap-2 p-3 text-sm text-rose-300 bg-rose-950/40 border border-rose-800 rounded-lg">
@@ -118,7 +118,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             </div>
           ) : messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-              <Bot size={36} className="text-teal-400/60 mb-2" />
+              <Bot size={36} className="text-purple-400/60 mb-2" />
               <p className="text-sm font-medium text-slate-300">No messages yet</p>
               <p className="text-xs text-slate-500 max-w-xs mt-1">
                 Coordinate pickup time, logistics, payment terms, or final verification here in real-time.
@@ -143,8 +143,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-md ${
                       isMine
-                        ? 'bg-teal-600 text-white rounded-br-none'
-                        : 'bg-[#293264] text-slate-100 rounded-bl-none border border-[#3f4b81]'
+                        ? 'bg-purple-600 text-white rounded-br-none'
+                        : 'bg-[#2B1F4D] text-slate-100 rounded-bl-none border border-[#2B1F4D]'
                     }`}
                   >
                     <p className="whitespace-pre-wrap break-words">{msg.text}</p>
@@ -159,19 +159,19 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         {/* Input Footer */}
         <form
           onSubmit={handleSendMessage}
-          className="p-3 border-t border-[#3f4b81] bg-[#151a41] flex items-center gap-2"
+          className="p-3 border-t border-[#2B1F4D] bg-[#1A1330] flex items-center gap-2"
         >
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Type your message (negotiate pickup, details)..."
-            className="flex-1 bg-[#0f1329] border border-[#3f4b81] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-400 transition-colors"
+            className="flex-1 bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition-colors"
           />
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className="p-2.5 bg-teal-500 hover:bg-teal-400 disabled:opacity-40 disabled:hover:bg-teal-500 text-navy-950 font-bold rounded-xl transition-all shadow-md cursor-pointer disabled:cursor-not-allowed"
+            className="p-2.5 bg-purple-500 hover:bg-purple-400 disabled:opacity-40 disabled:hover:bg-purple-500 text-navy-950 font-bold rounded-xl transition-all shadow-md cursor-pointer disabled:cursor-not-allowed"
           >
             <Send size={18} />
           </button>

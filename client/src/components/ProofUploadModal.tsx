@@ -58,9 +58,9 @@ export const ProofUploadModal: React.FC<ProofUploadModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-[#1b2151] border border-[#3f4b81] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#3f4b81] flex items-center justify-between bg-[#151a41]">
-          <div className="flex items-center gap-2 text-teal-400">
+      <div className="bg-[#1A1330] border border-[#2B1F4D] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#2B1F4D] flex items-center justify-between bg-[#1A1330]">
+          <div className="flex items-center gap-2 text-purple-400">
             <CheckCircle2 size={20} />
             <h3 className="font-semibold text-white">Complete Handover</h3>
           </div>
@@ -77,7 +77,7 @@ export const ProofUploadModal: React.FC<ProofUploadModalProps> = ({
             Confirm goods receipt or delivery. You can optionally attach a proof photograph (invoice, receipt, or goods photo) for records.
           </p>
 
-          <div className="border-2 border-dashed border-[#3f4b81] hover:border-teal-400/60 transition-colors rounded-xl p-6 flex flex-col items-center justify-center text-center bg-[#0f1329]/40 relative cursor-pointer group">
+          <div className="border-2 border-dashed border-[#2B1F4D] hover:border-purple-400/60 transition-colors rounded-xl p-6 flex flex-col items-center justify-center text-center bg-[#0F0B1A]/40 relative cursor-pointer group">
             <input
               type="file"
               accept="image/*"
@@ -89,15 +89,15 @@ export const ProofUploadModal: React.FC<ProofUploadModalProps> = ({
                 <img
                   src={previewUrl}
                   alt="Proof Preview"
-                  className="max-h-40 rounded-lg object-contain mx-auto border border-[#3f4b81]"
+                  className="max-h-40 rounded-lg object-contain mx-auto border border-[#2B1F4D]"
                 />
-                <p className="text-xs text-teal-300 flex items-center justify-center gap-1">
+                <p className="text-xs text-purple-300 flex items-center justify-center gap-1">
                   <FileImage size={14} /> Click or drag to change image
                 </p>
               </div>
             ) : (
               <>
-                <div className="w-12 h-12 rounded-full bg-teal-500/10 flex items-center justify-center text-teal-400 mb-2 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 mb-2 group-hover:scale-110 transition-transform">
                   <Upload size={22} />
                 </div>
                 <p className="text-sm font-medium text-slate-200">
@@ -127,7 +127,7 @@ export const ProofUploadModal: React.FC<ProofUploadModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 text-sm font-semibold text-navy-950 bg-teal-400 hover:bg-teal-300 disabled:opacity-50 rounded-xl transition-colors cursor-pointer shadow-lg shadow-teal-400/20"
+              className="px-5 py-2 text-sm font-semibold text-navy-950 bg-purple-400 hover:bg-purple-300 disabled:opacity-50 rounded-xl transition-colors cursor-pointer shadow-lg shadow-purple-400/20"
             >
               {loading ? 'Confirming...' : 'Mark Completed'}
             </button>

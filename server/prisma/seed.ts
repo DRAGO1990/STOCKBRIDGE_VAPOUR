@@ -23,21 +23,21 @@ async function main() {
 
   const users = await Promise.all([
     // Cluster 1 — Mumbai
-    prisma.user.create({ data: { name: 'Rajesh Sharma', email: 'rajesh@demo.com', passwordHash: hash, businessName: 'Sharma Wholesale', phone: '9876543210', lat: 19.076, lng: 72.877, address: 'Andheri West, Mumbai', rating: 4.5, verified: true } }),
-    prisma.user.create({ data: { name: 'Priya Patel', email: 'priya@demo.com', passwordHash: hash, businessName: 'Patel Traders', phone: '9876543211', lat: 19.060, lng: 72.850, address: 'Bandra, Mumbai', rating: 4.2, verified: true } }),
-    prisma.user.create({ data: { name: 'Amit Desai', email: 'amit@demo.com', passwordHash: hash, businessName: 'Desai Electronics', phone: '9876543212', lat: 19.090, lng: 72.900, address: 'Powai, Mumbai', rating: 3.8, verified: true } }),
+    prisma.user.create({ data: { name: 'Rajesh Sharma', email: 'rajesh@demo.com', passwordHash: hash, businessName: 'Sharma Wholesale', phone: '9876543210', lat: 19.1136, lng: 72.8697, address: 'Andheri West, Mumbai', rating: 4.5, verified: true } }),
+    prisma.user.create({ data: { name: 'Priya Patel', email: 'priya@demo.com', passwordHash: hash, businessName: 'Patel Traders', phone: '9876543211', lat: 19.0596, lng: 72.8295, address: 'Bandra West, Mumbai', rating: 4.2, verified: true } }),
+    prisma.user.create({ data: { name: 'Amit Desai', email: 'amit@demo.com', passwordHash: hash, businessName: 'Desai Electronics', phone: '9876543212', lat: 19.1197, lng: 72.9056, address: 'Powai, Mumbai', rating: 3.8, verified: true } }),
     // Cluster 2 — Delhi
-    prisma.user.create({ data: { name: 'Suresh Kumar', email: 'suresh@demo.com', passwordHash: hash, businessName: 'Kumar Groceries', phone: '9876543213', lat: 28.613, lng: 77.209, address: 'Connaught Place, Delhi', rating: 4.7, verified: true } }),
-    prisma.user.create({ data: { name: 'Neha Gupta', email: 'neha@demo.com', passwordHash: hash, businessName: 'Gupta Stationery', phone: '9876543214', lat: 28.630, lng: 77.220, address: 'Karol Bagh, Delhi', rating: 4.0, verified: true } }),
-    prisma.user.create({ data: { name: 'Vikram Singh', email: 'vikram@demo.com', passwordHash: hash, businessName: 'Singh Supplies', phone: '9876543215', lat: 28.600, lng: 77.190, address: 'Nehru Place, Delhi', rating: 3.5 } }),
+    prisma.user.create({ data: { name: 'Suresh Kumar', email: 'suresh@demo.com', passwordHash: hash, businessName: 'Kumar Groceries', phone: '9876543213', lat: 28.6315, lng: 77.2167, address: 'Connaught Place, Delhi', rating: 4.7, verified: true } }),
+    prisma.user.create({ data: { name: 'Neha Gupta', email: 'neha@demo.com', passwordHash: hash, businessName: 'Gupta Stationery', phone: '9876543214', lat: 28.6517, lng: 77.1906, address: 'Karol Bagh, Delhi', rating: 4.0, verified: true } }),
+    prisma.user.create({ data: { name: 'Vikram Singh', email: 'vikram@demo.com', passwordHash: hash, businessName: 'Singh Supplies', phone: '9876543215', lat: 28.5494, lng: 77.2515, address: 'Nehru Place, Delhi', rating: 3.5 } }),
     // Cluster 3 — Bangalore
-    prisma.user.create({ data: { name: 'Lakshmi Rao', email: 'lakshmi@demo.com', passwordHash: hash, businessName: 'Rao Fresh Foods', phone: '9876543216', lat: 12.971, lng: 77.594, address: 'MG Road, Bangalore', rating: 4.8, verified: true } }),
-    prisma.user.create({ data: { name: 'Karthik Reddy', email: 'karthik@demo.com', passwordHash: hash, businessName: 'Reddy Tech Hub', phone: '9876543217', lat: 12.980, lng: 77.610, address: 'Indiranagar, Bangalore', rating: 4.1 } }),
+    prisma.user.create({ data: { name: 'Lakshmi Rao', email: 'lakshmi@demo.com', passwordHash: hash, businessName: 'Rao Fresh Foods', phone: '9876543216', lat: 12.9756, lng: 77.6094, address: 'MG Road, Bangalore', rating: 4.8, verified: true } }),
+    prisma.user.create({ data: { name: 'Karthik Reddy', email: 'karthik@demo.com', passwordHash: hash, businessName: 'Reddy Tech Hub', phone: '9876543217', lat: 12.9784, lng: 77.6408, address: 'Indiranagar, Bangalore', rating: 4.1 } }),
     // Cluster 4 — Hyderabad
-    prisma.user.create({ data: { name: 'Fatima Khan', email: 'fatima@demo.com', passwordHash: hash, businessName: 'Khan Trading Co', phone: '9876543218', lat: 17.385, lng: 78.486, address: 'Banjara Hills, Hyderabad', rating: 4.4, verified: true } }),
-    prisma.user.create({ data: { name: 'Ravi Teja', email: 'ravi@demo.com', passwordHash: hash, businessName: 'Teja Wholesale', phone: '9876543219', lat: 17.400, lng: 78.500, address: 'Jubilee Hills, Hyderabad', rating: 3.9 } }),
+    prisma.user.create({ data: { name: 'Fatima Khan', email: 'fatima@demo.com', passwordHash: hash, businessName: 'Khan Trading Co', phone: '9876543218', lat: 17.4156, lng: 78.4487, address: 'Banjara Hills, Hyderabad', rating: 4.4, verified: true } }),
+    prisma.user.create({ data: { name: 'Ravi Teja', email: 'ravi@demo.com', passwordHash: hash, businessName: 'Teja Wholesale', phone: '9876543219', lat: 17.4325, lng: 78.4071, address: 'Jubilee Hills, Hyderabad', rating: 3.9 } }),
     // Admin user
-    prisma.user.create({ data: { name: 'Admin', email: 'admin@stockbridge.com', passwordHash: hash, businessName: 'StockBridge Admin', phone: '9999999999', lat: 19.076, lng: 72.877, address: 'Mumbai', isAdmin: true, verified: true, rating: 5.0 } }),
+    prisma.user.create({ data: { name: 'Admin', email: 'admin@stockbridge.com', passwordHash: hash, businessName: 'StockBridge Admin', phone: '9999999999', lat: 19.0760, lng: 72.8770, address: 'Mumbai', isAdmin: true, verified: true, rating: 5.0 } }),
   ]);
 
   const [rajesh, priya, amit, suresh, neha, vikram, lakshmi, karthik, fatima, ravi] = users;
@@ -49,34 +49,34 @@ async function main() {
   const listings = await Promise.all([
     // Groceries
     prisma.listing.create({ data: { sellerId: rajesh.id, title: 'Basmati Rice Premium 25kg bags', category: 'Groceries', quantity: 50, unit: 'bags', pricePerUnit: 1200, urgency: 'medium', expiryDate: daysFromNow(90) } }),
-    prisma.listing.create({ data: { sellerId: suresh.id, title: 'Toor Dal 1kg packets', category: 'Groceries', quantity: 200, unit: 'packets', pricePerUnit: 145, urgency: 'high', expiryDate: daysFromNow(5) } }),
+    prisma.listing.create({ data: { sellerId: suresh.id, title: 'Toor Dal 1kg packets', category: 'Groceries', quantity: 200, unit: 'packets', pricePerUnit: 145, urgency: 'high', expiryDate: daysFromNow(15) } }),
     prisma.listing.create({ data: { sellerId: lakshmi.id, title: 'Fresh Coconut Oil 1L bottles', category: 'Groceries', quantity: 100, unit: 'bottles', pricePerUnit: 220, urgency: 'medium', expiryDate: daysFromNow(30) } }),
     prisma.listing.create({ data: { sellerId: fatima.id, title: 'Atta Flour 10kg bags', category: 'Groceries', quantity: 80, unit: 'bags', pricePerUnit: 380, urgency: 'low', expiryDate: daysFromNow(60) } }),
-    prisma.listing.create({ data: { sellerId: priya.id, title: 'Cooking Oil Sunflower 5L cans', category: 'Groceries', quantity: 60, unit: 'cans', pricePerUnit: 650, urgency: 'high', expiryDate: daysFromNow(3) } }),
+    prisma.listing.create({ data: { sellerId: priya.id, title: 'Cooking Oil Sunflower 5L cans', category: 'Groceries', quantity: 60, unit: 'cans', pricePerUnit: 650, urgency: 'high', expiryDate: daysFromNow(12) } }),
 
     // Stationery
-    prisma.listing.create({ data: { sellerId: neha.id, title: 'A4 Copy Paper 500 sheets ream', category: 'Stationery', quantity: 500, unit: 'reams', pricePerUnit: 180, urgency: 'low' } }),
-    prisma.listing.create({ data: { sellerId: vikram.id, title: 'Ball Pens Blue Pack of 20', category: 'Stationery', quantity: 300, unit: 'packs', pricePerUnit: 85, urgency: 'medium' } }),
-    prisma.listing.create({ data: { sellerId: rajesh.id, title: 'Spiral Notebooks 200 pages', category: 'Stationery', quantity: 400, unit: 'pieces', pricePerUnit: 65, urgency: 'low' } }),
-    prisma.listing.create({ data: { sellerId: fatima.id, title: 'Printer Ink Cartridges HP Compatible', category: 'Stationery', quantity: 50, unit: 'pieces', pricePerUnit: 450, urgency: 'medium' } }),
+    prisma.listing.create({ data: { sellerId: neha.id, title: 'A4 Copy Paper 500 sheets ream', category: 'Stationery', quantity: 500, unit: 'reams', pricePerUnit: 180, urgency: 'low', expiryDate: daysFromNow(180) } }),
+    prisma.listing.create({ data: { sellerId: vikram.id, title: 'Ball Pens Blue Pack of 20', category: 'Stationery', quantity: 300, unit: 'packs', pricePerUnit: 85, urgency: 'medium', expiryDate: daysFromNow(120) } }),
+    prisma.listing.create({ data: { sellerId: rajesh.id, title: 'Spiral Notebooks 200 pages', category: 'Stationery', quantity: 400, unit: 'pieces', pricePerUnit: 65, urgency: 'low', expiryDate: daysFromNow(90) } }),
+    prisma.listing.create({ data: { sellerId: fatima.id, title: 'Printer Ink Cartridges HP Compatible', category: 'Stationery', quantity: 50, unit: 'pieces', pricePerUnit: 450, urgency: 'medium', expiryDate: daysFromNow(60) } }),
 
     // Electronics
-    prisma.listing.create({ data: { sellerId: amit.id, title: 'USB-C Charging Cables 1m', category: 'Electronics', quantity: 200, unit: 'pieces', pricePerUnit: 120, urgency: 'low' } }),
-    prisma.listing.create({ data: { sellerId: karthik.id, title: 'Bluetooth Earbuds TWS', category: 'Electronics', quantity: 50, unit: 'pieces', pricePerUnit: 850, urgency: 'medium' } }),
-    prisma.listing.create({ data: { sellerId: ravi.id, title: 'LED Desk Lamps Adjustable', category: 'Electronics', quantity: 30, unit: 'pieces', pricePerUnit: 550, urgency: 'high', expiryDate: daysFromNow(7) } }),
-    prisma.listing.create({ data: { sellerId: amit.id, title: 'Power Bank 10000mAh', category: 'Electronics', quantity: 100, unit: 'pieces', pricePerUnit: 750, urgency: 'low' } }),
+    prisma.listing.create({ data: { sellerId: amit.id, title: 'USB-C Charging Cables 1m', category: 'Electronics', quantity: 200, unit: 'pieces', pricePerUnit: 120, urgency: 'low', expiryDate: daysFromNow(90) } }),
+    prisma.listing.create({ data: { sellerId: karthik.id, title: 'Bluetooth Earbuds TWS', category: 'Electronics', quantity: 50, unit: 'pieces', pricePerUnit: 850, urgency: 'medium', expiryDate: daysFromNow(45) } }),
+    prisma.listing.create({ data: { sellerId: ravi.id, title: 'LED Desk Lamps Adjustable', category: 'Electronics', quantity: 30, unit: 'pieces', pricePerUnit: 550, urgency: 'high', expiryDate: daysFromNow(20) } }),
+    prisma.listing.create({ data: { sellerId: amit.id, title: 'Power Bank 10000mAh', category: 'Electronics', quantity: 100, unit: 'pieces', pricePerUnit: 750, urgency: 'low', expiryDate: daysFromNow(60) } }),
 
     // Packaging
-    prisma.listing.create({ data: { sellerId: suresh.id, title: 'Corrugated Boxes 12x10x8 inch', category: 'Packaging', quantity: 1000, unit: 'pieces', pricePerUnit: 25, urgency: 'low' } }),
-    prisma.listing.create({ data: { sellerId: priya.id, title: 'Bubble Wrap Roll 100m', category: 'Packaging', quantity: 20, unit: 'rolls', pricePerUnit: 900, urgency: 'medium' } }),
+    prisma.listing.create({ data: { sellerId: suresh.id, title: 'Corrugated Boxes 12x10x8 inch', category: 'Packaging', quantity: 1000, unit: 'pieces', pricePerUnit: 25, urgency: 'low', expiryDate: daysFromNow(150) } }),
+    prisma.listing.create({ data: { sellerId: priya.id, title: 'Bubble Wrap Roll 100m', category: 'Packaging', quantity: 20, unit: 'rolls', pricePerUnit: 900, urgency: 'medium', expiryDate: daysFromNow(180) } }),
 
     // Cleaning
     prisma.listing.create({ data: { sellerId: lakshmi.id, title: 'Floor Cleaner 5L Cans', category: 'Cleaning', quantity: 40, unit: 'cans', pricePerUnit: 280, urgency: 'low', expiryDate: daysFromNow(180) } }),
-    prisma.listing.create({ data: { sellerId: vikram.id, title: 'Hand Sanitizer 500ml bottles', category: 'Cleaning', quantity: 150, unit: 'bottles', pricePerUnit: 95, urgency: 'high', expiryDate: daysFromNow(10) } }),
+    prisma.listing.create({ data: { sellerId: vikram.id, title: 'Hand Sanitizer 500ml bottles', category: 'Cleaning', quantity: 150, unit: 'bottles', pricePerUnit: 95, urgency: 'high', expiryDate: daysFromNow(25) } }),
 
     // Textiles
-    prisma.listing.create({ data: { sellerId: fatima.id, title: 'Cotton Face Masks Pack of 50', category: 'Textiles', quantity: 200, unit: 'packs', pricePerUnit: 350, urgency: 'medium' } }),
-    prisma.listing.create({ data: { sellerId: ravi.id, title: 'Industrial Aprons Heavy Duty', category: 'Textiles', quantity: 100, unit: 'pieces', pricePerUnit: 200, urgency: 'low' } }),
+    prisma.listing.create({ data: { sellerId: fatima.id, title: 'Cotton Face Masks Pack of 50', category: 'Textiles', quantity: 200, unit: 'packs', pricePerUnit: 350, urgency: 'medium', expiryDate: daysFromNow(90) } }),
+    prisma.listing.create({ data: { sellerId: ravi.id, title: 'Industrial Aprons Heavy Duty', category: 'Textiles', quantity: 100, unit: 'pieces', pricePerUnit: 200, urgency: 'low', expiryDate: daysFromNow(120) } }),
 
     // Food & Beverages
     prisma.listing.create({ data: { sellerId: suresh.id, title: 'Green Tea Bags Box of 100', category: 'Food & Beverages', quantity: 60, unit: 'boxes', pricePerUnit: 320, urgency: 'medium', expiryDate: daysFromNow(120) } }),
