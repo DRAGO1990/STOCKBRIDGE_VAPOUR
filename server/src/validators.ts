@@ -16,7 +16,7 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-export const listingSchema = z.object({
+export const baseListingSchema = z.object({
   title: z.string().min(2).max(200),
   category: z.string().min(1).max(100),
   quantity: z.number().positive(),
@@ -31,15 +31,55 @@ export const listingSchema = z.object({
         if (isNaN(expiry.getTime())) return false;
         const minDate = new Date();
         minDate.setDate(minDate.getDate() + 10);
-        minDate.setHours(23, 59, 59, 999);
-        return expiry.getTime() > minDate.getTime();
+        minDate.setHours(0, 0, 0, 0);
+        return expiry.getTime() >= minDate.getTime();
       },
-      { message: 'Expiry date must be more than 10 days in the future' }
+      { message: 'Expiry date must be at least 10 days in the future' }
     ),
   urgency: z.enum(['low', 'medium', 'high']).default('low'),
 });
 
-export const listingUpdateSchema = listingSchema.partial();
+export const listingSchema = baseListingSchema.superRefine((data, ctx) => {
+  if (data.expiryDate && data.urgency === 'high') {
+    const expiry = new Date(data.expiryDate);
+    const minHigh = new Date();
+    minHigh.setDate(minHigh.getDate() + 10);
+    minHigh.setHours(0, 0, 0, 0);
+
+    const maxHigh = new Date();
+    maxHigh.setDate(maxHigh.getDate() + 15);
+    maxHigh.setHours(23, 59, 59, 999);
+
+    if (expiry.getTime() < minHigh.getTime() || expiry.getTime() > maxHigh.getTime()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'High urgency listings must have an expiry date between 10 to 15 days from today',
+        path: ['expiryDate'],
+      });
+    }
+  }
+});
+
+export const listingUpdateSchema = baseListingSchema.partial().superRefine((data, ctx) => {
+  if (data.expiryDate && data.urgency === 'high') {
+    const expiry = new Date(data.expiryDate);
+    const minHigh = new Date();
+    minHigh.setDate(minHigh.getDate() + 10);
+    minHigh.setHours(0, 0, 0, 0);
+
+    const maxHigh = new Date();
+    maxHigh.setDate(maxHigh.getDate() + 15);
+    maxHigh.setHours(23, 59, 59, 999);
+
+    if (expiry.getTime() < minHigh.getTime() || expiry.getTime() > maxHigh.getTime()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'High urgency listings must have an expiry date between 10 to 15 days from today',
+        path: ['expiryDate'],
+      });
+    }
+  }
+});
 
 export const reservationSchema = z.object({
   listingId: z.string().uuid(),

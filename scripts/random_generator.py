@@ -346,8 +346,11 @@ def generate_random_listing(seller_id: str):
     urgency = random.choices(["low", "medium", "high"], weights=[40, 35, 25])[0]
     
     # Expiry date
-    min_exp, max_exp = category_data["expiry_days"]
-    days_to_exp = random.randint(min_exp, max_exp)
+    if urgency == "high":
+        days_to_exp = random.randint(10, 15)
+    else:
+        min_exp, max_exp = category_data["expiry_days"]
+        days_to_exp = random.randint(min_exp, max_exp)
     expiry_date = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=days_to_exp)).isoformat()
     
     return {

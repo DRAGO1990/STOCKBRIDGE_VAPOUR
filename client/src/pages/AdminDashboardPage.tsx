@@ -92,7 +92,7 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
         <h1 className="text-3xl font-extrabold text-white">StockBridge Admin Command Center</h1>
         <p className="text-sm text-slate-400 mt-1">
-          Monitor platform liquidity metrics, manage merchant verifications, and moderate surplus inventory.
+          Monitor platform activity, verify businesses, and manage surplus inventory safely.
         </p>
       </div>
 

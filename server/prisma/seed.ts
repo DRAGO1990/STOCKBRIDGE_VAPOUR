@@ -63,7 +63,7 @@ async function main() {
     // Electronics
     prisma.listing.create({ data: { sellerId: amit.id, title: 'USB-C Charging Cables 1m', category: 'Electronics', quantity: 200, unit: 'pieces', pricePerUnit: 120, urgency: 'low', expiryDate: daysFromNow(90) } }),
     prisma.listing.create({ data: { sellerId: karthik.id, title: 'Bluetooth Earbuds TWS', category: 'Electronics', quantity: 50, unit: 'pieces', pricePerUnit: 850, urgency: 'medium', expiryDate: daysFromNow(45) } }),
-    prisma.listing.create({ data: { sellerId: ravi.id, title: 'LED Desk Lamps Adjustable', category: 'Electronics', quantity: 30, unit: 'pieces', pricePerUnit: 550, urgency: 'high', expiryDate: daysFromNow(20) } }),
+    prisma.listing.create({ data: { sellerId: ravi.id, title: 'LED Desk Lamps Adjustable', category: 'Electronics', quantity: 30, unit: 'pieces', pricePerUnit: 550, urgency: 'high', expiryDate: daysFromNow(14) } }),
     prisma.listing.create({ data: { sellerId: amit.id, title: 'Power Bank 10000mAh', category: 'Electronics', quantity: 100, unit: 'pieces', pricePerUnit: 750, urgency: 'low', expiryDate: daysFromNow(60) } }),
 
     // Packaging
@@ -72,7 +72,7 @@ async function main() {
 
     // Cleaning
     prisma.listing.create({ data: { sellerId: lakshmi.id, title: 'Floor Cleaner 5L Cans', category: 'Cleaning', quantity: 40, unit: 'cans', pricePerUnit: 280, urgency: 'low', expiryDate: daysFromNow(180) } }),
-    prisma.listing.create({ data: { sellerId: vikram.id, title: 'Hand Sanitizer 500ml bottles', category: 'Cleaning', quantity: 150, unit: 'bottles', pricePerUnit: 95, urgency: 'high', expiryDate: daysFromNow(25) } }),
+    prisma.listing.create({ data: { sellerId: vikram.id, title: 'Hand Sanitizer 500ml bottles', category: 'Cleaning', quantity: 150, unit: 'bottles', pricePerUnit: 95, urgency: 'high', expiryDate: daysFromNow(11) } }),
 
     // Textiles
     prisma.listing.create({ data: { sellerId: fatima.id, title: 'Cotton Face Masks Pack of 50', category: 'Textiles', quantity: 200, unit: 'packs', pricePerUnit: 350, urgency: 'medium', expiryDate: daysFromNow(90) } }),

@@ -110,8 +110,9 @@ EXTRACTION RULES & DOMAIN KNOWLEDGE:
 7. "urgency": Must be EXACTLY ONE of: "low", "medium", "high".
    - Carefully detect the seller's spoken urgency level:
      * "high":
+       - High urgency criteria: Expiry MUST be between 10 to 15 days from today (${todayStr}). Used for fast/emergency clearance, distress sales, or immediate liquidation.
        - Explicit mentions: "urgency level high", "urgency high", "high urgency", "urgency is high", "urgency: high"
-       - Urgency phrases: "urgent", "urgently", "emergency", "immediate", "immediately", "fast clearance", "clearance", "distress sale", "aaj hi bechna hai", "turant bechna hai", "jaldi nikalna hai", "jaldi se", "shop band ho rahi hai", "godown khali karna hai", "short expiry", "2 din me", "3 din me", "तुरंत", "जल्दी", "शीघ्र", "इमरजेंसी", "अर्जेंट", "तातडीने", "உடனடியாக", "తక్షణమే", "জরুরি", "તરત જ", "ತುರ್ತು", "ഉടൻ", "ਤੁਰੰਤ".
+       - Urgency phrases: "urgent", "urgently", "emergency", "immediate", "immediately", "fast clearance", "clearance", "distress sale", "aaj hi bechna hai", "turant bechna hai", "jaldi nikalna hai", "jaldi se", "shop band ho rahi hai", "godown khali karna hai", "short expiry", "10 din", "12 din", "15 din me", "तुरंत", "जल्दी", "शीघ्र", "इमरजेंसी", "अर्जेंट", "तातडीने", "உடனடியாக", "తక్షణమే", "জরুরি", "તરત જ", "ತುರ್ತು", "ഉടൻ", "ਤੁਰੰਤ".
      * "medium":
        - Explicit mentions: "urgency level medium", "urgency medium", "medium urgency", "moderate"
        - Medium phrases: "1-2 weeks", "agle hafte", "next week", "15 din", "20 din", "do hafte", "month end", "mahine ke aakhir", "medium priority", "मध्यम", "साधारण".
@@ -190,10 +191,14 @@ function sanitizeExtraction(raw: any): VoiceExtraction {
     urgency = 'low';
   }
 
-  // Normalize expiry date (must be >= 10 days in future)
+  // Normalize expiry date (must be >= 10 days in future, and 10 to 15 days for high urgency)
   const minFutureDate = new Date();
   minFutureDate.setDate(minFutureDate.getDate() + 10);
   minFutureDate.setHours(0, 0, 0, 0);
+
+  const maxHighDate = new Date();
+  maxHighDate.setDate(maxHighDate.getDate() + 15);
+  maxHighDate.setHours(23, 59, 59, 999);
 
   let expiryDate: string | null = null;
   let hasExplicitExpiry = false;
@@ -213,7 +218,19 @@ function sanitizeExtraction(raw: any): VoiceExtraction {
     }
   }
 
-  if (!expiryDate) {
+  if (urgency === 'high') {
+    if (!hasExplicitExpiry) {
+      const defaultHighDate = new Date(Date.now() + 12 * 24 * 60 * 60 * 1000);
+      expiryDate = defaultHighDate.toISOString().split('T')[0];
+    } else if (expiryDate) {
+      const parsed = new Date(expiryDate);
+      if (parsed.getTime() < minFutureDate.getTime()) {
+        expiryDate = minFutureDate.toISOString().split('T')[0];
+      } else if (parsed.getTime() > maxHighDate.getTime()) {
+        expiryDate = maxHighDate.toISOString().split('T')[0];
+      }
+    }
+  } else if (!expiryDate) {
     const defaultDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     expiryDate = defaultDate.toISOString().split('T')[0];
   }
@@ -389,7 +406,24 @@ function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
     }
   }
 
-  if (!expiryDate) {
+  if (urgency === 'high') {
+    if (!hasExplicitExpiry) {
+      const defaultHighDate = new Date(Date.now() + 12 * 24 * 60 * 60 * 1000);
+      expiryDate = defaultHighDate.toISOString().split('T')[0];
+      missingFields.push('expiryDate');
+    } else {
+      const parsed = new Date(expiryDate);
+      const minHigh = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+      const maxHigh = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+      minHigh.setHours(0, 0, 0, 0);
+      maxHigh.setHours(23, 59, 59, 999);
+      if (parsed.getTime() < minHigh.getTime()) {
+        expiryDate = minHigh.toISOString().split('T')[0];
+      } else if (parsed.getTime() > maxHigh.getTime()) {
+        expiryDate = maxHigh.toISOString().split('T')[0];
+      }
+    }
+  } else if (!expiryDate) {
     const defaultDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     expiryDate = defaultDate.toISOString().split('T')[0];
     missingFields.push('expiryDate');

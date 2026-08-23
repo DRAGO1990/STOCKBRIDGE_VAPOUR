@@ -414,7 +414,24 @@ function extractClientSideFallback(transcript: string): ExtractedFields {
     }
   }
 
-  if (!expiryDate) {
+  if (urgency === 'high') {
+    if (!hasExplicitExpiry) {
+      const defaultHighDate = new Date(Date.now() + 12 * 24 * 60 * 60 * 1000);
+      expiryDate = defaultHighDate.toISOString().split('T')[0];
+      missingFields.push('expiryDate');
+    } else {
+      const parsed = new Date(expiryDate);
+      const minHigh = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+      const maxHigh = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+      minHigh.setHours(0, 0, 0, 0);
+      maxHigh.setHours(23, 59, 59, 999);
+      if (parsed.getTime() < minHigh.getTime()) {
+        expiryDate = minHigh.toISOString().split('T')[0];
+      } else if (parsed.getTime() > maxHigh.getTime()) {
+        expiryDate = maxHigh.toISOString().split('T')[0];
+      }
+    }
+  } else if (!expiryDate) {
     const defaultDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     expiryDate = defaultDate.toISOString().split('T')[0];
     missingFields.push('expiryDate');

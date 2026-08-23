@@ -339,7 +339,9 @@ async function generate(userCount = 12, listingCount = 24, reservationCount = 6)
     const pricePerUnit = randFloat(catData.minPrice, catData.maxPrice);
     const quantity = randInt(catData.minQty, catData.maxQty);
     const urgency = sample([...urgencies]);
-    const expDays = randInt(catData.expiryDays[0], catData.expiryDays[1]);
+    const expDays = urgency === 'high'
+      ? randInt(10, 15)
+      : randInt(catData.expiryDays[0], catData.expiryDays[1]);
     const expiryDate = new Date(Date.now() + expDays * 24 * 60 * 60 * 1000);
 
     const listing = await prisma.listing.create({

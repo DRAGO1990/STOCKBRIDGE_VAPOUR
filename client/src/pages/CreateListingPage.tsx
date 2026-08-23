@@ -45,10 +45,27 @@ export const CreateListingPage: React.FC = () => {
   const [expiryDate, setExpiryDate] = useState('');
   const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('low');
 
-  // Minimum required expiry date is more than 10 days from today (minimum 11 days)
-  const minExpiryDate = new Date(Date.now() + 11 * 24 * 60 * 60 * 1000)
+  // Expiry date boundaries
+  const minExpiryDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
     .toISOString()
     .split('T')[0];
+  const maxHighUrgencyDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+
+  const handleUrgencyChange = (newUrgency: 'low' | 'medium' | 'high') => {
+    setUrgency(newUrgency);
+    if (newUrgency === 'high' && expiryDate) {
+      const exp = new Date(expiryDate);
+      const minDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+      const maxDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+      minDate.setHours(0, 0, 0, 0);
+      maxDate.setHours(23, 59, 59, 999);
+      if (exp.getTime() < minDate.getTime() || exp.getTime() > maxDate.getTime()) {
+        setExpiryDate(new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+      }
+    }
+  };
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -65,7 +82,22 @@ export const CreateListingPage: React.FC = () => {
       setUnit(fields.unit);
     }
     setPricePerUnit(fields.pricePerUnit || 0);
-    if (fields.expiryDate) {
+    if (fields.urgency === 'high') {
+      if (fields.expiryDate) {
+        const exp = new Date(fields.expiryDate);
+        const minD = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+        const maxD = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+        minD.setHours(0, 0, 0, 0);
+        maxD.setHours(23, 59, 59, 999);
+        if (exp.getTime() < minD.getTime() || exp.getTime() > maxD.getTime()) {
+          setExpiryDate(new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+        } else {
+          setExpiryDate(fields.expiryDate);
+        }
+      } else {
+        setExpiryDate(new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+      }
+    } else if (fields.expiryDate) {
       setExpiryDate(fields.expiryDate);
     }
     setUrgency(fields.urgency || 'low');
@@ -89,11 +121,22 @@ export const CreateListingPage: React.FC = () => {
     const selectedExpiry = new Date(expiryDate);
     const minRequiredTime = new Date();
     minRequiredTime.setDate(minRequiredTime.getDate() + 10);
-    minRequiredTime.setHours(23, 59, 59, 999);
+    minRequiredTime.setHours(0, 0, 0, 0);
 
-    if (selectedExpiry.getTime() <= minRequiredTime.getTime()) {
-      setError('Expiry date must be more than 10 days from today to ensure an adequate liquidation window.');
-      return;
+    if (urgency === 'high') {
+      const maxRequiredTime = new Date();
+      maxRequiredTime.setDate(maxRequiredTime.getDate() + 15);
+      maxRequiredTime.setHours(23, 59, 59, 999);
+
+      if (selectedExpiry.getTime() < minRequiredTime.getTime() || selectedExpiry.getTime() > maxRequiredTime.getTime()) {
+        setError('High urgency listings must have an expiry date between 10 to 15 days from today.');
+        return;
+      }
+    } else {
+      if (selectedExpiry.getTime() < minRequiredTime.getTime()) {
+        setError('Expiry date must be at least 10 days from today to ensure an adequate liquidation window.');
+        return;
+      }
     }
 
     setLoading(true);
@@ -129,7 +172,7 @@ export const CreateListingPage: React.FC = () => {
         </div>
         <h1 className="text-3xl font-extrabold text-white">List Surplus Inventory Batch</h1>
         <p className="text-sm text-slate-400 mt-1">
-          Publish lot details to connect with regional wholesale and retail buyers.
+          List your excess inventory and find verified buyers ready to purchase.
         </p>
       </div>
 
@@ -284,18 +327,23 @@ export const CreateListingPage: React.FC = () => {
                 <div>
                   <label className="block text-xs font-semibold text-slate-200 mb-1.5 flex items-center justify-between">
                     <span>Expiry Date *</span>
-                    <span className="text-[10px] text-purple-400 font-normal">More than 10 days</span>
+                    <span className="text-[10px] text-purple-400 font-normal">
+                      {urgency === 'high' ? '10 to 15 days (High Urgency)' : 'At least 10 days'}
+                    </span>
                   </label>
                   <input
                     type="date"
                     min={minExpiryDate}
+                    max={urgency === 'high' ? maxHighUrgencyDate : undefined}
                     value={expiryDate}
                     onChange={(e) => setExpiryDate(e.target.value)}
                     required
                     className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
                   />
                   <span className="text-[11px] text-slate-400 mt-1 block">
-                    Must be more than 10 days from today to ensure an adequate liquidation window.
+                    {urgency === 'high'
+                      ? 'High urgency listings must have an expiry date between 10 to 15 days from today.'
+                      : 'Must be at least 10 days from today to ensure an adequate liquidation window.'}
                   </span>
                 </div>
 
@@ -305,12 +353,12 @@ export const CreateListingPage: React.FC = () => {
                   </label>
                   <select
                     value={urgency}
-                    onChange={(e) => setUrgency(e.target.value as any)}
+                    onChange={(e) => handleUrgencyChange(e.target.value as any)}
                     className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
                   >
                     <option value="low" className="bg-[#1A1330]">Low — Standard Pace</option>
                     <option value="medium" className="bg-[#1A1330]">Medium — Within 1-2 Weeks</option>
-                    <option value="high" className="bg-[#1A1330]">High 🔥 — Immediate Clearance</option>
+                    <option value="high" className="bg-[#1A1330]">High 🔥 — Immediate Clearance (10–15 Days Expiry)</option>
                   </select>
                 </div>
               </div>
