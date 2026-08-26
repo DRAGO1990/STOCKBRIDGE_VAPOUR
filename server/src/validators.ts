@@ -108,13 +108,7 @@ export const matchQuerySchema = z.object({
 export const SUPPORTED_VOICE_LANGUAGES = [
   { code: 'hi-IN', name: 'Hindi / Hinglish', nativeName: 'हिन्दी / Hinglish' },
   { code: 'en-IN', name: 'English (India)', nativeName: 'English (IN)' },
-  { code: 'bn-IN', name: 'Bengali', nativeName: 'বাংলা' },
-  { code: 'mr-IN', name: 'Marathi', nativeName: 'मराठी' },
-  { code: 'ta-IN', name: 'Tamil', nativeName: 'தமிழ்' },
-  { code: 'te-IN', name: 'Telugu', nativeName: 'తెలుగు' },
-  { code: 'gu-IN', name: 'Gujarati', nativeName: 'ગુજરાતી' },
   { code: 'kn-IN', name: 'Kannada', nativeName: 'ಕನ್ನಡ' },
-  { code: 'ml-IN', name: 'Malayalam', nativeName: 'മലയാളം' },
   { code: 'pa-IN', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
 ] as const;
 

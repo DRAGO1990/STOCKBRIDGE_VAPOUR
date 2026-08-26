@@ -36,13 +36,7 @@ export interface SupportedLanguage {
 export const SUPPORTED_LANGUAGES: SupportedLanguage[] = [
   { code: 'hi-IN', name: 'Hindi / Hinglish', nativeName: 'हिन्दी / Hinglish', speechCode: 'hi-IN' },
   { code: 'en-IN', name: 'English (India)', nativeName: 'English (India)', speechCode: 'en-IN' },
-  { code: 'bn-IN', name: 'Bengali', nativeName: 'বাংলা', speechCode: 'bn-IN' },
-  { code: 'mr-IN', name: 'Marathi', nativeName: 'मराठी', speechCode: 'mr-IN' },
-  { code: 'ta-IN', name: 'Tamil', nativeName: 'தமிழ்', speechCode: 'ta-IN' },
-  { code: 'te-IN', name: 'Telugu', nativeName: 'తెలుగు', speechCode: 'te-IN' },
-  { code: 'gu-IN', name: 'Gujarati', nativeName: 'ગુજરાતી', speechCode: 'gu-IN' },
   { code: 'kn-IN', name: 'Kannada', nativeName: 'ಕನ್ನಡ', speechCode: 'kn-IN' },
-  { code: 'ml-IN', name: 'Malayalam', nativeName: 'മലയാളം', speechCode: 'ml-IN' },
   { code: 'pa-IN', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', speechCode: 'pa-IN' },
 ];
 
@@ -54,19 +48,19 @@ const SAMPLE_PROMPTS = [
     text: 'Hamare paas Fortune sunflower oil 1 litre pouch ke 50 packets surplus bache hain, 110 rupees per packet rate hai, expiry 3 months baad ki hai, packaging fresh aur sealed hai.',
   },
   {
-    label: 'Hindi Rice Bags',
-    lang: 'hi-IN',
-    text: 'हमारे पास दावत बासमती चावल 25 किलो वाले 30 कट्टे बचे हैं, 1200 रुपये प्रति कट्टा देंगे, एक्सपायरी अगले साल मार्च की है, तुरंत क्लीयरेंस करना है।',
-  },
-  {
     label: 'English Notebooks',
     lang: 'en-IN',
     text: 'We have 200 boxes of Classmate A4 long notebooks surplus stock, selling at 85 rupees per box, expiry 6 months from now, clean condition ready for bulk pickup.',
   },
   {
-    label: 'Hinglish Atta Lot',
-    lang: 'hi-IN',
-    text: 'Aashirvaad Shudh Chakki Atta 10kg wale 60 bori hain, rate 360 rupaye per bori, 4 mahine expiry bachi hai, emergency clearance hai.',
+    label: 'Kannada Rice Bags',
+    lang: 'kn-IN',
+    text: 'ನಮ್ಮ ಬಳಿ ಸೋನಾ ಮಸೂರಿ ಅಕ್ಕಿ 25 ಕೆಜಿ 50 ಚೀಲಗಳು ಇವೆ, ಪ್ರತಿ ಚೀಲಕ್ಕೆ 1150 ರೂಪಾಯಿ, 6 ತಿಂಗಳು ವ್ಯಾಲಿಡಿಟಿ ಇದೆ, ತಕ್ಷಣ ಮಾರಾಟಕ್ಕೆ ಲಭ್ಯ.',
+  },
+  {
+    label: 'Punjabi Wheat Lot',
+    lang: 'pa-IN',
+    text: 'ਸਾਡੇ ਕੋਲ 100 ਬੋਰੀਆਂ ਕਣਕ ਦਾ ਸਰਪਲਸ ਸਟਾਕ ਹੈ, ਰੇਟ 2200 ਰੁਪਏ ਪ੍ਰਤੀ ਕੁਇੰਟਲ, ਬਿਲਕੁਲ ਤਾਜ਼ਾ ਸਟਾਕ ਤੁਰੰਤ ਡਿਲੀਵਰੀ ਲਈ ਤਿਆਰ ਹੈ।',
   },
 ];
 
@@ -949,7 +943,7 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {SUPPORTED_LANGUAGES.map((lang) => (
             <button
               key={lang.code}

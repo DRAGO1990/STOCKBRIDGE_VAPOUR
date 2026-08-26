@@ -19,13 +19,7 @@ export const VALID_UNITS = ['kg', 'pieces', 'packets', 'bags', 'cans', 'litres',
 const LANGUAGE_NAMES: Record<string, string> = {
   'hi-IN': 'Hindi / Hinglish',
   'en-IN': 'Indian English',
-  'bn-IN': 'Bengali',
-  'mr-IN': 'Marathi',
-  'ta-IN': 'Tamil',
-  'te-IN': 'Telugu',
-  'gu-IN': 'Gujarati',
   'kn-IN': 'Kannada',
-  'ml-IN': 'Malayalam',
   'pa-IN': 'Punjabi',
 };
 
