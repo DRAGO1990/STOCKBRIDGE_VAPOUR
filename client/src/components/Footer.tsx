@@ -1,5 +1,5 @@
 import React from 'react';
-import { Compass, ShieldCheck, Zap, RefreshCw, Heart } from 'lucide-react';
+import { Compass, ShieldCheck, Zap, RefreshCw } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
@@ -50,10 +50,6 @@ export const Footer: React.FC = () => {
 
         <div className="mt-8 pt-6 border-t border-[#2B1F4D]/40 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} StockBridge Platform. All rights reserved.</p>
-          <div className="flex items-center gap-1 text-slate-400">
-            <span>Built for sustainable supply chain efficiency</span>
-            <Heart size={12} className="text-rose-400 fill-rose-400 inline" />
-          </div>
         </div>
       </div>
     </footer>
