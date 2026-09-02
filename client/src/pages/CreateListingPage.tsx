@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
-  PlusCircle,
-  Package,
-  Calendar,
   AlertCircle,
-  Sparkles,
-  Info,
-  DollarSign,
-  ArrowRight,
   Mic,
   Pencil,
+  Calendar,
+  Save,
+  ArrowLeft,
+  CheckCircle,
+  Loader2,
+  Package,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
 import { VoiceListingPanel } from '../components/VoiceListingPanel';
@@ -30,79 +30,104 @@ const CATEGORIES = [
 
 const UNITS = ['kg', 'pieces', 'packets', 'bags', 'cans', 'litres', 'boxes', 'reams', 'cartons'];
 
-type ListingMode = 'manual' | 'voice';
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontFamily: 'Work Sans, sans-serif',
+  fontSize: 11,
+  fontWeight: 600,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: '#bcc9c6',
+  marginBottom: 8,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  boxSizing: 'border-box',
+  background: '#2a2a2a',
+  border: '1px solid #3d4947',
+  borderRadius: 4,
+  padding: '11px 14px',
+  fontFamily: 'Work Sans, sans-serif',
+  fontSize: 14,
+  color: '#e5e2e1',
+  outline: 'none',
+};
 
 export const CreateListingPage: React.FC = () => {
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('edit');
+  const isEditMode = Boolean(editId);
 
-  const [mode, setMode] = useState<ListingMode>('manual');
+  const user = useAuthStore((s) => s.user);
+
+  const [mode, setMode] = useState<'manual' | 'voice'>('manual');
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Groceries');
   const [quantity, setQuantity] = useState<number>(0);
   const [unit, setUnit] = useState('packets');
-  const [pricePerUnit, setPricePerUnit] = useState<number>(0);
-  const [expiryDate, setExpiryDate] = useState('');
+  const [pricePerUnit, setPrice] = useState<number>(0);
+  const [expiryDate, setExpiry] = useState('');
   const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('low');
+  const [loading, setLoading] = useState(false);
+  const [fetchingListing, setFetchingListing] = useState(false);
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [voiceAutoFilled, setVoiceAutoFilled] = useState(false);
 
-  // Expiry date boundaries
-  const minExpiryDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split('T')[0];
-  const maxHighUrgencyDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split('T')[0];
+  const minExpiryDate = new Date(Date.now() + 10 * 86400000).toISOString().split('T')[0];
 
-  const handleUrgencyChange = (newUrgency: 'low' | 'medium' | 'high') => {
-    setUrgency(newUrgency);
-    if (newUrgency === 'high' && expiryDate) {
+  // If in edit mode, fetch existing listing details immediately and prefill the form
+  useEffect(() => {
+    if (!editId) return;
+
+    setFetchingListing(true);
+    setError('');
+
+    api
+      .get(`/listings/${editId}`)
+      .then((res) => {
+        const item = res.data;
+        setTitle(item.title || '');
+        if (CATEGORIES.includes(item.category)) setCategory(item.category);
+        setQuantity(item.quantity || 0);
+        if (UNITS.includes(item.unit)) setUnit(item.unit);
+        setPrice(item.pricePerUnit || 0);
+        if (item.expiryDate) {
+          setExpiry(item.expiryDate.split('T')[0]);
+        }
+        setUrgency(item.urgency || 'low');
+        setFetchingListing(false);
+      })
+      .catch((err) => {
+        setError(err.response?.data?.error || 'Failed to load existing listing details.');
+        setFetchingListing(false);
+      });
+  }, [editId]);
+
+  const handleUrgencyChange = (u: 'low' | 'medium' | 'high') => {
+    setUrgency(u);
+    if (u === 'high' && expiryDate) {
       const exp = new Date(expiryDate);
-      const minDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
-      const maxDate = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-      minDate.setHours(0, 0, 0, 0);
-      maxDate.setHours(23, 59, 59, 999);
-      if (exp.getTime() < minDate.getTime() || exp.getTime() > maxDate.getTime()) {
-        setExpiryDate(new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+      const max = new Date(Date.now() + 15 * 86400000);
+      const min = new Date(Date.now() + 10 * 86400000);
+      if (exp < min || exp > max) {
+        setExpiry(new Date(Date.now() + 12 * 86400000).toISOString().split('T')[0]);
       }
     }
   };
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [voiceAutoFilled, setVoiceAutoFilled] = useState(false);
-
-  // Handle voice extraction → auto-fill form fields → switch to manual mode for review
   const handleVoiceFieldsExtracted = (fields: ExtractedFields) => {
     setTitle(fields.title || '');
-    if (CATEGORIES.includes(fields.category)) {
-      setCategory(fields.category);
-    }
+    if (CATEGORIES.includes(fields.category)) setCategory(fields.category);
     setQuantity(fields.quantity || 0);
-    if (UNITS.includes(fields.unit)) {
-      setUnit(fields.unit);
-    }
-    setPricePerUnit(fields.pricePerUnit || 0);
-    if (fields.urgency === 'high') {
-      if (fields.expiryDate) {
-        const exp = new Date(fields.expiryDate);
-        const minD = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
-        const maxD = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-        minD.setHours(0, 0, 0, 0);
-        maxD.setHours(23, 59, 59, 999);
-        if (exp.getTime() < minD.getTime() || exp.getTime() > maxD.getTime()) {
-          setExpiryDate(new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-        } else {
-          setExpiryDate(fields.expiryDate);
-        }
-      } else {
-        setExpiryDate(new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-      }
-    } else if (fields.expiryDate) {
-      setExpiryDate(fields.expiryDate);
-    }
+    if (UNITS.includes(fields.unit)) setUnit(fields.unit);
+    setPrice(fields.pricePerUnit || 0);
+    setExpiry(fields.expiryDate || '');
     setUrgency(fields.urgency || 'low');
     setVoiceAutoFilled(true);
-    setMode('manual'); // Switch to manual for review & edit
+    setMode('manual');
     setError('');
   };
 
@@ -114,36 +139,30 @@ export const CreateListingPage: React.FC = () => {
     }
 
     if (!title.trim() || quantity <= 0 || pricePerUnit <= 0 || !expiryDate) {
-      setError('Please fill in all required fields including a valid expiry date, quantity, and price.');
+      setError('Please fill in all required fields.');
       return;
     }
 
     const selectedExpiry = new Date(expiryDate);
-    const minRequiredTime = new Date();
-    minRequiredTime.setDate(minRequiredTime.getDate() + 10);
-    minRequiredTime.setHours(0, 0, 0, 0);
+    const minReq = new Date(Date.now() + 10 * 86400000);
+    minReq.setHours(0, 0, 0, 0);
 
     if (urgency === 'high') {
-      const maxRequiredTime = new Date();
-      maxRequiredTime.setDate(maxRequiredTime.getDate() + 15);
-      maxRequiredTime.setHours(23, 59, 59, 999);
-
-      if (selectedExpiry.getTime() < minRequiredTime.getTime() || selectedExpiry.getTime() > maxRequiredTime.getTime()) {
-        setError('High urgency listings must have an expiry date between 10 to 15 days from today.');
+      const maxReq = new Date(Date.now() + 15 * 86400000);
+      if (selectedExpiry < minReq || selectedExpiry > maxReq) {
+        setError('High urgency listings must expire between 10–15 days from today.');
         return;
       }
-    } else {
-      if (selectedExpiry.getTime() < minRequiredTime.getTime()) {
-        setError('Expiry date must be at least 10 days from today to ensure an adequate liquidation window.');
-        return;
-      }
+    } else if (selectedExpiry < minReq) {
+      setError('Expiry date must be at least 10 days from today.');
+      return;
     }
 
     setLoading(true);
     setError('');
 
     try {
-      const res = await api.post('/listings', {
+      const payload = {
         title: title.trim(),
         category,
         quantity: Number(quantity),
@@ -151,284 +170,365 @@ export const CreateListingPage: React.FC = () => {
         pricePerUnit: Number(pricePerUnit),
         expiryDate: new Date(expiryDate).toISOString(),
         urgency,
-      });
+      };
 
-      navigate(`/listings/${res.data.id}`);
+      if (isEditMode && editId) {
+        // Update existing listing
+        const res = await api.put(`/listings/${editId}`, payload);
+        setSuccessMsg('Listing details updated successfully.');
+        setTimeout(() => {
+          navigate(`/listings/${res.data.id || editId}`);
+        }, 600);
+      } else {
+        // Create new listing
+        const res = await api.post('/listings', payload);
+        navigate(`/listings/${res.data.id}`);
+      }
     } catch (err: any) {
-      console.error('Create listing error', err);
-      setError(err.response?.data?.error || 'Failed to publish listing.');
+      setError(err.response?.data?.error || `Failed to ${isEditMode ? 'update' : 'publish'} listing.`);
       setLoading(false);
     }
   };
 
-  const totalLotValue = (quantity || 0) * (pricePerUnit || 0);
+  const totalValue = quantity * pricePerUnit;
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-16">
-      <div>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold mb-2">
-          <Sparkles size={14} className="text-purple-400" />
-          B2B Dead Stock & Surplus Liquidation
-        </div>
-        <h1 className="text-3xl font-extrabold text-white">List Surplus Inventory Batch</h1>
-        <p className="text-sm text-slate-400 mt-1">
-          List your excess inventory and find verified buyers ready to purchase.
+  if (fetchingListing) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', gap: 16 }}>
+        <Loader2 size={32} color="#6bd8cb" className="animate-spin" />
+        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6' }}>
+          Loading existing stock details...
         </p>
       </div>
+    );
+  }
 
-      {/* ─── Mode Toggle Tabs ─────────────────────────────────────────────── */}
-      <div className="flex bg-[#1A1330] rounded-2xl p-1 border border-[#2B1F4D]/60">
-        <button
-          type="button"
-          onClick={() => setMode('manual')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-            mode === 'manual'
-              ? 'bg-purple-500/25 text-purple-300 border border-purple-500/50 shadow-lg shadow-purple-500/10'
-              : 'text-slate-400 hover:text-white hover:bg-[#2B1F4D]'
-          }`}
-        >
-          <Pencil size={16} />
-          Manual Entry
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('voice')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-            mode === 'voice'
-              ? 'bg-violet-500/25 text-violet-300 border border-violet-500/50 shadow-lg shadow-violet-500/10'
-              : 'text-slate-400 hover:text-white hover:bg-[#2B1F4D]'
-          }`}
-        >
-          <Mic size={16} />
-          Voice Listing
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/30 text-violet-300 border border-violet-500/40 font-bold">
-            AI
-          </span>
-        </button>
-      </div>
-
-      {/* Voice auto-filled notification */}
-      {voiceAutoFilled && mode === 'manual' && (
-        <div className="text-xs text-emerald-400 bg-emerald-950/40 p-3 rounded-xl border border-emerald-800/60 flex items-center gap-2 animate-fade-in">
-          <Sparkles size={14} className="text-emerald-400 flex-shrink-0" />
-          <span>
-            <strong>AI auto-filled your listing!</strong> Review and edit the fields below, then publish when ready.
-          </span>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Form / Voice Column */}
-        <div className="lg:col-span-2">
-          {mode === 'voice' ? (
-            /* ─── Voice Listing Panel ──────────────────────────────────── */
-            <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 sm:p-8 shadow-2xl">
-              <VoiceListingPanel onFieldsExtracted={handleVoiceFieldsExtracted} />
-            </div>
-          ) : (
-            /* ─── Manual Form ──────────────────────────────────────────── */
-            <form
-              onSubmit={handleSubmit}
-              className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6"
+  return (
+    <div style={{ background: '#131313', minHeight: '100vh', color: '#e5e2e1' }}>
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '40px 24px 80px' }}>
+        
+        {/* ── Back button in Edit Mode ── */}
+        {isEditMode && (
+          <div style={{ marginBottom: 20 }}>
+            <Link
+              to={`/listings/${editId}`}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391',
+                textDecoration: 'none', transition: 'color 0.15s',
+              }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#6bd8cb')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#879391')}
             >
-              {/* Title */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                  Surplus Batch Title *
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Basmati Rice Premium 25kg bags, USB-C Cables 1m lot..."
-                  required
-                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition-colors"
-                />
-              </div>
+              <ArrowLeft size={16} /> Cancel & Return to Listing
+            </Link>
+          </div>
+        )}
 
-              {/* Category */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                  Category *
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
-                >
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat} className="bg-[#1A1330]">
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
+        {/* ── Page Header ── */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+            <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32, color: '#e5e2e1', margin: 0, letterSpacing: '-0.01em' }}>
+              {isEditMode ? 'Edit Stock Listing' : 'List New Stock'}
+            </h1>
+            {isEditMode && (
+              <span style={{
+                fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700,
+                color: '#6bd8cb', background: 'rgba(107,216,203,0.1)',
+                border: '1px solid rgba(107,216,203,0.25)', borderRadius: 4, padding: '3px 8px',
+              }}>
+                Editing #{editId?.substring(0, 8).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6', margin: 0 }}>
+            {isEditMode
+              ? 'Update price, quantity, or terms. Existing lot details have been loaded into the form below.'
+              : 'Fill in the details or use voice to quickly create a listing.'}
+          </p>
+        </motion.div>
 
-              {/* Quantity & Unit */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                    Available Quantity *
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
-                    required
-                    className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-purple-400 transition-colors"
-                  />
-                </div>
+        <hr style={{ border: 'none', borderTop: '1px solid #3d4947', marginBottom: 28 }} />
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                    Unit of Measure *
-                  </label>
-                  <select
-                    value={unit}
-                    onChange={(e) => setUnit(e.target.value)}
-                    className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
-                  >
-                    {UNITS.map((u) => (
-                      <option key={u} value={u} className="bg-[#1A1330]">
-                        {u}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+        {/* ── Mode Toggle (Only show on new listing) ── */}
+        {!isEditMode && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
+            {([
+              { key: 'manual', label: 'Manual Entry', icon: <Pencil size={14} /> },
+              { key: 'voice', label: 'Voice Input', icon: <Mic size={14} /> },
+            ] as const).map((m) => (
+              <button
+                key={m.key}
+                onClick={() => setMode(m.key)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '9px 18px', borderRadius: 4,
+                  fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600,
+                  border: '1px solid',
+                  cursor: 'pointer', transition: 'all 0.15s',
+                  ...(mode === m.key
+                    ? { background: 'rgba(107,216,203,0.1)', borderColor: '#6bd8cb', color: '#6bd8cb' }
+                    : { background: 'transparent', borderColor: '#3d4947', color: '#bcc9c6' }),
+                }}
+              >
+                {m.icon} {m.label}
+              </button>
+            ))}
+          </div>
+        )}
 
-              {/* Price per Unit */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                  Liquidation Price Per Unit (₹) *
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
-                    ₹
-                  </span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={pricePerUnit}
-                    onChange={(e) => setPricePerUnit(Number(e.target.value))}
-                    required
-                    className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl pl-8 pr-4 py-2.5 text-sm text-emerald-400 font-extrabold focus:outline-none focus:border-purple-400 transition-colors"
-                  />
-                </div>
-                <span className="text-[11px] text-slate-400 mt-1 block">
-                  Discounted price to attract fast liquidations.
+        {mode === 'voice' && !isEditMode ? (
+          <VoiceListingPanel onFieldsExtracted={handleVoiceFieldsExtracted} />
+        ) : (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            {voiceAutoFilled && (
+              <div style={{
+                background: 'rgba(107,216,203,0.08)', border: '1px solid rgba(107,216,203,0.2)',
+                borderRadius: 4, padding: '12px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <AlertCircle size={14} color="#6bd8cb" />
+                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#6bd8cb' }}>
+                  Voice data auto-filled — please review before publishing.
                 </span>
               </div>
+            )}
 
-              {/* Expiry Date & Urgency */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-200 mb-1.5 flex items-center justify-between">
-                    <span>Expiry Date *</span>
-                    <span className="text-[10px] text-purple-400 font-normal">
-                      {urgency === 'high' ? '10 to 15 days (High Urgency)' : 'At least 10 days'}
-                    </span>
-                  </label>
-                  <input
-                    type="date"
-                    min={minExpiryDate}
-                    max={urgency === 'high' ? maxHighUrgencyDate : undefined}
-                    value={expiryDate}
-                    onChange={(e) => setExpiryDate(e.target.value)}
-                    required
-                    className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
-                  />
-                  <span className="text-[11px] text-slate-400 mt-1 block">
-                    {urgency === 'high'
-                      ? 'High urgency listings must have an expiry date between 10 to 15 days from today.'
-                      : 'Must be at least 10 days from today to ensure an adequate liquidation window.'}
-                  </span>
+            {isEditMode && (
+              <div style={{
+                background: 'rgba(107,216,203,0.08)', border: '1px solid rgba(107,216,203,0.25)',
+                borderRadius: 6, padding: '12px 16px', marginBottom: 20,
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <CheckCircle size={16} color="#6bd8cb" />
+                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1' }}>
+                  Existing stock details loaded. Modify the price, quantity, or urgency below and save.
+                </span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, overflow: 'hidden' }}>
+                
+                {/* ── Section: Basics ── */}
+                <div style={{ padding: '24px 28px', borderBottom: '1px solid #3d4947' }}>
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', marginBottom: 20 }}>
+                    Basics
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                    {/* Title */}
+                    <div>
+                      <label style={labelStyle}>Listing Title *</label>
+                      <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                        placeholder="e.g., 500 Britannia Biscuit Packets (MRP ₹10)"
+                        style={inputStyle}
+                      />
+                    </div>
+
+                    {/* Category + Unit */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                      <div>
+                        <label style={labelStyle}>Category *</label>
+                        <select
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          style={{ ...inputStyle, cursor: 'pointer' }}
+                        >
+                          {CATEGORIES.map((c) => (
+                            <option key={c} value={c} style={{ background: '#1c1b1b' }}>
+                              {c}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Unit *</label>
+                        <select
+                          value={unit}
+                          onChange={(e) => setUnit(e.target.value)}
+                          style={{ ...inputStyle, cursor: 'pointer' }}
+                        >
+                          {UNITS.map((u) => (
+                            <option key={u} value={u} style={{ background: '#1c1b1b' }}>
+                              {u}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Qty + Price */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                      <div>
+                        <label style={labelStyle}>Quantity Available *</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={quantity || ''}
+                          onChange={(e) => setQuantity(Number(e.target.value))}
+                          required
+                          placeholder="0"
+                          style={inputStyle}
+                        />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Price per {unit} (₹) *</label>
+                        <input
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          value={pricePerUnit || ''}
+                          onChange={(e) => setPrice(Number(e.target.value))}
+                          required
+                          placeholder="0.00"
+                          style={inputStyle}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">
-                    Urgency Level *
-                  </label>
-                  <select
-                    value={urgency}
-                    onChange={(e) => handleUrgencyChange(e.target.value as any)}
-                    className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
+                {/* ── Section: Urgency ── */}
+                <div style={{ padding: '24px 28px', borderBottom: '1px solid #3d4947' }}>
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', marginBottom: 8 }}>
+                    Urgency
+                  </p>
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', marginBottom: 16 }}>
+                    Marks how urgently you need to liquidate this lot.
+                  </p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {(['low', 'medium', 'high'] as const).map((u) => {
+                      const active = urgency === u;
+                      const colors: Record<string, { color: string; bg: string; border: string }> = {
+                        low: { color: '#bcc9c6', bg: 'rgba(188,201,198,0.1)', border: 'rgba(188,201,198,0.2)' },
+                        medium: { color: '#f6b351', bg: 'rgba(246,179,81,0.1)', border: 'rgba(246,179,81,0.2)' },
+                        high: { color: '#ffb4ab', bg: 'rgba(255,180,171,0.1)', border: 'rgba(255,180,171,0.2)' },
+                      };
+                      return (
+                        <button
+                          key={u}
+                          type="button"
+                          onClick={() => handleUrgencyChange(u)}
+                          style={{
+                            padding: '8px 20px', borderRadius: 4,
+                            border: `1px solid ${active ? colors[u].border : '#3d4947'}`,
+                            background: active ? colors[u].bg : 'transparent',
+                            color: active ? colors[u].color : '#879391',
+                            fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600,
+                            cursor: 'pointer', textTransform: 'capitalize',
+                          }}
+                        >
+                          {u}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* ── Section: Expiry ── */}
+                <div style={{ padding: '24px 28px', borderBottom: '1px solid #3d4947' }}>
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', marginBottom: 8 }}>
+                    Expiry Date
+                  </p>
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', marginBottom: 16 }}>
+                    Must be at least 10 days from today{urgency === 'high' ? ' and no more than 15 days (high urgency)' : ''}.
+                  </p>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', background: '#2a2a2a',
+                    border: '1px solid #3d4947', borderRadius: 4, padding: '0 14px', maxWidth: 280,
+                  }}>
+                    <Calendar size={16} color="#879391" style={{ flexShrink: 0 }} />
+                    <input
+                      type="date"
+                      value={expiryDate}
+                      min={minExpiryDate}
+                      max={urgency === 'high' ? new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0] : undefined}
+                      onChange={(e) => setExpiry(e.target.value)}
+                      required
+                      style={{
+                        ...inputStyle, padding: '11px 10px', border: 'none', background: 'transparent',
+                        width: '100%', colorScheme: 'dark',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* ── Live Value Preview ── */}
+                {quantity > 0 && pricePerUnit > 0 && (
+                  <div style={{
+                    padding: '20px 28px', background: '#131313', borderBottom: '1px solid #3d4947',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  }}>
+                    <div>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', marginBottom: 4 }}>
+                        Estimated Lot Value
+                      </p>
+                      <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 26, color: '#6bd8cb', margin: 0 }}>
+                        ₹{totalValue.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', margin: 0 }}>
+                      {quantity} {unit} × ₹{pricePerUnit}
+                    </p>
+                  </div>
+                )}
+
+                {/* ── Alerts & Submit ── */}
+                <div style={{ padding: '24px 28px' }}>
+                  {error && (
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
+                      background: 'rgba(255,180,171,0.08)', border: '1px solid rgba(255,180,171,0.2)',
+                      borderRadius: 4, padding: '12px 16px',
+                      color: '#ffb4ab', fontFamily: 'Work Sans, sans-serif', fontSize: 13,
+                    }}>
+                      <AlertCircle size={14} /> {error}
+                    </div>
+                  )}
+
+                  {successMsg && (
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
+                      background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.25)',
+                      borderRadius: 4, padding: '12px 16px',
+                      color: '#6bd8cb', fontFamily: 'Work Sans, sans-serif', fontSize: 13,
+                    }}>
+                      <CheckCircle size={14} /> {successMsg}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="stitch-btn-primary glow-teal"
+                    style={{
+                      padding: '14px', width: '100%', fontSize: 14,
+                      letterSpacing: '0.04em', opacity: loading ? 0.6 : 1,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    }}
                   >
-                    <option value="low" className="bg-[#1A1330]">Low — Standard Pace</option>
-                    <option value="medium" className="bg-[#1A1330]">Medium — Within 1-2 Weeks</option>
-                    <option value="high" className="bg-[#1A1330]">High 🔥 — Immediate Clearance (10–15 Days Expiry)</option>
-                  </select>
+                    {loading ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        <span>{isEditMode ? 'Saving Changes...' : 'Publishing...'}</span>
+                      </>
+                    ) : (
+                      <>
+                        {isEditMode ? <Save size={16} /> : <Package size={16} />}
+                        <span>{isEditMode ? 'Save Listing Changes' : 'Publish Listing'}</span>
+                      </>
+                    )}
+                  </button>
                 </div>
+
               </div>
-
-              {error && (
-                <p className="text-xs text-rose-400 bg-rose-950/40 p-3 rounded-xl border border-rose-800/60 flex items-center gap-2">
-                  <AlertCircle size={16} /> {error}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3.5 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-purple-500/25 transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2"
-              >
-                <PlusCircle size={18} />
-                {loading ? 'Publishing Lot...' : 'Publish Surplus Lot'}
-              </button>
             </form>
-          )}
-        </div>
-
-        {/* Live Preview Card */}
-        <div className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Info size={14} className="text-purple-400" />
-            Live Preview Card
-          </h3>
-
-          <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-5 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                {category}
-              </span>
-              <span
-                className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                  urgency === 'high'
-                    ? 'bg-rose-500/20 text-rose-300'
-                    : urgency === 'medium'
-                    ? 'bg-amber-500/20 text-amber-300'
-                    : 'bg-purple-500/20 text-purple-300'
-                }`}
-              >
-                {urgency.toUpperCase()} Urgency
-              </span>
-            </div>
-
-            <h4 className="font-bold text-white text-base line-clamp-2">
-              {title || 'Your Surplus Batch Title Here'}
-            </h4>
-
-            <div className="grid grid-cols-2 gap-2 bg-[#0F0B1A]/60 p-3 rounded-xl border border-[#2B1F4D]/40 text-xs">
-              <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Quantity</span>
-                <span className="font-bold text-white">{quantity} {unit}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Unit Price</span>
-                <span className="font-bold text-emerald-400">₹{pricePerUnit}/{unit}</span>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-[#2B1F4D]/60 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Total Lot Valuation:</span>
-              <span className="text-sm font-extrabold text-pink-300">
-                ₹{totalLotValue.toLocaleString('en-IN')}
-              </span>
-            </div>
-          </div>
-        </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

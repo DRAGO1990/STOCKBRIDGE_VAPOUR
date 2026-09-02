@@ -1,20 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
-  CalendarCheck,
-  MessageSquare,
-  CheckCircle,
-  XCircle,
-  CheckCircle2,
-  Star,
-  Layers,
-  Building2,
-  Clock,
-  ArrowRight,
-  ShieldCheck,
-  FileImage,
-  Package,
+  MessageSquare, CheckCircle, CheckCircle2, Star, FileImage, Package, X,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../lib/api';
 import type { Reservation } from '../types';
 import { StatusBadge } from '../components/StatusBadges';
@@ -23,324 +12,270 @@ import { RateModal } from '../components/RateModal';
 import { ProofUploadModal } from '../components/ProofUploadModal';
 import { useAuthStore } from '../stores/authStore';
 
+const labelStyle: React.CSSProperties = {
+  fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600,
+  letterSpacing: '0.06em', textTransform: 'uppercase', color: '#879391', marginBottom: 4, display: 'block',
+};
+
 export const ReservationsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const user = useAuthStore((state) => state.user);
+  const user = useAuthStore(s => s.user);
 
   const [tab, setTab] = useState<'buying' | 'selling'>('buying');
   const [buyingReservations, setBuyingReservations] = useState<Reservation[]>([]);
   const [sellingReservations, setSellingReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Modals state
-  const [activeChatRes, setActiveChatRes] = useState<Reservation | null>(null);
-  const [activeRateRes, setActiveRateRes] = useState<Reservation | null>(null);
+  const [activeChatRes, setActiveChatRes]   = useState<Reservation | null>(null);
+  const [activeRateRes, setActiveRateRes]   = useState<Reservation | null>(null);
   const [activeProofRes, setActiveProofRes] = useState<Reservation | null>(null);
 
   const fetchReservations = async () => {
     setLoading(true);
     try {
-      const [buyingRes, sellingRes] = await Promise.all([
-        api.get('/reservations/my/buying'),
-        api.get('/reservations/my/selling'),
-      ]);
-      setBuyingReservations(buyingRes.data);
-      setSellingReservations(sellingRes.data);
-
-      // Auto-open chat if URL has active query parameter
+      const [b, s] = await Promise.all([api.get('/reservations/my/buying'), api.get('/reservations/my/selling')]);
+      setBuyingReservations(b.data);
+      setSellingReservations(s.data);
       const activeId = searchParams.get('active');
       if (activeId) {
-        const found =
-          buyingRes.data.find((r: Reservation) => r.id === activeId) ||
-          sellingRes.data.find((r: Reservation) => r.id === activeId);
-        if (found) {
-          setActiveChatRes(found);
-        }
+        const found = b.data.find((r: Reservation) => r.id === activeId) || s.data.find((r: Reservation) => r.id === activeId);
+        if (found) setActiveChatRes(found);
       }
-    } catch (err) {
-      console.error('Failed to load reservations', err);
-    } finally {
-      setLoading(false);
-    }
+    } catch { /* noop */ } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchReservations();
-  }, []);
+  useEffect(() => { fetchReservations(); }, []);
 
   const handleConfirm = async (id: string) => {
-    try {
-      await api.post(`/reservations/${id}/confirm`);
-      fetchReservations();
-    } catch (err) {
-      console.error('Failed to confirm', err);
-    }
+    try { await api.post(`/reservations/${id}/confirm`); fetchReservations(); } catch { /* noop */ }
   };
-
   const handleCancel = async (id: string) => {
-    if (!confirm('Are you sure you want to cancel this reservation? The inventory lot will be restored.')) return;
-    try {
-      await api.post(`/reservations/${id}/cancel`);
-      fetchReservations();
-    } catch (err) {
-      console.error('Failed to cancel', err);
-    }
+    if (!confirm('Cancel this reservation?')) return;
+    try { await api.post(`/reservations/${id}/cancel`); fetchReservations(); } catch { /* noop */ }
   };
 
   const currentList = tab === 'buying' ? buyingReservations : sellingReservations;
+  const pendingCount = currentList.filter(r => r.status === 'pending').length;
 
   return (
-    <div className="space-y-6 pb-16 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5">
-          <CalendarCheck className="text-purple-400" />
-          Trade Reservations & Orders
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Coordinate inventory handover, negotiate logistics in direct chat, and confirm completed transactions.
-        </p>
-      </div>
+    <div style={{ background: '#131313', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 80px' }}>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-3 border-b border-[#2B1F4D]/60 pb-3">
-        <button
-          onClick={() => setTab('buying')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-            tab === 'buying'
-              ? 'bg-purple-500 text-navy-950 shadow-md shadow-purple-500/20'
-              : 'bg-[#1A1330] text-slate-300 hover:text-white border border-[#2B1F4D]'
-          }`}
-        >
-          <span>Orders Placed (Buying)</span>
-          <span className="px-2 py-0.2 bg-black/20 text-xs rounded-full">
-            {buyingReservations.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setTab('selling')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-            tab === 'selling'
-              ? 'bg-purple-500 text-navy-950 shadow-md shadow-purple-500/20'
-              : 'bg-[#1A1330] text-slate-300 hover:text-white border border-[#2B1F4D]'
-          }`}
-        >
-          <span>Orders Received (Selling)</span>
-          <span className="px-2 py-0.2 bg-black/20 text-xs rounded-full">
-            {sellingReservations.length}
-          </span>
-        </button>
-      </div>
-
-      {/* Content */}
-      {loading ? (
-        <div className="py-20 flex justify-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-400"></div>
-        </div>
-      ) : currentList.length === 0 ? (
-        <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-12 text-center max-w-md mx-auto space-y-3">
-          <CalendarCheck size={36} className="text-purple-400/50 mx-auto" />
-          <h3 className="text-lg font-bold text-white">No reservations in this tab</h3>
-          <p className="text-xs text-slate-400">
-            {tab === 'buying'
-              ? 'You have not reserved any surplus items yet. Browse marketplace to find deals.'
-              : 'No buyers have placed reservations on your surplus lots yet.'}
+        {/* ── Header ── */}
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32, color: '#e5e2e1', marginBottom: 8, letterSpacing: '-0.01em' }}>
+            Orders & Reservations
+          </h1>
+          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6' }}>
+            Coordinate handovers, chat with counterparties, and track all trade activity.
           </p>
-          {tab === 'buying' && (
-            <Link
-              to="/"
-              className="inline-block px-4 py-2 bg-purple-500 text-navy-950 font-bold text-xs rounded-xl mt-2"
-            >
-              Browse Surplus Marketplace
-            </Link>
-          )}
         </div>
-      ) : (
-        <div className="space-y-4">
-          {currentList.map((res) => {
-            const counterparty =
-              tab === 'buying'
-                ? res.listing?.seller || { name: 'Seller', businessName: 'Seller Wholesale', rating: 5 }
-                : res.buyer || { name: 'Buyer', businessName: 'Buyer Business', rating: 5 };
 
-            const toUserId = tab === 'buying' ? res.listing?.sellerId : res.buyerId;
+        <hr style={{ border: 'none', borderTop: '1px solid #3d4947', marginBottom: 28 }} />
 
-            return (
-              <div
-                key={res.id}
-                className="bg-[#1A1330] border border-[#2B1F4D] hover:border-purple-400/40 rounded-2xl p-5 sm:p-6 shadow-xl transition-all space-y-4"
-              >
-                {/* Header Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2B1F4D]/60">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
-                      <Package size={20} />
-                    </div>
+        {/* ── Tabs ── */}
+        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #3d4947', marginBottom: 24 }}>
+          {([
+            { key: 'buying' as const,  label: `Buying (${buyingReservations.length})` },
+            { key: 'selling' as const, label: `Selling (${sellingReservations.length})` },
+          ]).map(t => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              style={{
+                padding: '10px 20px',
+                fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: tab === t.key ? 600 : 400,
+                color: tab === t.key ? '#6bd8cb' : '#bcc9c6',
+                background: 'transparent', border: 'none',
+                borderBottom: `2px solid ${tab === t.key ? '#6bd8cb' : 'transparent'}`,
+                cursor: 'pointer', marginBottom: -1, transition: 'all 0.12s',
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Content ── */}
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 60 }}>
+            <div style={{ width: 32, height: 32, border: '2px solid #3d4947', borderTopColor: '#6bd8cb', borderRadius: '50%' }} className="animate-stitch-spin" />
+          </div>
+        ) : currentList.length === 0 ? (
+          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: '60px 24px', textAlign: 'center' }}>
+            <Package size={36} color="#3d4947" style={{ margin: '0 auto 16px', display: 'block' }} />
+            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, color: '#e5e2e1', marginBottom: 8 }}>
+              {tab === 'buying' ? 'No orders placed yet' : 'No orders received yet'}
+            </p>
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#879391', marginBottom: 20 }}>
+              {tab === 'buying' ? 'Browse the marketplace and reserve a lot.' : 'Buyers will reserve your listed lots.'}
+            </p>
+            {tab === 'buying' && (
+              <Link to="/" className="stitch-btn-primary" style={{ display: 'inline-block', padding: '10px 24px', textDecoration: 'none', borderRadius: 4 }}>
+                Browse Marketplace
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {currentList.map((res, i) => {
+              const counterparty = tab === 'buying'
+                ? (res.listing?.seller || { name: 'Seller', businessName: 'Seller Wholesale' })
+                : (res.buyer || { name: 'Buyer', businessName: 'Buyer Business' });
+
+              return (
+                <motion.div
+                  key={res.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04 }}
+                  style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, overflow: 'hidden' }}
+                >
+                  {/* Card header */}
+                  <div style={{ padding: '16px 20px', borderBottom: '1px solid #3d4947', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                     <div>
                       <Link
                         to={`/listings/${res.listingId}`}
-                        className="font-bold text-white text-base hover:text-purple-300 transition-colors"
+                        style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', textDecoration: 'none', transition: 'color 0.15s' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#6bd8cb'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#e5e2e1'; }}
                       >
                         {res.listing?.title || 'Surplus Item'}
                       </Link>
-                      <p className="text-xs text-slate-400">
-                        Reserved on {new Date(res.createdAt).toLocaleDateString()}
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', marginTop: 2 }}>
+                        Reserved {new Date(res.createdAt).toLocaleDateString()} · #SB-{res.id.substring(0, 8).toUpperCase()}
+                      </p>
+                    </div>
+                    <StatusBadge status={res.status} />
+                  </div>
+
+                  {/* Stats row */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, background: '#3d4947', margin: '0' }}>
+                    <div style={{ background: '#1c1b1b', padding: '14px 20px' }}>
+                      <p style={labelStyle}>Quantity</p>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 15, fontWeight: 600, color: '#e5e2e1' }}>
+                        {res.agreedQty} {res.listing?.unit || 'units'}
+                      </p>
+                    </div>
+                    <div style={{ background: '#1c1b1b', padding: '14px 20px' }}>
+                      <p style={labelStyle}>Agreed Value</p>
+                      <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, fontWeight: 700, color: '#6bd8cb' }}>
+                        ₹{res.agreedPrice.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                    <div style={{ background: '#1c1b1b', padding: '14px 20px' }}>
+                      <p style={labelStyle}>{tab === 'buying' ? 'Seller' : 'Buyer'}</p>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, fontWeight: 600, color: '#e5e2e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {counterparty.businessName || counterparty.name}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <StatusBadge status={res.status} />
-                  </div>
-                </div>
+                  {/* Proof photo banner */}
+                  {res.proofPhoto && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px', background: 'rgba(107,216,203,0.06)', borderTop: '1px solid rgba(107,216,203,0.15)' }}>
+                      <FileImage size={14} color="#6bd8cb" />
+                      <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#6bd8cb', flex: 1 }}>Handover proof on file</span>
+                      <a href={res.proofPhoto} target="_blank" rel="noreferrer" style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700, color: '#6bd8cb', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        View Photo
+                      </a>
+                    </div>
+                  )}
 
-                {/* Body Row: Details Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#0F0B1A]/60 p-4 rounded-xl border border-[#2B1F4D]/40 text-xs">
-                  <div>
-                    <span className="text-slate-400 block uppercase font-semibold text-[10px]">
-                      Agreed Reserved Quantity
-                    </span>
-                    <span className="text-sm font-bold text-white flex items-center gap-1 mt-0.5">
-                      <Layers size={14} className="text-purple-400" />
-                      {res.agreedQty} {res.listing?.unit || 'units'}
-                    </span>
-                  </div>
-
-                  <div>
-                    <span className="text-slate-400 block uppercase font-semibold text-[10px]">
-                      Total Agreed Value
-                    </span>
-                    <span className="text-sm font-extrabold text-emerald-400 mt-0.5 block">
-                      ₹{res.agreedPrice.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-
-                  <div>
-                    <span className="text-slate-400 block uppercase font-semibold text-[10px]">
-                      {tab === 'buying' ? 'Seller Merchant' : 'Buyer Merchant'}
-                    </span>
-                    <span className="text-sm font-bold text-pink-300 mt-0.5 block truncate">
-                      {counterparty.businessName || counterparty.name}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Proof photo banner if completed */}
-                {res.proofPhoto && (
-                  <div className="flex items-center gap-2 p-2.5 bg-emerald-950/40 border border-emerald-800/60 rounded-xl text-xs text-emerald-300">
-                    <FileImage size={16} />
-                    <span>Proof of Handover verified on file</span>
-                    <a
-                      href={res.proofPhoto}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="ml-auto underline font-semibold hover:text-white"
+                  {/* Actions */}
+                  <div style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                    <button
+                      onClick={() => setActiveChatRes(res)}
+                      className="stitch-btn-ghost"
+                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 12 }}
                     >
-                      View Photo
-                    </a>
+                      <MessageSquare size={13} /> Open Chat
+                    </button>
+
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      {tab === 'selling' && res.status === 'pending' && (
+                        <button
+                          onClick={() => handleConfirm(res.id)}
+                          className="stitch-btn-primary"
+                          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 12 }}
+                        >
+                          <CheckCircle size={13} /> Confirm
+                        </button>
+                      )}
+                      {res.status === 'confirmed' && (
+                        <button
+                          onClick={() => setActiveProofRes(res)}
+                          className="stitch-btn-primary"
+                          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 12 }}
+                        >
+                          <CheckCircle2 size={13} /> Mark Handover Complete
+                        </button>
+                      )}
+                      {res.status === 'completed' && (
+                        <button
+                          onClick={() => setActiveRateRes(res)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
+                            background: 'rgba(246,179,81,0.1)', border: '1px solid rgba(246,179,81,0.25)',
+                            borderRadius: 4, color: '#f6b351', fontFamily: 'Work Sans, sans-serif',
+                            fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                          }}
+                        >
+                          <Star size={13} /> Rate Counterparty
+                        </button>
+                      )}
+                      {(res.status === 'pending' || res.status === 'confirmed') && (
+                        <button
+                          onClick={() => handleCancel(res.id)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 5, padding: '8px 16px',
+                            background: 'transparent', border: '1px solid #3d4947',
+                            borderRadius: 4, color: '#879391', fontFamily: 'Work Sans, sans-serif',
+                            fontSize: 12, cursor: 'pointer', transition: 'color 0.12s',
+                          }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#ffb4ab'; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#879391'; }}
+                        >
+                          <X size={13} /> Cancel
+                        </button>
+                      )}
+                    </div>
                   </div>
-                )}
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
-                {/* Actions Row */}
-                <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
-                  {/* Left: Direct Chat CTA */}
-                  <button
-                    onClick={() => setActiveChatRes(res)}
-                    className="px-4 py-2 bg-[#2B1F4D] hover:bg-purple-500 text-purple-300 hover:text-navy-950 border border-purple-500/40 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <MessageSquare size={15} />
-                    <span>Open Direct Trade Chat</span>
-                  </button>
-
-                  {/* Right: State Mutation Actions */}
-                  <div className="flex items-center gap-2">
-                    {/* Seller Confirm Pending */}
-                    {tab === 'selling' && res.status === 'pending' && (
-                      <button
-                        onClick={() => handleConfirm(res.id)}
-                        className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-navy-950 text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-500/20 flex items-center gap-1 cursor-pointer"
-                      >
-                        <CheckCircle size={14} /> Confirm Reservation
-                      </button>
-                    )}
-
-                    {/* Complete Handover (Available when confirmed) */}
-                    {res.status === 'confirmed' && (
-                      <button
-                        onClick={() => setActiveProofRes(res)}
-                        className="px-3.5 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-navy-950 text-xs font-bold rounded-xl transition-all shadow-md shadow-purple-500/20 flex items-center gap-1 cursor-pointer"
-                      >
-                        <CheckCircle2 size={14} /> Complete Handover
-                      </button>
-                    )}
-
-                    {/* Rate Counterparty (Available when completed) */}
-                    {res.status === 'completed' && (
-                      <button
-                        onClick={() => setActiveRateRes(res)}
-                        className="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-navy-950 text-xs font-bold rounded-xl transition-all shadow-md shadow-amber-500/20 flex items-center gap-1 cursor-pointer"
-                      >
-                        <Star size={14} className="fill-navy-950" /> Rate Counterparty
-                      </button>
-                    )}
-
-                    {/* Cancel Action */}
-                    {(res.status === 'pending' || res.status === 'confirmed') && (
-                      <button
-                        onClick={() => handleCancel(res.id)}
-                        className="px-3 py-2 bg-slate-800/80 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Direct Socket Chat Modal */}
-      {activeChatRes && (
-        <ChatModal
-          reservationId={activeChatRes.id}
-          isOpen={Boolean(activeChatRes)}
-          onClose={() => setActiveChatRes(null)}
-          title={`Listing #SB-${(activeChatRes.listingId || activeChatRes.id).substring(0, 5).toUpperCase()}: ${activeChatRes.listing?.title || 'Surplus Item'}`}
-          counterpartyName={
-            tab === 'buying'
-              ? activeChatRes.listing?.seller?.businessName || 'Seller'
-              : activeChatRes.buyer?.businessName || 'Buyer'
-          }
-        />
-      )}
-
-      {/* Review / Rating Modal */}
-      {activeRateRes && (
-        <RateModal
-          reservationId={activeRateRes.id}
-          toUserId={tab === 'buying' ? activeRateRes.listing.sellerId : activeRateRes.buyerId}
-          toUserName={
-            tab === 'buying'
-              ? activeRateRes.listing?.seller?.businessName || 'Seller'
-              : activeRateRes.buyer?.businessName || 'Buyer'
-          }
-          isOpen={Boolean(activeRateRes)}
-          onClose={() => setActiveRateRes(null)}
-          onSuccess={fetchReservations}
-        />
-      )}
-
-      {/* Handover Complete with Proof Photo Modal */}
-      {activeProofRes && (
-        <ProofUploadModal
-          reservationId={activeProofRes.id}
-          isOpen={Boolean(activeProofRes)}
-          onClose={() => setActiveProofRes(null)}
-          onSuccess={fetchReservations}
-        />
-      )}
+        {/* Modals */}
+        {activeChatRes && (
+          <ChatModal
+            reservationId={activeChatRes.id}
+            isOpen={!!activeChatRes}
+            onClose={() => setActiveChatRes(null)}
+            title={`${activeChatRes.listing?.title || 'Surplus Item'}`}
+            counterpartyName={tab === 'buying' ? (activeChatRes.listing?.seller?.businessName || 'Seller') : (activeChatRes.buyer?.businessName || 'Buyer')}
+          />
+        )}
+        {activeRateRes && (
+          <RateModal
+            reservationId={activeRateRes.id}
+            toUserId={tab === 'buying' ? activeRateRes.listing.sellerId : activeRateRes.buyerId}
+            toUserName={tab === 'buying' ? (activeRateRes.listing?.seller?.businessName || 'Seller') : (activeRateRes.buyer?.businessName || 'Buyer')}
+            isOpen={!!activeRateRes}
+            onClose={() => setActiveRateRes(null)}
+            onSuccess={fetchReservations}
+          />
+        )}
+        {activeProofRes && (
+          <ProofUploadModal
+            reservationId={activeProofRes.id}
+            isOpen={!!activeProofRes}
+            onClose={() => setActiveProofRes(null)}
+            onSuccess={fetchReservations}
+          />
+        )}
+      </div>
     </div>
   );
 };

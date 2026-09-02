@@ -1,37 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  MapPin,
-  Calendar,
-  Layers,
-  ArrowUpRight,
-  Sparkles,
-} from 'lucide-react';
+import { MapPin, Store } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { Listing } from '../types';
-import { UrgencyBadge, StatusBadge } from './StatusBadges';
-import { RatingStars } from './RatingStars';
 import { useAuthStore } from '../stores/authStore';
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Groceries: 'from-amber-500/20 to-orange-500/20 text-amber-300 border-amber-500/40',
-  Stationery: 'from-blue-500/20 to-indigo-500/20 text-blue-300 border-blue-500/40',
-  Electronics: 'from-fuchsia-500/20 to-violet-500/20 text-fuchsia-300 border-fuchsia-500/40',
-  Packaging: 'from-emerald-500/20 to-green-500/20 text-emerald-300 border-emerald-500/40',
-  Textiles: 'from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/40',
-  Hardware: 'from-slate-500/20 to-zinc-500/20 text-slate-300 border-slate-500/40',
-};
-
-export const ListingCard: React.FC<{ listing: Listing; distanceKm?: number }> = ({
-  listing,
-  distanceKm,
-}) => {
-  const user = useAuthStore((state) => state.user);
+export const ListingCard: React.FC<{ listing: Listing; distanceKm?: number }> = ({ listing, distanceKm }) => {
+  const user = useAuthStore(s => s.user);
   const isMine = user?.id === listing.sellerId;
-  const categoryStyle =
-    CATEGORY_COLORS[listing.category] ||
-    'from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/40';
+  const [hovered, setHovered] = useState(false);
 
-  const totalBatchPrice = listing.quantity * listing.pricePerUnit;
+  const totalValue = listing.quantity * listing.pricePerUnit;
 
   let daysRemaining: number | null = null;
   if (listing.expiryDate) {
@@ -39,123 +18,149 @@ export const ListingCard: React.FC<{ listing: Listing; distanceKm?: number }> = 
     daysRemaining = Math.ceil(diff / (1000 * 60 * 60 * 24));
   }
 
-  return (
-    <div className="group bg-[#1A1330] hover:bg-[#231845] border border-[#2B1F4D] hover:border-purple-400/50 rounded-2xl p-5 shadow-xl transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
-      {/* Top Accent Gradient Bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-400 to-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+  const rawDist = distanceKm ?? listing.distanceKm;
+  const displayDist = rawDist !== undefined && rawDist !== null
+    ? (rawDist < 0.8 ? '< 1 km away' : `${rawDist.toFixed(1)} km away`)
+    : null;
 
-      <div>
-        {/* Header Tags */}
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span
-            className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-gradient-to-r ${categoryStyle}`}
-          >
-            {listing.category}
-          </span>
-          <div className="flex items-center gap-1.5">
-            <UrgencyBadge urgency={listing.urgency} />
-            {listing.status !== 'active' && <StatusBadge status={listing.status} />}
+  const isUrgent = daysRemaining !== null && daysRemaining <= 7;
+
+  return (
+    <motion.div
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      style={{
+        background: '#1c1b1b',
+        border: `1px solid ${hovered ? '#6bd8cb' : '#3d4947'}`,
+        borderRadius: 8,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'border-color 0.2s ease',
+        cursor: 'default',
+      }}
+    >
+      {/* ── Image area ── */}
+      <div style={{ position: 'relative', background: '#2a2a2a', height: 160, overflow: 'hidden' }}>
+        {listing.imageUrl ? (
+          <img
+            src={listing.imageUrl}
+            alt={listing.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.04)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)'; }}
+          />
+        ) : (
+          <div style={{
+            height: '100%', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}>
+            <Store size={28} color="#3d4947" />
+            <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              No Stock Photo
+            </span>
           </div>
+        )}
+
+        {/* Urgency badge */}
+        {daysRemaining !== null && daysRemaining <= 14 && (
+          <div style={{
+            position: 'absolute', top: 10, left: 10,
+            display: 'flex', alignItems: 'center', gap: 5,
+            background: isUrgent ? 'rgba(255,180,171,0.15)' : 'rgba(246,179,81,0.15)',
+            border: `1px solid ${isUrgent ? 'rgba(255,180,171,0.3)' : 'rgba(246,179,81,0.3)'}`,
+            borderRadius: 4, padding: '4px 8px',
+            color: isUrgent ? '#ffb4ab' : '#f6b351',
+            fontFamily: 'Work Sans, sans-serif',
+            fontSize: 11, fontWeight: 600,
+            letterSpacing: '0.04em', textTransform: 'uppercase',
+          }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: isUrgent ? '#ffb4ab' : '#f6b351', animation: 'stitch-pulse-teal 1.5s infinite' }} />
+            {daysRemaining <= 0 ? 'Expiring Today' : `${daysRemaining} Days Left`}
+          </div>
+        )}
+      </div>
+
+      {/* ── Card body ── */}
+      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+        {/* Seller row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <Store size={12} color="#879391" />
+          <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {listing.seller?.businessName || listing.seller?.name || 'Verified Merchant'}
+          </span>
+          {listing.seller?.rating && (
+            <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ color: '#f6b351' }}>★</span>
+              {listing.seller.rating.toFixed(1)}
+            </span>
+          )}
         </div>
 
         {/* Title */}
-        <Link to={`/listings/${listing.id}`} className="block group-hover:text-purple-300 transition-colors">
-          <h3 className="font-bold text-white text-lg leading-snug line-clamp-2">
-            {listing.title}
-          </h3>
-        </Link>
+        <h3 style={{
+          fontFamily: 'Sora, sans-serif',
+          fontWeight: 600, fontSize: 15,
+          color: hovered ? '#6bd8cb' : '#e5e2e1',
+          lineHeight: 1.35, marginBottom: 14,
+          transition: 'color 0.15s',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}>
+          {listing.title}
+        </h3>
 
-        {/* Seller Info */}
-        <div className="mt-2.5 flex items-center justify-between text-xs text-slate-300 pb-3 border-b border-[#2B1F4D]/60">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="font-medium text-slate-200 truncate">
-              {listing.seller?.businessName || listing.seller?.name || 'Verified Merchant'}
-            </span>
-            {isMine && (
-              <span className="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-semibold border border-indigo-500/30">
-                You
-              </span>
-            )}
-          </div>
-          {listing.seller && (
-            <RatingStars rating={listing.seller.rating} size={13} />
-          )}
-        </div>
-
-        {/* Inventory Details Grid */}
-        <div className="grid grid-cols-2 gap-3 my-4 bg-[#0F0B1A]/60 p-3 rounded-xl border border-[#2B1F4D]/40">
-          <div>
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">Available Lot</span>
-            <p className="text-sm font-bold text-white flex items-center gap-1 mt-0.5">
-              <Layers size={14} className="text-purple-400" />
-              {listing.quantity} <span className="text-xs font-normal text-slate-400">{listing.unit}</span>
+        {/* Price + Qty grid */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 1fr',
+          gap: 1, background: '#3d4947', borderRadius: 4, overflow: 'hidden', marginBottom: 12,
+        }}>
+          <div style={{ background: '#2a2a2a', padding: '10px 12px' }}>
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#879391', marginBottom: 4 }}>Unit Price</p>
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 15, fontWeight: 600, color: '#e5e2e1' }}>
+              ₹{listing.pricePerUnit.toLocaleString('en-IN')}
+              <span style={{ fontSize: 11, color: '#879391', fontWeight: 400 }}> /{listing.unit}</span>
             </p>
           </div>
-          <div>
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">Unit Price</span>
-            <p className="text-sm font-bold text-emerald-400 mt-0.5">
-              ₹{listing.pricePerUnit.toLocaleString('en-IN')}{' '}
-              <span className="text-[10px] font-normal text-slate-400">/{listing.unit}</span>
+          <div style={{ background: '#2a2a2a', padding: '10px 12px' }}>
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#879391', marginBottom: 4 }}>Available</p>
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 15, fontWeight: 600, color: '#e5e2e1' }}>
+              {listing.quantity} <span style={{ fontSize: 11, color: '#879391', fontWeight: 400 }}>{listing.unit}</span>
             </p>
           </div>
         </div>
 
-        {/* Secondary Info: Total Value, Expiry, Distance */}
-        <div className="space-y-1.5 text-xs text-slate-400 mb-4">
-          <div className="flex items-center justify-between">
-            <span>Estimated Batch Value:</span>
-            <span className="font-semibold text-slate-200">
-              ₹{totalBatchPrice.toLocaleString('en-IN')}
-            </span>
-          </div>
-
-          {daysRemaining !== null && (
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1">
-                <Calendar size={13} className="text-amber-400" /> Expiry Window:
-              </span>
-              <span
-                className={`font-semibold ${
-                  daysRemaining <= 3
-                    ? 'text-rose-400 font-bold animate-pulse'
-                    : daysRemaining <= 14
-                    ? 'text-amber-300'
-                    : 'text-slate-300'
-                }`}
-              >
-                {daysRemaining <= 0 ? 'Expiring Today' : `${daysRemaining} days left`}
-              </span>
-            </div>
-          )}
-
-          {(distanceKm !== undefined || listing.distanceKm !== undefined) && (() => {
-            const rawDist = distanceKm ?? listing.distanceKm;
-            if (rawDist === undefined || rawDist === null) return null;
-            const displayDist = rawDist < 0.8 ? '< 1 km away' : `${rawDist.toFixed(1)} km away`;
-            return (
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1">
-                  <MapPin size={13} className="text-pink-400" /> Proximity:
-                </span>
-                <span className="font-semibold text-pink-300">
-                  {displayDist}
-                </span>
-              </div>
-            );
-          })()}
+        {/* Total lot value */}
+        <div style={{ marginBottom: 14 }}>
+          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#879391', marginBottom: 4 }}>Total Lot Value</p>
+          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 20, color: '#e5e2e1' }}>
+            ₹{totalValue.toLocaleString('en-IN')}
+          </p>
         </div>
-      </div>
 
-      {/* Action CTA */}
-      <div className="pt-2">
+        {/* CTA button */}
         <Link
           to={`/listings/${listing.id}`}
-          className="w-full py-2.5 px-4 bg-purple-500/10 hover:bg-purple-500 border border-purple-500/30 hover:border-purple-500 text-purple-300 hover:text-navy-950 font-semibold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm group/btn"
+          className="stitch-btn-primary"
+          style={{
+            display: 'block', textAlign: 'center',
+            padding: '11px', textDecoration: 'none',
+            borderRadius: 4, marginBottom: 10,
+          }}
         >
-          <span>{isMine ? 'Manage Listing' : 'View & Reserve'}</span>
-          <ArrowUpRight size={16} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+          {isMine ? 'Manage Listing' : 'View Details'}
         </Link>
+
+        {/* Distance */}
+        {displayDist && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <MapPin size={12} color="#879391" />
+            <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391' }}>{displayDist}</span>
+          </div>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 };

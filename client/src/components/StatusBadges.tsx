@@ -1,81 +1,108 @@
 import React from 'react';
-import { AlertCircle, Clock, CheckCircle, XCircle } from 'lucide-react';
 
+// ── Stitch-style badge — flat, bordered, low-alpha fill ──
+
+type BadgeBase = { children: React.ReactNode; style?: React.CSSProperties };
+
+const Badge: React.FC<BadgeBase> = ({ children, style }) => (
+  <span style={{
+    display: 'inline-flex', alignItems: 'center', gap: 5,
+    padding: '3px 9px',
+    borderRadius: 4,
+    fontFamily: 'Work Sans, sans-serif',
+    fontSize: 11, fontWeight: 600,
+    letterSpacing: '0.05em', textTransform: 'uppercase',
+    ...style,
+  }}>
+    {children}
+  </span>
+);
+
+const Dot: React.FC<{ color: string; pulse?: boolean }> = ({ color, pulse }) => (
+  <span style={{
+    width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0,
+    animation: pulse ? 'stitch-pulse-teal 2s infinite' : undefined,
+  }} />
+);
+
+// ── Urgency Badge ──
 export const UrgencyBadge: React.FC<{ urgency: 'low' | 'medium' | 'high' }> = ({ urgency }) => {
   if (urgency === 'high') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse">
-        <AlertCircle size={12} className="text-rose-400" />
-        High Urgency
-      </span>
+      <Badge style={{ color: '#ffb4ab', background: 'rgba(255,180,171,0.12)', border: '1px solid rgba(255,180,171,0.25)' }}>
+        <Dot color="#ffb4ab" pulse />
+        Urgent
+      </Badge>
     );
   }
   if (urgency === 'medium') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/40">
-        <Clock size={12} className="text-amber-400" />
-        Med Urgency
-      </span>
+      <Badge style={{ color: '#f6b351', background: 'rgba(246,179,81,0.10)', border: '1px solid rgba(246,179,81,0.20)' }}>
+        <Dot color="#f6b351" />
+        Medium
+      </Badge>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/40">
-      Normal
-    </span>
+    <Badge style={{ color: '#bcc9c6', background: 'rgba(188,201,198,0.08)', border: '1px solid rgba(188,201,198,0.15)' }}>
+      Standard
+    </Badge>
   );
 };
 
+// ── Status Badge ──
 export const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   switch (status.toLowerCase()) {
     case 'active':
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+        <Badge style={{ color: '#6bd8cb', background: 'rgba(107,216,203,0.10)', border: '1px solid rgba(107,216,203,0.20)' }}>
+          <Dot color="#6bd8cb" pulse />
           Active
-        </span>
+        </Badge>
       );
     case 'reserved':
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-500/20 text-sky-300 border border-sky-500/40">
-          <Clock size={12} className="text-sky-400" />
+        <Badge style={{ color: '#ddb7ff', background: 'rgba(221,183,255,0.10)', border: '1px solid rgba(221,183,255,0.20)' }}>
           Reserved
-        </span>
+        </Badge>
       );
     case 'pending':
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/40">
-          <Clock size={12} className="text-amber-400" />
-          Pending Approval
-        </span>
+        <Badge style={{ color: '#f6b351', background: 'rgba(246,179,81,0.10)', border: '1px solid rgba(246,179,81,0.20)' }}>
+          Pending
+        </Badge>
       );
     case 'confirmed':
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-          <CheckCircle size={12} className="text-indigo-400" />
+        <Badge style={{ color: '#6bd8cb', background: 'rgba(107,216,203,0.08)', border: '1px solid rgba(107,216,203,0.15)' }}>
           Confirmed
-        </span>
+        </Badge>
       );
     case 'completed':
     case 'sold':
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40">
-          <CheckCircle size={12} className="text-purple-400" />
+        <Badge style={{ color: '#bcc9c6', background: 'rgba(188,201,198,0.10)', border: '1px solid rgba(188,201,198,0.20)' }}>
           {status === 'sold' ? 'Sold' : 'Completed'}
-        </span>
+        </Badge>
       );
     case 'cancelled':
     case 'expired':
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-700 text-slate-400 border border-slate-600">
-          <XCircle size={12} />
+        <Badge style={{ color: '#879391', background: 'rgba(135,147,145,0.08)', border: '1px solid rgba(135,147,145,0.15)' }}>
           {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
+        </Badge>
+      );
+    case 'suspended':
+      return (
+        <Badge style={{ color: '#ffb4ab', background: 'rgba(255,180,171,0.10)', border: '1px solid rgba(255,180,171,0.20)' }}>
+          Suspended
+        </Badge>
       );
     default:
       return (
-        <span className="px-2 py-0.5 rounded text-xs bg-slate-800 text-slate-300">
+        <Badge style={{ color: '#879391', background: 'rgba(135,147,145,0.08)', border: '1px solid rgba(135,147,145,0.15)' }}>
           {status}
-        </span>
+        </Badge>
       );
   }
 };

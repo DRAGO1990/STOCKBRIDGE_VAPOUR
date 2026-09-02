@@ -1,0 +1,392 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>StockBridge Admin Portal - Merchant Accounts</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;family=Work+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#131313",
+                        "on-error": "#690005",
+                        "on-primary-container": "#00302b",
+                        "primary-fixed-dim": "#6bd8cb",
+                        "inverse-on-surface": "#313030",
+                        "outline-variant": "#3d4947",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-bright": "#393939",
+                        "inverse-surface": "#e5e2e1",
+                        "on-primary-fixed": "#00201d",
+                        "on-secondary-fixed": "#2c0051",
+                        "tertiary-fixed": "#e1e2e4",
+                        "surface-dim": "#131313",
+                        "on-tertiary-container": "#272a2c",
+                        "surface": "#131313",
+                        "on-background": "#e5e2e1",
+                        "on-primary-fixed-variant": "#005049",
+                        "surface-container": "#201f1f",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#ddb7ff",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "secondary-fixed": "#f0dbff",
+                        "primary-container": "#29a195",
+                        "surface-tint": "#6bd8cb",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-surface-variant": "#bcc9c6",
+                        "surface-variant": "#353534",
+                        "outline": "#879391",
+                        "surface-container-highest": "#353534",
+                        "inverse-primary": "#006a61",
+                        "on-secondary": "#490080",
+                        "tertiary-fixed-dim": "#c5c6c8",
+                        "on-secondary-fixed-variant": "#6900b3",
+                        "on-surface": "#e5e2e1",
+                        "surface-container-low": "#1c1b1b",
+                        "on-tertiary": "#2e3132",
+                        "secondary-fixed-dim": "#ddb7ff",
+                        "on-secondary-container": "#d6a9ff",
+                        "tertiary": "#c5c6c8",
+                        "secondary-container": "#6f00be",
+                        "primary": "#6bd8cb",
+                        "on-primary": "#003732",
+                        "tertiary-container": "#8f9193",
+                        "primary-fixed": "#89f5e7",
+                        "error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "section-gap": "64px",
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "stack-lg": "32px",
+                        "container-margin": "24px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "body-sm": ["Work Sans"],
+                        "body-lg": ["Work Sans"],
+                        "display-lg": ["Sora"],
+                        "headline-md": ["Sora"],
+                        "label-md": ["Work Sans"],
+                        "headline-sm": ["Sora"],
+                        "body-md": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex antialiased">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen sticky left-0 top-0 py-stack-md px-gutter w-64 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant">
+<div class="flex items-center gap-3 mb-stack-lg px-2">
+<img class="w-10 h-10 rounded-DEFAULT bg-surface-container-high object-cover" data-alt="A highly detailed 50-100 word description of a premium corporate logo for a B2B financing platform named StockBridge. The logo features a minimalist geometric bridge motif forming an abstract 'S' and 'B'. The color palette is stark charcoal gray (#131313) with sharp emerald teal (#6bd8cb) accents. High contrast, precise edges, signaling trust and digital infrastructure. White background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFIPDewlspsgRblJGt-qGWmlp3oB9VywrDs7SBtSyTao4I2vkLtXZUp23HlcNuN23NFyPIX93kPiL2G4GW8cyi0bKvRroIxlj95BAKimQycUkX5btI87ojdULzGeQoKwLYJ06kJBfJ-z3f6CbXg6TOey6RivzTvW6dvbIAJuxT2VqJd6mvPV5IZxMSp4stm28p2RyCObtV_4WAdwItQTR_tJ-WKHvLUFaFCz-ZBIBgxgSycXzC_Zng">
+<div>
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary">Admin Portal</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">B2B Surplus Exchange</p>
+</div>
+</div>
+<div class="flex-1 space-y-stack-sm">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px] w-5 h-5 flex items-center justify-center">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary-container text-on-primary-container font-semibold rounded-lg transition-transform duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px] w-5 h-5 flex items-center justify-center">storefront</span>
+<span class="font-label-md text-label-md">Merchant Accounts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px] w-5 h-5 flex items-center justify-center">inventory_2</span>
+<span class="font-label-md text-label-md">Surplus Listings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px] w-5 h-5 flex items-center justify-center">gavel</span>
+<span class="font-label-md text-label-md">Moderation</span>
+</a>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all active:scale-95 mb-stack-md" href="#"><span class="material-symbols-outlined text-[20px] w-5 h-5 flex items-center justify-center">assessment</span><span class="font-label-md text-label-md">Generate Reports</span></a>
+<div class="mt-auto space-y-stack-sm border-t border-outline-variant pt-stack-md">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px] w-5 h-5 flex items-center justify-center">help_outline</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px] w-5 h-5 flex items-center justify-center">logout</span>
+<span class="font-label-md text-label-md">Log Out</span>
+</a>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-w-0 bg-background">
+<!-- TopAppBar (Mobile & Global Actions) -->
+<header class="flex justify-between items-center px-container-margin h-16 w-full sticky top-0 z-50 bg-background dark:bg-background border-b border-outline-variant dark:border-outline-variant">
+<div class="flex items-center gap-gutter">
+<button class="md:hidden text-on-surface-variant">
+<span class="material-symbols-outlined font-headline-sm text-headline-sm">menu</span>
+</button>
+<div class="hidden md:flex items-center bg-surface-container-low border border-outline-variant rounded-full px-3 py-1.5 focus-within:border-primary transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant mr-2 text-[20px]">search</span>
+<input class="bg-transparent border-none text-body-sm text-on-surface focus:ring-0 placeholder-on-surface-variant w-64 p-0" placeholder="Search merchants..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-gutter">
+<span class="hidden sm:block font-label-md text-label-md text-on-surface-variant font-medium">Admin Portal</span>
+<button class="text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container transition-colors p-2 rounded-full cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined font-headline-sm text-headline-sm">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container transition-colors p-2 rounded-full cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined font-headline-sm text-headline-sm">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full border border-outline-variant bg-surface-container-high flex items-center justify-center text-[12px] font-bold text-on-surface ml-2">SA</div>
+</div>
+</header>
+<div class="p-container-margin md:p-section-gap flex-1 overflow-auto">
+<!-- Header Section -->
+<div class="mb-stack-lg">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-unit">StockBridge Admin</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Monitor platform activity, verify businesses and manage marketplace safety.</p>
+</div>
+<!-- Summary Metrics -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mb-stack-lg">
+<div class="bg-surface-container border border-outline-variant rounded-xl p-stack-md flex flex-col gap-stack-sm relative overflow-hidden">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Total Users</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface">1,240</div>
+
+</div>
+<div class="bg-surface-container border border-outline-variant rounded-xl p-stack-md flex flex-col gap-stack-sm relative overflow-hidden">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">view_list</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Active Listings</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface">842</div>
+</div>
+<div class="bg-surface-container border border-outline-variant rounded-xl p-stack-md flex flex-col gap-stack-sm relative overflow-hidden">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">bookmark</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Reservations</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface">156</div>
+</div>
+<div class="bg-surface-container border border-outline-variant rounded-xl p-stack-md flex flex-col gap-stack-sm relative overflow-hidden">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">handshake</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Completed Trades</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface">3,102</div>
+</div>
+</div>
+<!-- Admin Overview (Needs Attention) -->
+<div class="bg-surface-container-high border-l-4 border-error rounded-r-xl p-stack-md mb-stack-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-stack-md">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2 mb-unit">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+                        Needs Attention
+                    </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Critical tasks requiring immediate administrative action.</p>
+</div>
+<div class="flex flex-wrap gap-3"><div class="flex flex-col gap-2 w-full sm:w-auto"><div class="bg-error/10 text-error px-3 py-2 rounded-DEFAULT border border-error/20 flex items-center justify-between gap-4 font-label-md text-label-md"><span class="font-medium">12 Pending Verifications: Businesses waiting for approval</span><button class="bg-error text-on-error px-2 py-1 rounded text-[10px] font-bold uppercase">Review</button></div><div class="bg-error/10 text-error px-3 py-2 rounded-DEFAULT border border-error/20 flex items-center justify-between gap-4 font-label-md text-label-md"><span class="font-medium">5 Flagged Listings: Listings requiring moderation</span><button class="bg-error text-on-error px-2 py-1 rounded text-[10px] font-bold uppercase">Review</button></div></div></div>
+</div>
+<!-- Data Table Section -->
+<div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden flex flex-col">
+<!-- Table Tabs / Filter Bar -->
+<div class="border-b border-outline-variant flex px-stack-md bg-surface-container-lowest">
+<button class="px-4 py-3 font-label-md text-label-md font-semibold text-primary border-b-2 border-primary mr-4 flex items-center gap-2">
+                        Merchant Accounts
+                        <span class="bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm text-[10px]">1,240</span>
+</button>
+<button class="px-4 py-3 font-label-md text-label-md font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2">
+                        Surplus Listings
+                    </button>
+<div class="ml-auto flex items-center gap-2">
+<button class="text-on-surface-variant hover:bg-surface-variant p-1.5 rounded-DEFAULT transition-colors">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-variant p-1.5 rounded-DEFAULT transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Responsive Table Wrapper -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest border-b border-outline-variant">
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant font-medium whitespace-nowrap">Merchant / Contact</th>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant font-medium whitespace-nowrap">Email / Phone</th>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant font-medium whitespace-nowrap">Trust Rating</th>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant font-medium whitespace-nowrap">Listings / Orders</th>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant font-medium whitespace-nowrap">Status</th>
+<th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant font-medium text-right w-12">Action</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm text-on-surface">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="font-medium text-on-surface">Teja Wholesale</div>
+<div class="text-on-surface-variant text-[12px]">Ravi Teja</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="">ravi@wholesale.com</div>
+<div class="text-on-surface-variant text-[12px]">+91 98765 43210</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-medium">3.9</span>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="">12 <span class="text-on-surface-variant text-[12px]">Listings</span></div>
+<div class="text-on-surface-variant text-[12px]">45 Orders</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm bg-primary/10 text-primary border border-primary/20 font-label-md text-[10px] uppercase font-semibold"><span class="material-symbols-outlined text-[12px] mr-1">check_circle</span>Active</span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-DEFAULT hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="font-medium text-on-surface">Patel Inventory Co.</div>
+<div class="text-on-surface-variant text-[12px]">Amit Patel</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="">amit.p@inventoryco.in</div>
+<div class="text-on-surface-variant text-[12px]">+91 99887 76655</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">horizontal_rule</span>
+<span class="font-medium">N/A</span>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="">0 <span class="text-on-surface-variant text-[12px]">Listings</span></div>
+<div class="text-on-surface-variant text-[12px]">0 Orders</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm bg-secondary/10 text-secondary border border-secondary/20 font-label-md text-[10px] uppercase font-semibold"><span class="material-symbols-outlined text-[12px] mr-1">hourglass_empty</span>Pending Verification</span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-DEFAULT hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="font-medium text-on-surface">Global Electronics Surplus</div>
+<div class="text-on-surface-variant text-[12px]">Sanjay Kumar</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="">compliance@globalelectronics.com</div>
+<div class="text-on-surface-variant text-[12px]">+91 91234 56789</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-medium">4.8</span>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="">104 <span class="text-on-surface-variant text-[12px]">Listings</span></div>
+<div class="text-on-surface-variant text-[12px]">312 Orders</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm bg-error/10 text-error border border-error/20 font-label-md text-[10px] uppercase font-semibold">
+                                        Suspended
+                                    </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-DEFAULT hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="font-medium text-on-surface">Mehta Textiles</div>
+<div class="text-on-surface-variant text-[12px]">Kiran Mehta</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="">kiran@mehtatex.in</div>
+<div class="text-on-surface-variant text-[12px]">+91 98888 12345</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-medium">4.2</span>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="">34 <span class="text-on-surface-variant text-[12px]">Listings</span></div>
+<div class="text-on-surface-variant text-[12px]">89 Orders</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm bg-primary/10 text-primary border border-primary/20 font-label-md text-[10px] uppercase font-semibold">
+                                        Active
+                                    </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-DEFAULT hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="bg-surface-container-lowest border-t border-outline-variant p-3 flex justify-between items-center text-body-sm text-on-surface-variant">
+<div class="">Showing 1 to 10 of 1,240 entries</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded hover:bg-surface-variant disabled:opacity-50" disabled=""><span class="material-symbols-outlined text-[20px]">chevron_left</span></button>
+<button class="px-2 py-1 rounded bg-surface-variant text-on-surface">1</button>
+<button class="px-2 py-1 rounded hover:bg-surface-variant">2</button>
+<button class="px-2 py-1 rounded hover:bg-surface-variant">3</button>
+<span class="px-1">...</span>
+<button class="p-1 rounded hover:bg-surface-variant"><span class="material-symbols-outlined text-[20px]">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+
+</body></html>

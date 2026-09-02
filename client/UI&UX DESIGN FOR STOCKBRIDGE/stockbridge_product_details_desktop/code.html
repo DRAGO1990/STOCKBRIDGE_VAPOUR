@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StockBridge - Product Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;family=Work+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#ddb7ff",
+                    "on-background": "#e5e2e1",
+                    "primary": "#6bd8cb",
+                    "on-secondary-fixed": "#2c0051",
+                    "surface-container-high": "#2a2a2a",
+                    "tertiary-container": "#8f9193",
+                    "on-error-container": "#ffdad6",
+                    "secondary": "#ddb7ff",
+                    "surface-dim": "#131313",
+                    "error": "#ffb4ab",
+                    "outline": "#879391",
+                    "surface-container-low": "#1c1b1b",
+                    "surface-bright": "#393939",
+                    "surface-container-highest": "#353534",
+                    "on-primary-fixed-variant": "#005049",
+                    "surface-variant": "#353534",
+                    "on-tertiary-container": "#272a2c",
+                    "on-primary-fixed": "#00201d",
+                    "background": "#131313",
+                    "outline-variant": "#3d4947",
+                    "on-primary": "#003732",
+                    "on-secondary": "#490080",
+                    "on-secondary-container": "#d6a9ff",
+                    "secondary-container": "#6f00be",
+                    "tertiary-fixed-dim": "#c5c6c8",
+                    "tertiary": "#c5c6c8",
+                    "primary-container": "#29a195",
+                    "primary-fixed-dim": "#6bd8cb",
+                    "primary-fixed": "#89f5e7",
+                    "surface-container-lowest": "#0e0e0e",
+                    "tertiary-fixed": "#e1e2e4",
+                    "on-surface": "#e5e2e1",
+                    "surface-tint": "#6bd8cb",
+                    "on-tertiary-fixed-variant": "#444749",
+                    "on-primary-container": "#00302b",
+                    "surface-container": "#201f1f",
+                    "on-tertiary": "#2e3132",
+                    "on-error": "#690005",
+                    "inverse-primary": "#006a61",
+                    "inverse-on-surface": "#313030",
+                    "inverse-surface": "#e5e2e1",
+                    "secondary-fixed": "#f0dbff",
+                    "surface": "#131313",
+                    "on-tertiary-fixed": "#191c1e",
+                    "on-secondary-fixed-variant": "#6900b3",
+                    "on-surface-variant": "#bcc9c6",
+                    "error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "section-gap": "64px",
+                    "stack-md": "16px",
+                    "stack-lg": "32px",
+                    "container-margin": "24px",
+                    "stack-sm": "8px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Sora"],
+                    "headline-sm": ["Sora"],
+                    "headline-md": ["Sora"],
+                    "display-lg": ["Sora"],
+                    "body-md": ["Work Sans"],
+                    "body-sm": ["Work Sans"],
+                    "headline-lg-mobile": ["Sora"],
+                    "label-md": ["Work Sans"],
+                    "body-lg": ["Work Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-background dark:bg-background border-b border-outline-variant dark:border-outline-variant w-full sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-container-margin py-4 max-w-full mx-auto">
+<div class="flex items-center gap-8">
+<a class="text-headline-md font-headline-md font-bold text-primary dark:text-primary tracking-tight flex items-center gap-2" href="#">
+<span class="material-symbols-outlined">explore</span>
+                    StockBridge
+                </a>
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary-fixed-dim transition-colors duration-200 text-body-md font-body-md flex items-center gap-1 active:scale-95 transition-transform" href="#"><span class="material-symbols-outlined text-[18px]">storefront</span>Marketplace</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary-fixed-dim transition-colors duration-200 text-body-md font-body-md flex items-center gap-1 active:scale-95 transition-transform" href="#"><span class="material-symbols-outlined text-[18px]">gavel</span>Active Bids</a>
+<a class="text-primary dark:text-primary border-b-2 border-primary pb-1 text-body-md font-body-md flex items-center gap-1 active:scale-95 transition-transform" href="#"><span class="material-symbols-outlined text-[18px]">list_alt</span>Orders</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary-fixed-dim transition-colors duration-200 text-body-md font-body-md flex items-center gap-1 active:scale-95 transition-transform" href="#"><span class="material-symbols-outlined text-[18px]">account_balance</span>Financing</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-3">
+<button class="text-on-surface-variant hover:text-primary transition-colors active:scale-95"><span class="material-symbols-outlined">notifications</span></button>
+<button class="text-on-surface-variant hover:text-primary transition-colors active:scale-95"><span class="material-symbols-outlined">location_on</span></button>
+<button class="text-on-surface-variant hover:text-primary transition-colors active:scale-95"><span class="material-symbols-outlined">account_circle</span></button>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded font-label-md hover:bg-primary-fixed transition-colors active:scale-95 flex items-center gap-2">
+                    List Inventory
+                </button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow px-container-margin py-stack-lg max-w-7xl mx-auto w-full">
+<div class="mb-stack-md flex items-center gap-2 text-on-surface-variant font-body-sm">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#"><span class="material-symbols-outlined text-[16px]">arrow_back</span> Back to Listings</a>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Left Column: Image & Details -->
+<div class="lg:col-span-8 flex flex-col gap-stack-md">
+<!-- Product Header & Image Card -->
+<div class="bg-surface rounded-xl border border-outline-variant p-container-margin">
+<div class="flex justify-between items-start mb-stack-md">
+<div>
+<span class="inline-block px-2 py-1 rounded bg-surface-container-high text-primary border border-outline-variant font-label-md mb-2">Stationery</span>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-1">Printer Ink Cartridges HP Compatible</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Listed on 23/08/2026 • Listing #SB-7D10D129</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<div class="flex items-center gap-1 bg-surface-container-high px-2 py-1 rounded border border-outline-variant">
+<span class="material-symbols-outlined text-[16px] text-error">schedule</span>
+<span class="font-label-md text-error">Med Urgency</span>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-high px-2 py-1 rounded border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-primary block"></span>
+<span class="font-label-md text-primary">Active</span>
+</div>
+</div>
+</div>
+<div class="relative w-full h-[400px] rounded-lg overflow-hidden border border-outline-variant bg-surface-container-lowest">
+<img class="w-full h-full object-cover" data-alt="A large, high-resolution product shot of generic HP compatible printer ink cartridges stacked neatly on a wooden pallet. The scene is illuminated by dramatic, high-contrast studio lighting typical of a dark-mode, tech-forward B2B platform. The background is a deep charcoal grey gradient, highlighting the stark black plastic of the cartridges and the subtle sheen of their labels. The aesthetic is clean, professional, and slightly industrial." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPnu5PfsKk7RcVT86wvJG5tiymsaBev36Kd6Osj8WIP7rCFV7bV0frkQiHhJPLr191-gn0kBeAbj3cD-LJmJE4eopi8BQYwptyfceubV1yjElV5naiEDaAwBq_4MGRqtEAuzHN5H-oxXWdSx1BqTfvkkSyXLrfsC38Osnib0GITTnuGMqhufC2bMJcVcOHdoMvHpvz2lTZ0mcUItesI5b61hiqYuIa39tUYbt3Q_es2-9FKqKlYuSn"/>
+</div>
+</div>
+<!-- Seller Info -->
+<div class="bg-surface rounded-xl border border-outline-variant p-container-margin flex flex-col sm:flex-row justify-between items-start sm:items-center gap-stack-md">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">store</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Khan Trading Co</h3>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 text-primary font-label-md border border-primary/20">
+<span class="material-symbols-outlined text-[14px] fill">verified</span> Verified
+                                </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span> Banjara Hills, Hyderabad
+                            </p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-md text-on-surface-variant uppercase mb-1">Merchant Trust Rating</p>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined fill">star</span>
+<span class="material-symbols-outlined fill">star</span>
+<span class="material-symbols-outlined fill">star</span>
+<span class="material-symbols-outlined fill">star</span>
+<span class="material-symbols-outlined">star_half</span>
+<span class="font-body-md text-on-surface ml-1">4.4</span>
+</div>
+</div>
+</div>
+<!-- Product & Lot Information -->
+<div class="bg-surface rounded-xl border border-outline-variant p-container-margin">
+<h2 class="font-headline-md text-headline-md text-on-surface border-b border-outline-variant pb-stack-sm mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined">inventory_2</span> Product &amp; Lot Information
+                    </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-lg">
+<div class="flex flex-col gap-stack-sm">
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-body-sm text-on-surface-variant">Condition</span>
+<span class="font-body-md text-on-surface">New / Factory Sealed</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-body-sm text-on-surface-variant">Compatibility</span>
+<span class="font-body-md text-on-surface">HP DeskJet, Envy, OfficeJet</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-body-sm text-on-surface-variant">Color Profile</span>
+<span class="font-body-md text-on-surface">CMYK Multipack</span>
+</div>
+</div>
+<div class="flex flex-col gap-stack-sm">
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-body-sm text-on-surface-variant">Packaging</span>
+<span class="font-body-md text-on-surface">Retail Boxes in Master Carton</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-body-sm text-on-surface-variant">Min. Order Qty</span>
+<span class="font-body-md text-on-surface">10 Pieces</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-2">
+<span class="font-body-sm text-on-surface-variant">Trade Terms</span>
+<span class="font-body-md text-on-surface">Ex-Works (EXW)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Why this stock? -->
+<div class="bg-surface rounded-xl border border-outline-variant p-container-margin">
+<h2 class="font-headline-md text-headline-md text-on-surface border-b border-outline-variant pb-stack-sm mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined">lightbulb</span> Why this stock?
+                    </h2>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-gutter">
+<div class="bg-surface-container-lowest p-stack-md rounded border border-outline-variant flex flex-col items-center text-center gap-2">
+<span class="material-symbols-outlined text-primary text-[32px]">map</span>
+<h4 class="font-body-md text-on-surface">3.2 km away</h4>
+<p class="font-body-sm text-on-surface-variant">Low transport cost</p>
+</div>
+<div class="bg-surface-container-lowest p-stack-md rounded border border-outline-variant flex flex-col items-center text-center gap-2">
+<span class="material-symbols-outlined text-primary text-[32px] fill">verified</span>
+<h4 class="font-body-md text-on-surface">Verified Merchant</h4>
+<p class="font-body-sm text-on-surface-variant">High trust rating</p>
+</div>
+<div class="bg-surface-container-lowest p-stack-md rounded border border-outline-variant flex flex-col items-center text-center gap-2">
+<span class="material-symbols-outlined text-primary text-[32px]">savings</span>
+<h4 class="font-body-md text-on-surface">Best Price</h4>
+<p class="font-body-sm text-on-surface-variant">For this lot size</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Action Card -->
+<div class="lg:col-span-4">
+<div class="sticky top-[100px] bg-surface rounded-xl border border-outline-variant p-container-margin shadow-lg shadow-primary/5 flex flex-col gap-stack-md">
+<div class="border-b border-outline-variant pb-stack-md flex justify-between items-start">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary">add_shopping_cart</span> Reserve Inventory
+                            </h2>
+<p class="font-body-sm text-on-surface-variant">Lock lot and open direct trade chat.</p>
+</div>
+</div>
+<!-- Lot Metrics -->
+<div class="grid grid-cols-2 gap-stack-sm">
+<div class="bg-surface-container-lowest p-stack-sm rounded border border-outline-variant">
+<p class="font-label-md text-on-surface-variant uppercase mb-1">Unit Price</p>
+<p class="font-headline-sm text-primary">₹450 <span class="font-body-sm text-on-surface-variant">/ pc</span></p>
+</div>
+<div class="bg-surface-container-lowest p-stack-sm rounded border border-outline-variant">
+<p class="font-label-md text-on-surface-variant uppercase mb-1">Available</p>
+<p class="font-headline-sm text-on-surface flex items-center gap-2">
+                                50 <span class="font-body-sm text-on-surface-variant">pcs</span>
+</p>
+</div>
+</div>
+<!-- Expiry -->
+<div class="flex items-center justify-between bg-error/10 border border-error/20 p-stack-sm rounded">
+<div class="flex items-center gap-2 text-error">
+<span class="material-symbols-outlined">hourglass_bottom</span>
+<span class="font-body-md font-medium">Expiry: 22/10/2026</span>
+</div>
+<span class="font-label-md text-error px-2 py-1 bg-error/20 rounded">50 days left</span>
+</div>
+<!-- Stepper -->
+<div class="flex flex-col gap-unit">
+<label class="font-label-md text-on-surface-variant uppercase">Quantity to Reserve (pieces)</label>
+<div class="flex items-center border border-outline-variant rounded bg-surface-container-lowest focus-within:border-primary transition-colors overflow-hidden">
+<button class="px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors active:bg-surface-container-highest"><span class="material-symbols-outlined">remove</span></button>
+<input class="w-full bg-transparent border-none text-center font-headline-sm text-on-surface focus:ring-0 p-0 h-12" max="50" min="10" type="number" value="50"/>
+<button class="px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors active:bg-surface-container-highest"><span class="material-symbols-outlined">add</span></button>
+</div>
+<p class="font-body-sm text-on-surface-variant text-right">Max available: 50 pieces</p>
+</div>
+<!-- Valuation Summary -->
+<div class="bg-surface-container-lowest rounded p-stack-md border border-outline-variant flex flex-col gap-stack-sm">
+<div class="flex justify-between font-body-sm text-on-surface-variant">
+<span>Agreed Unit Price:</span>
+<span>₹450</span>
+</div>
+<div class="flex justify-between font-body-sm text-on-surface-variant">
+<span>Reserved Volume:</span>
+<span>50 pieces</span>
+</div>
+<div class="border-t border-outline-variant pt-2 mt-1 flex justify-between items-center">
+<span class="font-headline-sm text-on-surface">Total Valuation:</span>
+<span class="font-headline-md text-primary">₹22,500</span>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary py-4 rounded font-headline-sm hover:bg-primary-fixed transition-colors active:scale-95 shadow-md flex justify-center items-center gap-2">
+                        Reserve Stock
+                        <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<p class="font-body-sm text-on-surface-variant text-center flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">lock_clock</span> Instant 24h Holding Window
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline-variant full-width mt-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:flex lg:justify-between items-center px-container-margin py-stack-lg w-full max-w-7xl mx-auto gap-stack-md">
+<div class="text-headline-sm font-headline-sm text-on-surface dark:text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined">explore</span> StockBridge
+            </div>
+<nav class="flex flex-wrap gap-4 font-body-sm text-body-sm">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Terms of Trade</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Escrow Policy</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Verified Seller Program</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Support</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer" href="#">Privacy</a>
+</nav>
+<div class="text-on-surface-variant dark:text-on-surface-variant font-body-sm text-body-sm">
+                © 2024 StockBridge B2B. All rights reserved. SEC Protected.
+            </div>
+</div>
+</footer>
+</body></html>

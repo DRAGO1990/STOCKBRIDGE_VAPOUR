@@ -1,0 +1,201 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>StockBridge - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;family=Work+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#006a61",
+                        "on-secondary": "#490080",
+                        "surface-bright": "#393939",
+                        "outline": "#879391",
+                        "on-secondary-fixed-variant": "#6900b3",
+                        "surface-tint": "#6bd8cb",
+                        "secondary-fixed-dim": "#ddb7ff",
+                        "primary-fixed-dim": "#6bd8cb",
+                        "tertiary-fixed-dim": "#c5c6c8",
+                        "secondary": "#ddb7ff",
+                        "surface-container": "#201f1f",
+                        "on-background": "#e5e2e1",
+                        "on-secondary-fixed": "#2c0051",
+                        "on-tertiary-container": "#272a2c",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-tertiary": "#2e3132",
+                        "surface-container-high": "#2a2a2a",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#00201d",
+                        "surface": "#131313",
+                        "primary-container": "#29a195",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed": "#f0dbff",
+                        "on-primary-container": "#00302b",
+                        "surface-dim": "#131313",
+                        "on-surface-variant": "#bcc9c6",
+                        "outline-variant": "#3d4947",
+                        "on-primary": "#003732",
+                        "surface-container-low": "#1c1b1b",
+                        "on-primary-fixed-variant": "#005049",
+                        "tertiary": "#c5c6c8",
+                        "surface-variant": "#353534",
+                        "inverse-surface": "#e5e2e1",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-surface": "#e5e2e1",
+                        "primary-fixed": "#89f5e7",
+                        "primary": "#6bd8cb",
+                        "on-secondary-container": "#d6a9ff",
+                        "secondary-container": "#6f00be",
+                        "background": "#131313",
+                        "on-error": "#690005",
+                        "tertiary-container": "#8f9193",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-highest": "#353534",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#e1e2e4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "container-margin": "24px",
+                        "stack-sm": "8px",
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "section-gap": "64px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Work Sans"],
+                        "label-md": ["Work Sans"],
+                        "body-lg": ["Work Sans"],
+                        "headline-lg-mobile": ["Sora"],
+                        "headline-md": ["Sora"],
+                        "body-md": ["Work Sans"],
+                        "headline-sm": ["Sora"],
+                        "display-lg": ["Sora"],
+                        "headline-lg": ["Sora"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background dark:bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar (Transactional/Login State - Supressed Navigation) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-margin py-4 max-w-full mx-auto bg-background dark:bg-background border-b border-outline-variant dark:border-outline-variant">
+<div class="flex items-center">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-primary tracking-tight">StockBridge</span>
+</div>
+<!-- Intentionally omitting primary/secondary navigation logic as per strict layout mandate for transactional pages -->
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex items-center justify-center px-container-margin py-section-gap mt-16 relative overflow-hidden">
+<!-- Subtle decorative background element for depth -->
+
+<div class="w-full max-w-md bg-surface border border-outline-variant rounded-lg relative z-10 py-4 px-stack-lg">
+<!-- Header Section -->
+<div class="mb-stack-lg text-center border-b border-outline-variant pb-stack-md">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-unit">Welcome back to StockBridge</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Sign in to manage your stock and orders</p>
+</div>
+<!-- Login Form -->
+<form action="#" class="space-y-stack-md" method="POST">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant uppercase mb-unit" for="email">Registered Email</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="mail">mail</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-DEFAULT bg-surface-container-low text-on-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm font-body-sm" id="email" name="email" placeholder="you@company.com" required="" type="email">
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant uppercase mb-unit flex justify-between" for="password">
+<span class="">Password</span>
+<a class="text-primary hover:text-primary-fixed transition-colors normal-case tracking-normal" href="#">Forgot password?</a>
+</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="lock">lock</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-DEFAULT bg-surface-container-low text-on-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm font-body-sm" id="password" name="password" placeholder="••••••••" required="" type="password">
+</div>
+</div>
+<div class="pt-stack-sm">
+<button class="w-full flex justify-center py-2 px-4 border border-transparent rounded-DEFAULT shadow-sm font-label-md text-label-md uppercase font-medium text-on-primary bg-primary hover:bg-primary-fixed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-background transition-colors" type="submit">
+                        Sign In
+                    </button>
+</div>
+<div class="text-center mt-stack-md">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Don't have an account? <a class="text-primary hover:text-primary-fixed font-medium transition-colors" href="#">Register account</a>
+</p>
+</div>
+</form>
+<!-- Demo Accounts Section -->
+<div class="pt-stack-md border-t border-outline-variant mt-stack-md">
+<div class="text-center mb-stack-sm"><p class="font-label-md text-label-md text-on-surface-variant uppercase">Demo access</p><p class="text-[10px] text-on-surface-variant opacity-80">For presentation/testing only</p></div>
+<div class="grid grid-cols-2 gap-stack-sm">
+<button class="flex items-center justify-center gap-2 px-3 py-2 border border-outline-variant rounded-DEFAULT bg-surface hover:bg-surface-container-low transition-colors text-on-surface font-body-sm text-body-sm group">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant group-hover:text-primary transition-colors" data-icon="person">person</span>
+                        Rajesh (Distributor)
+                    </button>
+<button class="flex items-center justify-center gap-2 px-3 py-2 border border-outline-variant rounded-DEFAULT bg-surface hover:bg-surface-container-low transition-colors text-on-surface font-body-sm text-body-sm group">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant group-hover:text-primary transition-colors" data-icon="storefront">storefront</span>
+                        Suresh (Retailer)
+                    </button>
+<button class="flex items-center justify-center gap-2 px-3 py-2 border border-outline-variant rounded-DEFAULT bg-surface hover:bg-surface-container-low transition-colors text-on-surface font-body-sm text-body-sm group">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant group-hover:text-primary transition-colors" data-icon="inventory_2">inventory_2</span>
+                        Lakshmi (Supplier)
+                    </button>
+<button class="flex items-center justify-center gap-2 px-3 py-2 border border-outline-variant rounded-DEFAULT bg-surface hover:bg-surface-container-low transition-colors text-on-surface font-body-sm text-body-sm group">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant group-hover:text-primary transition-colors" data-icon="admin_panel_settings">admin_panel_settings</span>
+                        Admin (System)
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full px-container-margin py-stack-lg flex flex-col md:flex-row justify-between items-center gap-gutter bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline-variant">
+<div class="flex items-center">
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">StockBridge</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 StockBridge. Verified B2B Marketplace.</p>
+<div class="flex gap-gutter flex-wrap justify-center">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:underline transition-all opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:underline transition-all opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:underline transition-all opacity-80 hover:opacity-100" href="#">Contact Support</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:underline transition-all opacity-80 hover:opacity-100" href="#">Trust Guarantee</a>
+</div>
+</footer>
+
+
+</body></html>

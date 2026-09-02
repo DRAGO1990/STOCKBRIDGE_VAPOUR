@@ -2,35 +2,53 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft,
-  Calendar,
-  Layers,
   MapPin,
   ShieldCheck,
-  Building2,
-  Trash2,
-  Lock,
-  MessageSquare,
-  CheckCircle,
+  Store,
   AlertTriangle,
+  Lock,
+  CheckCircle,
+  Trash2,
+  Calendar,
+  Hourglass,
   Clock,
+  Package,
+  Layers,
   Sparkles,
+  ArrowRight,
+  Plus,
+  Minus,
+  Check,
+  Zap,
+  ShoppingCart,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../lib/api';
 import type { Listing } from '../types';
 import { useAuthStore } from '../stores/authStore';
-import { UrgencyBadge, StatusBadge } from '../components/StatusBadges';
 import { RatingStars } from '../components/RatingStars';
+import { StatusBadge } from '../components/StatusBadges';
+
+const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
+  Stationery: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=1200&auto=format&fit=crop&q=80',
+  Groceries: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&auto=format&fit=crop&q=80',
+  'Food & Bakery': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&auto=format&fit=crop&q=80',
+  'Prepared Food & Bakery': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&auto=format&fit=crop&q=80',
+  Packaging: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=1200&auto=format&fit=crop&q=80',
+  Electronics: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=1200&auto=format&fit=crop&q=80',
+  Textiles: 'https://images.unsplash.com/photo-1528458909336-e7a0adfed0a5?w=1200&auto=format&fit=crop&q=80',
+  Hardware: 'https://images.unsplash.com/photo-1581783342308-f792dbdd27c5?w=1200&auto=format&fit=crop&q=80',
+};
 
 export const ListingDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
+  const user = useAuthStore((s) => s.user);
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Reservation state
   const [reserveQty, setReserveQty] = useState<number>(0);
   const [isReserving, setIsReserving] = useState(false);
   const [reserveError, setReserveError] = useState('');
@@ -45,8 +63,7 @@ export const ListingDetailPage: React.FC = () => {
         setReserveQty(res.data.quantity);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error('Failed to load listing', err);
+      .catch(() => {
         setError('Listing not found or has been deactivated.');
         setLoading(false);
       });
@@ -59,61 +76,51 @@ export const ListingDetailPage: React.FC = () => {
       return;
     }
     if (!listing) return;
-
     if (reserveQty <= 0 || reserveQty > listing.quantity) {
-      setReserveError(`Please enter a quantity between 1 and ${listing.quantity}`);
+      setReserveError(`Enter a quantity between 1 and ${listing.quantity}`);
       return;
     }
-
     setIsReserving(true);
     setReserveError('');
-
     try {
-      const calculatedPrice = reserveQty * listing.pricePerUnit;
       const res = await api.post('/reservations', {
         listingId: listing.id,
         agreedQty: Number(reserveQty),
-        agreedPrice: calculatedPrice,
+        agreedPrice: reserveQty * listing.pricePerUnit,
       });
-
-      // Redirect to reservations page
       navigate(`/reservations?active=${res.data.id}`);
     } catch (err: any) {
-      console.error('Reservation error', err);
       setReserveError(err.response?.data?.error || 'Failed to place reservation.');
       setIsReserving(false);
     }
   };
 
-  const handleDeleteListing = async () => {
-    if (!listing || !confirm('Are you sure you want to deactivate this listing?')) return;
+  const handleDelete = async () => {
+    if (!listing || !confirm('Deactivate this listing?')) return;
     try {
       await api.delete(`/listings/${listing.id}`);
       navigate('/my-listings');
-    } catch (err) {
-      console.error('Failed to delete listing', err);
+    } catch {
+      /* noop */
     }
   };
 
   if (loading) {
     return (
-      <div className="py-20 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-400"></div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <div style={{ width: 32, height: 32, border: '2px solid #3d4947', borderTopColor: '#6bd8cb', borderRadius: '50%' }} className="animate-stitch-spin" />
       </div>
     );
   }
 
   if (error || !listing) {
     return (
-      <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-12 text-center max-w-lg mx-auto space-y-4 my-10">
-        <AlertTriangle className="text-rose-400 mx-auto" size={36} />
-        <h2 className="text-xl font-bold text-white">Listing Unavailable</h2>
-        <p className="text-sm text-slate-400">{error || 'This listing does not exist.'}</p>
-        <Link
-          to="/"
-          className="inline-block px-5 py-2.5 bg-purple-500 text-navy-950 font-bold text-sm rounded-xl shadow-md"
-        >
-          Return to Marketplace
+      <div style={{ textAlign: 'center', padding: '80px 24px', background: '#131313', minHeight: '80vh' }}>
+        <AlertTriangle size={36} color="#ffb4ab" style={{ margin: '0 auto 16px' }} />
+        <h2 style={{ fontFamily: 'Sora, sans-serif', fontSize: 20, color: '#e5e2e1', marginBottom: 8 }}>Listing Unavailable</h2>
+        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6', marginBottom: 20 }}>{error}</p>
+        <Link to="/marketplace" className="stitch-btn-primary" style={{ padding: '10px 24px', textDecoration: 'none', display: 'inline-block', borderRadius: 4 }}>
+          Back to Listings
         </Link>
       </div>
     );
@@ -121,230 +128,525 @@ export const ListingDetailPage: React.FC = () => {
 
   const isMine = user?.id === listing.sellerId;
   const totalPrice = reserveQty * listing.pricePerUnit;
+  const daysRemaining = listing.expiryDate
+    ? Math.ceil((new Date(listing.expiryDate).getTime() - Date.now()) / 86400000)
+    : null;
 
-  let daysRemaining: number | null = null;
-  if (listing.expiryDate) {
-    const diff = new Date(listing.expiryDate).getTime() - Date.now();
-    daysRemaining = Math.ceil(diff / (1000 * 60 * 60 * 24));
-  }
+  const displayImage =
+    listing.imageUrl ||
+    DEFAULT_CATEGORY_IMAGES[listing.category] ||
+    'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=1200&auto=format&fit=crop&q=80';
+
+  const formattedCreatedDate = new Date(listing.createdAt).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+
+  const formattedExpiryDate = listing.expiryDate
+    ? new Date(listing.expiryDate).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+    : 'No Expiry';
 
   return (
-    <div className="space-y-6 pb-16 max-w-6xl mx-auto">
-      {/* Back navigation */}
-      <div>
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white bg-[#1A1330] border border-[#2B1F4D] px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
-        >
-          <ArrowLeft size={14} /> Back to Listings
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left 2 Columns: Main Listing Info & Seller Profile */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Main Card */}
-          <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                {listing.category}
-              </span>
-              <div className="flex items-center gap-2">
-                <UrgencyBadge urgency={listing.urgency} />
-                <StatusBadge status={listing.status} />
-              </div>
-            </div>
-
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
-                {listing.title}
-              </h1>
-              <p className="text-xs text-slate-400 mt-1">
-                Listed on {new Date(listing.createdAt).toLocaleDateString()} • Listing #SB-{listing.id.substring(0, 8).toUpperCase()}
-              </p>
-            </div>
-
-            {/* Inventory Lot Highlight Box */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-[#0F0B1A]/70 p-5 rounded-2xl border border-[#2B1F4D]/50">
-              <div>
-                <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider">Lot Quantity</span>
-                <p className="text-xl font-bold text-white flex items-center gap-1.5 mt-1">
-                  <Layers size={18} className="text-purple-400" />
-                  {listing.quantity} <span className="text-xs font-normal text-slate-400">{listing.unit}</span>
-                </p>
-              </div>
-
-              <div>
-                <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider">Unit Price</span>
-                <p className="text-xl font-bold text-emerald-400 mt-1">
-                  ₹{listing.pricePerUnit.toLocaleString('en-IN')}{' '}
-                  <span className="text-xs font-normal text-slate-400">/{listing.unit}</span>
-                </p>
-              </div>
-
-              <div className="col-span-2 sm:col-span-1">
-                <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider">Total Lot Valuation</span>
-                <p className="text-xl font-bold text-pink-300 mt-1">
-                  ₹{(listing.quantity * listing.pricePerUnit).toLocaleString('en-IN')}
-                </p>
-              </div>
-            </div>
-
-            {/* Expiry Details */}
-            {listing.expiryDate && (
-              <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-between text-xs sm:text-sm">
-                <div className="flex items-center gap-2 text-amber-300">
-                  <Clock size={18} className="text-amber-400" />
-                  <div>
-                    <span className="font-bold">Expiry Date: </span>
-                    <span>{new Date(listing.expiryDate).toLocaleDateString()}</span>
-                  </div>
-                </div>
-                <span className="font-semibold text-amber-400">
-                  {daysRemaining !== null && daysRemaining <= 0
-                    ? '⚠️ Expiring today'
-                    : `⏳ ${daysRemaining} days remaining`}
-                </span>
-              </div>
-            )}
-
-            {/* Deactivate Button for Owner */}
-            {isMine && (
-              <div className="pt-4 border-t border-[#2B1F4D]/60 flex items-center justify-between">
-                <span className="text-xs text-indigo-300 font-semibold bg-indigo-500/20 px-2.5 py-1 rounded-lg border border-indigo-500/30">
-                  You own this listing
-                </span>
-                <button
-                  onClick={handleDeleteListing}
-                  className="px-4 py-2 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Trash2 size={14} /> Deactivate Lot
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Seller Profile Card */}
-          <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 shadow-xl space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-              <Building2 size={16} className="text-purple-400" />
-              Verified Seller Information
-            </h3>
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0F0B1A]/50 p-4 rounded-2xl border border-[#2B1F4D]/40">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-bold text-white text-base">
-                    {listing.seller?.businessName || listing.seller?.name}
-                  </h4>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/40">
-                    <ShieldCheck size={12} /> Verified
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 flex items-center gap-1">
-                  <MapPin size={13} className="text-purple-400" />
-                  {listing.seller?.address || 'Address provided upon reservation confirmation'}
-                </p>
-              </div>
-
-              {listing.seller && (
-                <div className="sm:text-right">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">Merchant Trust Rating</span>
-                  <RatingStars rating={listing.seller.rating} size={16} />
-                </div>
-              )}
-            </div>
-          </div>
+    <div style={{ background: '#131313', color: '#e5e2e1', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 80px' }}>
+        
+        {/* ── Breadcrumb / Back Link ── */}
+        <div style={{ marginBottom: 20 }}>
+          <button
+            type="button"
+            onClick={() => navigate('/marketplace')}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'transparent', border: 'none', padding: 0,
+              fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 500,
+              color: '#879391', cursor: 'pointer', transition: 'color 0.15s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#6bd8cb')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#879391')}
+          >
+            <ArrowLeft size={16} /> Back to Listings
+          </button>
         </div>
 
-        {/* Right 1 Column: Immediate Reservation Action Widget */}
-        <div className="space-y-6">
-          <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 shadow-2xl sticky top-24 space-y-5">
-            <div className="border-b border-[#2B1F4D]/60 pb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Sparkles size={18} className="text-purple-400" />
-                Reserve Inventory
-              </h3>
-              <p className="text-xs text-slate-400 mt-1">
-                Zero advance risk. Place reservation to lock lot and open direct trade chat with seller.
-              </p>
+        {/* ── Main Two-Column Layout ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24, alignItems: 'start' }} className="lg:grid-cols-12">
+          
+          {/* ════ LEFT COLUMN: Product Overview & Info (8 Cols) ════ */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }} className="lg:col-span-8">
+            
+            {/* Card 1: Header & Product Hero Image */}
+            <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: 24 }}>
+              
+              {/* Header row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+                <div>
+                  <span style={{
+                    display: 'inline-block',
+                    fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                    letterSpacing: '0.05em', textTransform: 'uppercase',
+                    color: '#6bd8cb', background: '#2a2a2a',
+                    border: '1px solid #3d4947', borderRadius: 4,
+                    padding: '3px 8px', marginBottom: 10,
+                  }}>
+                    {listing.category}
+                  </span>
+
+                  <h1 style={{
+                    fontFamily: 'Sora, sans-serif', fontWeight: 700,
+                    fontSize: 'clamp(22px, 3vw, 28px)', color: '#e5e2e1',
+                    letterSpacing: '-0.01em', margin: '0 0 6px',
+                  }}>
+                    {listing.title}
+                  </h1>
+
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', margin: 0 }}>
+                    Listed on {formattedCreatedDate} • Listing #SB-{listing.id.substring(0, 8).toUpperCase()}
+                  </p>
+                </div>
+
+                {/* Status and Urgency Badges */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    background: '#2a2a2a', border: '1px solid #3d4947',
+                    borderRadius: 4, padding: '4px 10px',
+                    fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                    color: listing.urgency === 'high' ? '#ffb4ab' : listing.urgency === 'medium' ? '#f6b351' : '#6bd8cb',
+                  }}>
+                    <Clock size={13} />
+                    <span>
+                      {listing.urgency === 'high'
+                        ? 'High Urgency'
+                        : listing.urgency === 'medium'
+                        ? 'Med Urgency'
+                        : 'Standard Lot'}
+                    </span>
+                  </div>
+
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    background: '#2a2a2a', border: '1px solid #3d4947',
+                    borderRadius: 4, padding: '4px 10px',
+                    fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                    color: '#6bd8cb',
+                  }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#6bd8cb' }} className="animate-pulse" />
+                    <span>Active</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* High-res Image Box */}
+              <div style={{
+                width: '100%', height: 380, borderRadius: 6,
+                overflow: 'hidden', border: '1px solid #3d4947',
+                background: '#0e0e0e', position: 'relative',
+              }}>
+                <img
+                  src={displayImage}
+                  alt={listing.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
             </div>
 
-            {listing.status !== 'active' ? (
-              <div className="p-4 bg-slate-800/80 rounded-2xl text-center space-y-2 border border-slate-700">
-                <Lock className="mx-auto text-slate-400" size={24} />
-                <p className="text-sm font-semibold text-slate-300">
-                  This lot is currently {listing.status}.
-                </p>
-                <p className="text-xs text-slate-500">
-                  New reservations cannot be created at this time.
-                </p>
-              </div>
-            ) : isMine ? (
-              <div className="p-4 bg-indigo-950/40 border border-indigo-800/60 rounded-2xl text-center space-y-2 text-xs text-indigo-300">
-                <p className="font-semibold">This is your listing.</p>
-                <p className="text-slate-400">Buyers will reserve this lot directly from your post.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleReserve} className="space-y-4">
+            {/* Card 2: Seller & Verified Trust Card */}
+            <div style={{
+              background: '#1c1b1b', border: '1px solid #3d4947',
+              borderRadius: 8, padding: '20px 24px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              flexWrap: 'wrap', gap: 16,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 4,
+                  background: '#2a2a2a', border: '1px solid #3d4947',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#6bd8cb', flexShrink: 0,
+                }}>
+                  <Store size={22} />
+                </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Quantity to Reserve ({listing.unit})
-                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', margin: 0 }}>
+                      {listing.seller?.businessName || listing.seller?.name || 'Verified Merchant'}
+                    </h3>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 3,
+                      background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.25)',
+                      borderRadius: 4, padding: '2px 6px',
+                      fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 700,
+                      letterSpacing: '0.04em', textTransform: 'uppercase', color: '#6bd8cb',
+                    }}>
+                      <ShieldCheck size={11} /> Verified
+                    </span>
+                  </div>
+                  <p style={{
+                    fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391',
+                    margin: 0, display: 'flex', alignItems: 'center', gap: 4,
+                  }}>
+                    <MapPin size={13} color="#879391" />
+                    {listing.seller?.address || 'Banjara Hills, Hyderabad'}
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'right' }}>
+                <span style={{
+                  fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600,
+                  letterSpacing: '0.06em', textTransform: 'uppercase', color: '#879391',
+                  display: 'block', marginBottom: 4,
+                }}>
+                  Merchant Trust Rating
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
+                  <RatingStars rating={listing.seller?.rating || 4.5} size={15} />
+                  <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 700, color: '#f6b351' }}>
+                    {(listing.seller?.rating || 4.5).toFixed(1)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Product & Lot Information */}
+            <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: 24 }}>
+              <h2 style={{
+                fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 17, color: '#e5e2e1',
+                display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 16px',
+                paddingBottom: 12, borderBottom: '1px solid #3d4947',
+              }}>
+                <Package size={18} color="#6bd8cb" /> Product & Lot Information
+              </h2>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid #2a2a2a' }}>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391' }}>Condition</span>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 500, color: '#e5e2e1' }}>New / Factory Sealed</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid #2a2a2a' }}>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391' }}>Category & Specs</span>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 500, color: '#e5e2e1' }}>{listing.description || `${listing.category} standard lot`}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid #2a2a2a' }}>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391' }}>Color / Batch Spec</span>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 500, color: '#e5e2e1' }}>Commercial Grade</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid #2a2a2a' }}>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391' }}>Packaging</span>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 500, color: '#e5e2e1' }}>Retail Boxes / Sealed</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid #2a2a2a' }}>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391' }}>Min. Order Qty</span>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 500, color: '#e5e2e1' }}>1 {listing.unit}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid #2a2a2a' }}>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391' }}>Trade Terms</span>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 500, color: '#e5e2e1' }}>Ex-Works (EXW) / Local</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4: "Why this stock?" */}
+            <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: 24 }}>
+              <h2 style={{
+                fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 17, color: '#e5e2e1',
+                display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 16px',
+                paddingBottom: 12, borderBottom: '1px solid #3d4947',
+              }}>
+                <Zap size={18} color="#6bd8cb" /> Why this stock?
+              </h2>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+                <div style={{
+                  background: '#131313', border: '1px solid #3d4947', borderRadius: 6,
+                  padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 6,
+                }}>
+                  <MapPin size={24} color="#6bd8cb" />
+                  <h4 style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: '#e5e2e1', margin: 0 }}>
+                    {listing.distanceKm ? `${listing.distanceKm.toFixed(1)} km away` : '3.2 km away'}
+                  </h4>
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', margin: 0 }}>Low transport cost</p>
+                </div>
+
+                <div style={{
+                  background: '#131313', border: '1px solid #3d4947', borderRadius: 6,
+                  padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 6,
+                }}>
+                  <ShieldCheck size={24} color="#6bd8cb" />
+                  <h4 style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: '#e5e2e1', margin: 0 }}>
+                    Verified Merchant
+                  </h4>
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', margin: 0 }}>High trust rating</p>
+                </div>
+
+                <div style={{
+                  background: '#131313', border: '1px solid #3d4947', borderRadius: 6,
+                  padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 6,
+                }}>
+                  <Sparkles size={24} color="#6bd8cb" />
+                  <h4 style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: '#e5e2e1', margin: 0 }}>
+                    Best Price
+                  </h4>
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', margin: 0 }}>For this lot size</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* ════ RIGHT COLUMN: Sticky Reservation Card (4 Cols) ════ */}
+          <div className="lg:col-span-4">
+            <div style={{
+              position: 'sticky', top: 80,
+              background: '#1c1b1b', border: '1px solid #3d4947',
+              borderRadius: 8, padding: 24,
+              boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              display: 'flex', flexDirection: 'column', gap: 18,
+            }}>
+              
+              {/* Card Header */}
+              <div style={{ paddingBottom: 14, borderBottom: '1px solid #3d4947' }}>
+                <h2 style={{
+                  fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: '#e5e2e1',
+                  display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 4px',
+                }}>
+                  <ShoppingCart size={18} color="#6bd8cb" /> Reserve Inventory
+                </h2>
+                <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', margin: 0 }}>
+                  Lock lot and open direct trade chat.
+                </p>
+              </div>
+
+              {/* Unit Price & Available 2-grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div style={{ background: '#131313', border: '1px solid #3d4947', borderRadius: 6, padding: '12px 14px' }}>
+                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Unit Price
+                  </span>
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, fontWeight: 700, color: '#6bd8cb', margin: '4px 0 0' }}>
+                    ₹{listing.pricePerUnit} <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 400, color: '#879391' }}>/{listing.unit}</span>
+                  </p>
+                </div>
+
+                <div style={{ background: '#131313', border: '1px solid #3d4947', borderRadius: 6, padding: '12px 14px' }}>
+                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Available
+                  </span>
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, fontWeight: 700, color: '#e5e2e1', margin: '4px 0 0' }}>
+                    {listing.quantity} <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 400, color: '#879391' }}>{listing.unit}</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Expiry Banner */}
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: 'rgba(246,179,81,0.08)', border: '1px solid rgba(246,179,81,0.25)',
+                borderRadius: 6, padding: '10px 12px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#f6b351' }}>
+                  <Hourglass size={14} />
+                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, fontWeight: 600 }}>
+                    Expiry: {formattedExpiryDate}
+                  </span>
+                </div>
+                {daysRemaining !== null && (
+                  <span style={{
+                    fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700,
+                    color: daysRemaining <= 7 ? '#ffb4ab' : '#f6b351',
+                    background: daysRemaining <= 7 ? 'rgba(255,180,171,0.15)' : 'rgba(246,179,81,0.15)',
+                    padding: '2px 8px', borderRadius: 4,
+                  }}>
+                    {daysRemaining > 0 ? `${daysRemaining} days left` : 'Expired'}
+                  </span>
+                )}
+              </div>
+
+              {/* Quantity Stepper */}
+              <div>
+                <label style={{
+                  fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                  letterSpacing: '0.05em', textTransform: 'uppercase', color: '#879391',
+                  display: 'block', marginBottom: 8,
+                }}>
+                  Quantity to Reserve ({listing.unit.toUpperCase()})
+                </label>
+
+                <div style={{
+                  display: 'flex', alignItems: 'center',
+                  background: '#131313', border: '1px solid #3d4947', borderRadius: 4,
+                  overflow: 'hidden',
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setReserveQty((prev) => Math.max(1, prev - 1))}
+                    disabled={reserveQty <= 1}
+                    style={{
+                      background: 'transparent', border: 'none', color: '#bcc9c6',
+                      padding: '12px 18px', cursor: reserveQty <= 1 ? 'not-allowed' : 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    <Minus size={15} />
+                  </button>
+
                   <input
                     type="number"
-                    min="1"
+                    min={1}
                     max={listing.quantity}
                     value={reserveQty}
-                    onChange={(e) => setReserveQty(Number(e.target.value))}
-                    required
-                    className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-purple-400 transition-colors"
+                    onChange={(e) => setReserveQty(Math.min(listing.quantity, Math.max(1, Number(e.target.value))))}
+                    style={{
+                      flex: 1, background: 'transparent', border: 'none',
+                      textAlign: 'center', fontFamily: 'Sora, sans-serif',
+                      fontSize: 18, fontWeight: 700, color: '#e5e2e1',
+                      outline: 'none',
+                    }}
                   />
-                  <span className="text-[10px] text-slate-400 mt-1 block">
-                    Max available in this batch: {listing.quantity} {listing.unit}
+
+                  <button
+                    type="button"
+                    onClick={() => setReserveQty((prev) => Math.min(listing.quantity, prev + 1))}
+                    disabled={reserveQty >= listing.quantity}
+                    style={{
+                      background: 'transparent', border: 'none', color: '#bcc9c6',
+                      padding: '12px 18px', cursor: reserveQty >= listing.quantity ? 'not-allowed' : 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    <Plus size={15} />
+                  </button>
+                </div>
+
+                <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391', textAlign: 'right', margin: '6px 0 0' }}>
+                  Max available: {listing.quantity} {listing.unit}
+                </p>
+              </div>
+
+              {/* Valuation Summary Box */}
+              <div style={{
+                background: '#131313', border: '1px solid #3d4947', borderRadius: 6,
+                padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391' }}>
+                  <span>Agreed Unit Price:</span>
+                  <span style={{ color: '#e5e2e1' }}>₹{listing.pricePerUnit}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391' }}>
+                  <span>Reserved Volume:</span>
+                  <span style={{ color: '#e5e2e1' }}>{reserveQty} {listing.unit}</span>
+                </div>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  paddingTop: 8, borderTop: '1px solid #3d4947', marginTop: 4,
+                }}>
+                  <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 13, color: '#e5e2e1' }}>
+                    Total Valuation:
+                  </span>
+                  <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 20, color: '#6bd8cb' }}>
+                    ₹{totalPrice.toLocaleString('en-IN')}
                   </span>
                 </div>
+              </div>
 
-                {/* Price Breakdown */}
-                <div className="bg-[#0F0B1A]/60 p-3.5 rounded-xl border border-[#2B1F4D]/40 space-y-2 text-xs">
-                  <div className="flex items-center justify-between text-slate-300">
-                    <span>Agreed Unit Price:</span>
-                    <span>₹{listing.pricePerUnit}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-slate-300">
-                    <span>Reserved Volume:</span>
-                    <span>{reserveQty} {listing.unit}</span>
-                  </div>
-                  <div className="pt-2 border-t border-[#2B1F4D]/60 flex items-center justify-between text-sm font-extrabold text-purple-300">
-                    <span>Total Valuation:</span>
-                    <span>₹{totalPrice.toLocaleString('en-IN')}</span>
-                  </div>
+              {/* Reserve Error */}
+              {reserveError && (
+                <p style={{
+                  fontFamily: 'Work Sans, sans-serif', fontSize: 12,
+                  color: '#ffb4ab', background: 'rgba(255,180,171,0.08)',
+                  border: '1px solid rgba(255,180,171,0.2)', borderRadius: 4,
+                  padding: '8px 12px', margin: 0,
+                }}>
+                  {reserveError}
+                </p>
+              )}
+
+              {/* CTA Action */}
+              {isMine ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <Link
+                    to={`/create-listing?edit=${listing.id}`}
+                    className="stitch-btn-primary"
+                    style={{
+                      textAlign: 'center', padding: '14px', borderRadius: 4,
+                      fontSize: 13, textDecoration: 'none', letterSpacing: '0.04em',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    }}
+                  >
+                    Edit Listing Details
+                  </Link>
+                  <Link
+                    to="/my-listings"
+                    className="stitch-btn-ghost"
+                    style={{
+                      textAlign: 'center', padding: '12px', borderRadius: 4,
+                      fontSize: 13, textDecoration: 'none', letterSpacing: '0.04em',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    Manage in My Stock
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    style={{
+                      padding: '10px', background: 'transparent', border: '1px solid rgba(255,180,171,0.3)',
+                      color: '#ffb4ab', borderRadius: 4, fontFamily: 'Work Sans, sans-serif',
+                      fontSize: 12, cursor: 'pointer',
+                    }}
+                  >
+                    Deactivate Listing
+                  </button>
                 </div>
+              ) : (
+                <form onSubmit={handleReserve}>
+                  <button
+                    type="submit"
+                    disabled={isReserving || listing.quantity === 0}
+                    className="stitch-btn-primary"
+                    style={{
+                      width: '100%', padding: '15px', borderRadius: 4,
+                      fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 700,
+                      letterSpacing: '0.04em', cursor: isReserving ? 'not-allowed' : 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      opacity: isReserving ? 0.6 : 1,
+                    }}
+                  >
+                    {isReserving ? (
+                      'Locking Reservation...'
+                    ) : (
+                      <>
+                        Reserve Stock <ArrowRight size={16} />
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
 
-                {reserveError && (
-                  <p className="text-xs text-rose-400 bg-rose-950/40 p-2.5 rounded-xl border border-rose-800/60">
-                    {reserveError}
-                  </p>
-                )}
+              {/* Lock reassurance text */}
+              <p style={{
+                fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391',
+                textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                margin: 0,
+              }}>
+                <Lock size={13} color="#6bd8cb" /> Instant 24h Holding Window (No Advance)
+              </p>
 
-                <button
-                  type="submit"
-                  disabled={isReserving}
-                  className="w-full py-3.5 px-4 bg-gradient-to-r from-purple-500 to-pink-400 hover:from-purple-400 hover:to-pink-300 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-purple-500/25 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-                >
-                  {isReserving ? 'Confirming Reservation...' : 'Lock Reservation Now'}
-                </button>
-
-                <div className="text-[11px] text-slate-400 text-center space-y-1 pt-1">
-                  <p className="flex items-center justify-center gap-1 text-emerald-400 font-medium">
-                    <CheckCircle size={12} /> Instant 24h Holding Window
-                  </p>
-                  <p>Direct chat with seller unlocks immediately upon reserve.</p>
-                </div>
-              </form>
-            )}
+            </div>
           </div>
+
         </div>
+
       </div>
     </div>
   );

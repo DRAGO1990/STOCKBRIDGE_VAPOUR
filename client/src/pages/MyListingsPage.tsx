@@ -1,223 +1,308 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Package,
-  PlusCircle,
-  Clock,
-  Trash2,
-  Eye,
-  Layers,
-  ArrowUpRight,
-  Sparkles,
+  Plus, Search, ChevronDown, Edit, Eye, AlertTriangle, Store,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../lib/api';
 import type { Listing } from '../types';
-import { UrgencyBadge, StatusBadge } from '../components/StatusBadges';
+
+type FilterTab = 'all' | 'active' | 'reserved' | 'sold' | 'attention';
+
+const TAB_LABELS: { key: FilterTab; label: string }[] = [
+  { key: 'all',       label: 'All' },
+  { key: 'active',    label: 'Active' },
+  { key: 'reserved',  label: 'Reserved' },
+  { key: 'sold',      label: 'Sold' },
+  { key: 'attention', label: 'Needs Attention' },
+];
+
+const statusStyle = (status: string): React.CSSProperties => {
+  switch (status) {
+    case 'active':   return { color: '#6bd8cb', background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.2)' };
+    case 'reserved': return { color: '#ddb7ff', background: 'rgba(221,183,255,0.1)', border: '1px solid rgba(221,183,255,0.2)' };
+    case 'sold':     return { color: '#bcc9c6', background: 'rgba(188,201,198,0.1)', border: '1px solid rgba(188,201,198,0.2)' };
+    default:         return { color: '#f6b351', background: 'rgba(246,179,81,0.1)',   border: '1px solid rgba(246,179,81,0.2)' };
+  }
+};
 
 export const MyListingsPage: React.FC = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'active' | 'other'>('all');
+  const [tab, setTab] = useState<FilterTab>('all');
+  const [search, setSearch] = useState('');
+  const [sortOpen, setSortOpen] = useState(false);
 
   const fetchListings = () => {
     setLoading(true);
-    api
-      .get('/listings/my/all')
-      .then((res) => {
-        setListings(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Failed to load my listings', err);
-        setLoading(false);
-      });
+    api.get('/listings/my/all')
+      .then(res => { setListings(res.data); setLoading(false); })
+      .catch(() => setLoading(false));
   };
 
-  useEffect(() => {
-    fetchListings();
-  }, []);
+  useEffect(() => { fetchListings(); }, []);
 
   const handleDeactivate = async (id: string) => {
-    if (!confirm('Are you sure you want to deactivate this listing?')) return;
-    try {
-      await api.delete(`/listings/${id}`);
-      fetchListings();
-    } catch (err) {
-      console.error('Failed to deactivate listing', err);
-    }
+    if (!confirm('Deactivate this listing?')) return;
+    try { await api.delete(`/listings/${id}`); fetchListings(); } catch { /* noop */ }
   };
 
-  const filteredListings = listings.filter((l) => {
-    if (filter === 'active') return l.status === 'active' && l.active;
-    if (filter === 'other') return l.status !== 'active' || !l.active;
+  const activeCount   = listings.filter(l => l.status === 'active' && l.active).length;
+  const reservedCount = listings.filter(l => l.status === 'reserved').length;
+  const soldCount     = listings.filter(l => l.status === 'sold').length;
+  const totalValue    = listings.reduce((s, l) => s + l.quantity * l.pricePerUnit, 0);
+
+  const expiringCount = listings.filter(l => {
+    if (!l.expiryDate) return false;
+    const days = Math.ceil((new Date(l.expiryDate).getTime() - Date.now()) / 86400000);
+    return days >= 0 && days <= 7;
+  }).length;
+
+  const filtered = listings.filter(l => {
+    if (search && !l.title.toLowerCase().includes(search.toLowerCase())) return false;
+    if (tab === 'active')    return l.status === 'active' && l.active;
+    if (tab === 'reserved')  return l.status === 'reserved';
+    if (tab === 'sold')      return l.status === 'sold';
+    if (tab === 'attention') {
+      const days = l.expiryDate ? Math.ceil((new Date(l.expiryDate).getTime() - Date.now()) / 86400000) : 999;
+      return days <= 7 || l.status === 'reserved';
+    }
     return true;
   });
 
-  const activeCount = listings.filter((l) => l.status === 'active' && l.active).length;
-  const reservedCount = listings.filter((l) => l.status === 'reserved').length;
-  const soldCount = listings.filter((l) => l.status === 'sold').length;
+  const S = {
+    label: { fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#879391' } as React.CSSProperties,
+  };
 
   return (
-    <div className="space-y-6 pb-16 max-w-6xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5">
-            <Package className="text-purple-400" />
-            My Surplus Listings
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Track your surplus inventory, manage active listings, and monitor reservations from one place.
-          </p>
-        </div>
+    <div style={{ background: '#131313', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px 80px' }}>
 
-        <Link
-          to="/create-listing"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-navy-950 font-bold text-sm rounded-xl shadow-lg shadow-purple-500/20 transition-all"
-        >
-          <PlusCircle size={18} />
-          Post New Lot
-        </Link>
-      </div>
-
-      {/* Metrics Summary Row */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-[#1A1330] border border-[#2B1F4D] p-4 rounded-2xl">
-          <span className="text-[11px] text-slate-400 uppercase font-semibold block">Active Marketplace Lots</span>
-          <p className="text-2xl font-extrabold text-purple-400 mt-1">{activeCount}</p>
-        </div>
-        <div className="bg-[#1A1330] border border-[#2B1F4D] p-4 rounded-2xl">
-          <span className="text-[11px] text-slate-400 uppercase font-semibold block">Under Reservation</span>
-          <p className="text-2xl font-extrabold text-sky-400 mt-1">{reservedCount}</p>
-        </div>
-        <div className="bg-[#1A1330] border border-[#2B1F4D] p-4 rounded-2xl">
-          <span className="text-[11px] text-slate-400 uppercase font-semibold block">Completed / Liquidated</span>
-          <p className="text-2xl font-extrabold text-emerald-400 mt-1">{soldCount}</p>
-        </div>
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#2B1F4D]/60 pb-3">
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-            filter === 'all'
-              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          All Lots ({listings.length})
-        </button>
-        <button
-          onClick={() => setFilter('active')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-            filter === 'active'
-              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          Active ({activeCount})
-        </button>
-        <button
-          onClick={() => setFilter('other')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-            filter === 'other'
-              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          Reserved / Sold / Inactive
-        </button>
-      </div>
-
-      {/* Listings Table / Cards */}
-      {loading ? (
-        <div className="py-16 flex justify-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-400"></div>
-        </div>
-      ) : filteredListings.length === 0 ? (
-        <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-12 text-center max-w-md mx-auto space-y-3">
-          <Package size={36} className="text-purple-400/50 mx-auto" />
-          <h3 className="text-lg font-bold text-white">No listings found</h3>
-          <p className="text-xs text-slate-400">
-            You don't have any surplus listings in this view.
-          </p>
+        {/* ── Page Header ── */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32, color: '#e5e2e1', marginBottom: 8, letterSpacing: '-0.01em' }}>
+              My Stock
+            </h1>
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6' }}>
+              Manage your listed inventory, track reservations and see what needs attention.
+            </p>
+          </div>
           <Link
             to="/create-listing"
-            className="inline-block px-4 py-2 bg-purple-500 text-navy-950 font-bold text-xs rounded-xl mt-2"
+            className="stitch-btn-primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 20px', textDecoration: 'none', borderRadius: 4 }}
           >
-            Post Your First Lot
+            <Plus size={16} /> List New Stock
           </Link>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredListings.map((listing) => (
-            <div
-              key={listing.id}
-              className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4"
-            >
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                    {listing.category}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <UrgencyBadge urgency={listing.urgency} />
-                    <StatusBadge status={listing.status} />
-                  </div>
-                </div>
 
-                <h3 className="font-bold text-white text-base line-clamp-2">
-                  {listing.title}
-                </h3>
+        <hr style={{ border: 'none', borderTop: '1px solid #3d4947', marginBottom: 28 }} />
 
-                <div className="grid grid-cols-2 gap-2 bg-[#0F0B1A]/60 p-3 rounded-xl border border-[#2B1F4D]/40 text-xs my-3">
-                  <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-semibold">Available Lot</span>
-                    <span className="font-bold text-white">{listing.quantity} {listing.unit}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-semibold">Unit Price</span>
-                    <span className="font-bold text-emerald-400">₹{listing.pricePerUnit}/{listing.unit}</span>
-                  </div>
-                </div>
-
-                <div className="text-xs text-slate-400 space-y-1">
-                  <div className="flex justify-between">
-                    <span>Total Value:</span>
-                    <span className="font-semibold text-slate-200">
-                      ₹{(listing.quantity * listing.pricePerUnit).toLocaleString('en-IN')}
-                    </span>
-                  </div>
-                  {listing._count?.reservations !== undefined && (
-                    <div className="flex justify-between text-pink-300">
-                      <span>Buyer Inquiries / Reservations:</span>
-                      <span className="font-bold">{listing._count.reservations}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-[#2B1F4D]/60 flex items-center justify-between gap-2">
-                <Link
-                  to={`/listings/${listing.id}`}
-                  className="flex-1 py-2 px-3 bg-[#2B1F4D] hover:bg-[#2B1F4D] text-slate-200 text-xs font-semibold rounded-xl text-center flex items-center justify-center gap-1 transition-colors"
-                >
-                  <Eye size={14} /> View Details
-                </Link>
-                {listing.status === 'active' && listing.active && (
-                  <button
-                    onClick={() => handleDeactivate(listing.id)}
-                    className="p-2 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-xl transition-colors"
-                    title="Deactivate Lot"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
+        {/* ── Stats row ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 1, background: '#3d4947', borderRadius: 8, overflow: 'hidden', marginBottom: 28 }}>
+          {[
+            { label: 'Active Listings',    value: activeCount,                               color: '#6bd8cb' },
+            { label: 'Reserved',           value: reservedCount,                             color: '#ddb7ff' },
+            { label: 'Sold / Completed',   value: soldCount,                                 color: '#bcc9c6' },
+            { label: 'Total Listed Value', value: `₹${totalValue.toLocaleString('en-IN')}`, color: '#6bd8cb' },
+          ].map(stat => (
+            <div key={stat.label} style={{ background: '#1c1b1b', padding: '20px 20px 24px' }}>
+              <p style={S.label}>{stat.label}</p>
+              <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 28, color: stat.color, marginTop: 8 }}>
+                {stat.value}
+              </p>
             </div>
           ))}
+
+          {/* Needs Attention cell */}
+          {expiringCount > 0 && (
+            <div style={{ background: '#1c1b1b', padding: '20px 20px 24px', gridColumn: 'span 1' }}>
+              <p style={{ ...S.label, color: '#f6b351', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <AlertTriangle size={10} /> Needs Attention
+              </p>
+              <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#bcc9c6' }}>{expiringCount} listings expiring soon</span>
+                  <button style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#6bd8cb', letterSpacing: '0.05em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>Review</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* ── Filter Tabs + Search ── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #3d4947' }}>
+            {TAB_LABELS.map(t => {
+              const active = tab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  style={{
+                    padding: '10px 16px',
+                    fontFamily: 'Work Sans, sans-serif',
+                    fontWeight: active ? 600 : 400,
+                    fontSize: t.key === 'attention' ? 11 : 13,
+                    color: active ? '#6bd8cb' : (t.key === 'attention' ? '#f6b351' : '#bcc9c6'),
+                    background: 'transparent', border: 'none',
+                    borderBottom: active ? '2px solid #6bd8cb' : '2px solid transparent',
+                    cursor: 'pointer', marginBottom: -1,
+                    textTransform: t.key === 'attention' ? 'uppercase' as const : 'none' as const,
+                    letterSpacing: t.key === 'attention' ? '0.04em' : 0,
+                  } as React.CSSProperties}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search + sort */}
+          <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 4, padding: '0 12px' }}>
+              <Search size={14} color="#879391" />
+              <input
+                type="text" placeholder="Search my listings"
+                value={search} onChange={e => setSearch(e.target.value)}
+                style={{ background: 'transparent', border: 'none', outline: 'none', padding: '9px 10px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1', width: 180 }}
+              />
+            </div>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setSortOpen(v => !v)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: '#1c1b1b', border: '1px solid #3d4947',
+                  borderRadius: 4, padding: '9px 14px',
+                  fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#bcc9c6', cursor: 'pointer',
+                }}
+              >
+                Expiring soon <ChevronDown size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Listing Rows ── */}
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, height: 100 }} />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: '60px 24px', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, color: '#e5e2e1', marginBottom: 8 }}>No listings here</p>
+            <Link to="/create-listing" className="stitch-btn-primary" style={{ display: 'inline-block', padding: '10px 24px', marginTop: 12, textDecoration: 'none', borderRadius: 4 }}>
+              + List New Stock
+            </Link>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: '#3d4947', borderRadius: 8, overflow: 'hidden' }}>
+            {filtered.map((listing, i) => {
+              const days = listing.expiryDate
+                ? Math.ceil((new Date(listing.expiryDate).getTime() - Date.now()) / 86400000)
+                : null;
+              return (
+                <motion.div
+                  key={listing.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.03 }}
+                  style={{
+                    background: '#1c1b1b',
+                    padding: '16px 20px',
+                    display: 'flex', alignItems: 'center', gap: 16,
+                  }}
+                >
+                  {/* Thumbnail */}
+                  <div style={{
+                    width: 70, height: 70, borderRadius: 6,
+                    background: '#2a2a2a', overflow: 'hidden', flexShrink: 0,
+                    border: '1px solid #3d4947', position: 'relative',
+                  }}>
+                    {listing.imageUrl ? (
+                      <img src={listing.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Store size={22} color="#3d4947" />
+                      </div>
+                    )}
+                    {/* Status overlay */}
+                    <div style={{
+                      position: 'absolute', top: 4, left: 4,
+                      padding: '2px 6px', borderRadius: 3,
+                      fontFamily: 'Work Sans, sans-serif', fontSize: 9, fontWeight: 700,
+                      letterSpacing: '0.06em', textTransform: 'uppercase',
+                      ...statusStyle(listing.status),
+                    }}>
+                      {listing.status}
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#879391', marginBottom: 4 }}>
+                      {listing.category}
+                    </p>
+                    <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 15, color: '#e5e2e1', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {listing.title}
+                    </h3>
+                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391' }}>
+                      {listing.quantity} {listing.unit} remaining
+                    </p>
+                  </div>
+
+                  {/* Value */}
+                  <div style={{ textAlign: 'right', minWidth: 120 }}>
+                    <p style={S.label}>Value</p>
+                    <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: '#e5e2e1', marginTop: 4 }}>
+                      ₹{(listing.quantity * listing.pricePerUnit).toLocaleString('en-IN')}
+                    </p>
+                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391' }}>
+                      (₹{listing.pricePerUnit}/{listing.unit})
+                    </p>
+                  </div>
+
+                  {/* Status + days */}
+                  <div style={{ minWidth: 140 }}>
+                    <p style={S.label}>Status</p>
+                    {days !== null && (
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: days <= 7 ? '#f6b351' : '#bcc9c6', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                        {days <= 7 && <AlertTriangle size={12} />}
+                        {days <= 0 ? 'Expired' : `${days} days left`}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                    <Link
+                      to={`/listings/${listing.id}`}
+                      className="stitch-btn-ghost"
+                      style={{ padding: '7px 14px', fontSize: 12, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}
+                    >
+                      <Eye size={13} /> View Listing
+                    </Link>
+                    {listing.status !== 'sold' && (
+                      <Link
+                        to={`/create-listing?edit=${listing.id}`}
+                        className="stitch-btn-primary"
+                        style={{ padding: '7px 14px', fontSize: 12, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}
+                      >
+                        <Edit size={13} /> Edit
+                      </Link>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

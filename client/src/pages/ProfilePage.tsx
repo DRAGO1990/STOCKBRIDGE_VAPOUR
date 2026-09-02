@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import {
-  User as UserIcon,
-  Building2,
-  Phone,
-  Mail,
-  MapPin,
-  ShieldCheck,
-  Star,
-  Save,
-  CheckCircle,
-  Clock,
-  Sparkles,
+  Building2, Phone, Mail, MapPin, ShieldCheck, Star, Save, CheckCircle, Clock
 } from 'lucide-react';
 import api from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
 import type { User, Rating } from '../types';
 import { RatingStars } from '../components/RatingStars';
+
+const labelStyle: React.CSSProperties = {
+  fontFamily: 'Work Sans, sans-serif',
+  fontSize: 11, fontWeight: 600,
+  letterSpacing: '0.06em', textTransform: 'uppercase',
+  color: '#879391', marginBottom: 8, display: 'block',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%', boxSizing: 'border-box',
+  background: '#2a2a2a', border: '1px solid #3d4947',
+  borderRadius: 4, padding: '11px 14px',
+  fontFamily: 'Work Sans, sans-serif',
+  fontSize: 14, color: '#e5e2e1', outline: 'none',
+};
 
 export const ProfilePage: React.FC = () => {
   const { user, updateUser } = useAuthStore();
@@ -52,8 +57,6 @@ export const ProfilePage: React.FC = () => {
           lng: u.lng || 72.877,
         });
         updateUser(u);
-
-        // Fetch ratings
         return api.get(`/ratings/user/${u.id}`);
       })
       .then((res) => {
@@ -79,7 +82,7 @@ export const ProfilePage: React.FC = () => {
         lng: Number(formData.lng),
       });
       updateUser(res.data);
-      setSuccessMsg('Profile and location settings updated successfully!');
+      setSuccessMsg('Profile and location settings updated successfully.');
     } catch (err: any) {
       console.error('Update profile error', err);
       setErrorMsg(err.response?.data?.error || 'Failed to update profile.');
@@ -91,188 +94,203 @@ export const ProfilePage: React.FC = () => {
   if (!user) return null;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-16">
-      {/* Header Info */}
-      <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-400 p-0.5 shadow-lg shadow-purple-500/20">
-            <div className="w-full h-full bg-[#0F0B1A] rounded-[14px] flex items-center justify-center text-purple-400 text-2xl font-black">
-              {user.name.charAt(0).toUpperCase()}
+    <div style={{ background: '#131313', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '40px 24px 80px' }}>
+        
+        {/* ── Merchant Header Card ── */}
+        <div style={{
+          background: '#1c1b1b', border: '1px solid #3d4947',
+          borderRadius: 8, padding: '24px 28px', marginBottom: 28,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: 16,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 28,
+              background: '#29a195', color: '#003732',
+              fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 24,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              {(user.businessName || user.name).charAt(0).toUpperCase()}
             </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-extrabold text-white">{user.businessName || user.name}</h1>
-              {user.verified && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/40">
-                  <ShieldCheck size={12} /> Verified Merchant
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 22, color: '#e5e2e1', margin: 0 }}>
+                  {user.businessName || user.name}
+                </h1>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.25)',
+                  borderRadius: 4, padding: '2px 8px',
+                  fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                  color: '#6bd8cb', textTransform: 'uppercase', letterSpacing: '0.04em',
+                }}>
+                  <ShieldCheck size={11} /> Verified
                 </span>
-              )}
+              </div>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', margin: 0 }}>
+                {user.email} · Registered Merchant
+              </p>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">{user.email}</p>
+          </div>
+
+          <div style={{ textAlign: 'right' }}>
+            <span style={labelStyle}>Trust Score</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <RatingStars rating={user.rating || 5} size={16} />
+              <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 16, fontWeight: 700, color: '#f6b351' }}>
+                {(user.rating || 5).toFixed(1)}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-[#0F0B1A]/60 px-5 py-3 rounded-2xl border border-[#2B1F4D]/50 text-right sm:text-right w-full sm:w-auto">
-          <span className="text-[10px] text-slate-400 uppercase font-semibold block">Merchant Trust Score</span>
-          <div className="flex items-center gap-2 mt-0.5">
-            <RatingStars rating={user.rating || 5} size={18} />
-            <span className="text-xs text-slate-400">({ratings.length} reviews)</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Profile Settings Form */}
-        <div className="lg:col-span-2">
-          <form
-            onSubmit={handleSubmit}
-            className="bg-[#1A1330] border border-[#2B1F4D] rounded-3xl p-6 sm:p-8 shadow-xl space-y-5"
-          >
-            <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Building2 size={18} className="text-purple-400" />
-              Business & Location Settings
+        {/* ── Grid: Edit Form & Reviews ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+          
+          {/* Form */}
+          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: '28px' }}>
+            <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 18, color: '#e5e2e1', margin: '0 0 20px' }}>
+              Merchant Profile & Location
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Contact Person Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Business / Firm Name</label>
-                <input
-                  type="text"
-                  value={formData.businessName}
-                  onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Contact Phone</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="e.g. 9876543210"
-                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Account Email (Fixed)</label>
-                <input
-                  type="email"
-                  disabled
-                  value={user.email}
-                  className="w-full bg-[#0F0B1A]/50 border border-[#2B1F4D]/40 rounded-xl px-4 py-2 text-sm text-slate-400 cursor-not-allowed"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Warehouse / Store Physical Address</label>
-              <textarea
-                rows={2}
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="e.g. Unit 4, Wholesale Market Road, Andheri West, Mumbai"
-                className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl p-3 text-sm text-white focus:outline-none focus:border-purple-400 transition-colors"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[#2B1F4D]/50">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">GPS Latitude</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={formData.lat}
-                  onChange={(e) => setFormData({ ...formData, lat: Number(e.target.value) })}
-                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white font-mono focus:outline-none focus:border-purple-400 transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">GPS Longitude</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={formData.lng}
-                  onChange={(e) => setFormData({ ...formData, lng: Number(e.target.value) })}
-                  className="w-full bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2 text-sm text-white font-mono focus:outline-none focus:border-purple-400 transition-colors"
-                />
-              </div>
-            </div>
-
             {successMsg && (
-              <p className="text-xs text-emerald-300 bg-emerald-950/40 p-3 rounded-xl border border-emerald-800/60 flex items-center gap-1.5">
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px',
+                background: 'rgba(107,216,203,0.08)', border: '1px solid rgba(107,216,203,0.25)',
+                borderRadius: 4, color: '#6bd8cb', fontFamily: 'Work Sans, sans-serif',
+                fontSize: 13, marginBottom: 20,
+              }}>
                 <CheckCircle size={15} /> {successMsg}
-              </p>
+              </div>
             )}
+
             {errorMsg && (
-              <p className="text-xs text-rose-300 bg-rose-950/40 p-3 rounded-xl border border-rose-800/60">
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px',
+                background: 'rgba(255,180,171,0.08)', border: '1px solid rgba(255,180,171,0.25)',
+                borderRadius: 4, color: '#ffb4ab', fontFamily: 'Work Sans, sans-serif',
+                fontSize: 13, marginBottom: 20,
+              }}>
                 {errorMsg}
-              </p>
+              </div>
             )}
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full py-3 px-4 bg-purple-500 hover:bg-purple-400 disabled:opacity-50 text-navy-950 font-bold text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
-            >
-              <Save size={16} />
-              {saving ? 'Saving...' : 'Save Profile Changes'}
-            </button>
-          </form>
-        </div>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div>
+                <label style={labelStyle}>Business / Firm Name</label>
+                <input
+                  type="text" value={formData.businessName}
+                  onChange={e => setFormData({ ...formData, businessName: e.target.value })}
+                  placeholder="e.g. Sharma Kirana & Wholesale"
+                  style={inputStyle}
+                />
+              </div>
 
-        {/* Ratings & Feedback List */}
-        <div className="space-y-4">
-          <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <Star size={18} className="text-amber-400 fill-amber-400" />
-            Trade Reviews ({ratings.length})
-          </h2>
-
-          {ratings.length === 0 ? (
-            <div className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-6 text-center text-xs text-slate-400">
-              No ratings recorded yet. Complete handovers to earn ratings.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {ratings.map((r) => (
-                <div
-                  key={r.id}
-                  className="bg-[#1A1330] border border-[#2B1F4D] rounded-2xl p-4 space-y-2 shadow-md"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white">
-                      {r.fromUser?.businessName || r.fromUser?.name || 'Verified Merchant'}
-                    </span>
-                    <RatingStars rating={r.score} size={12} />
-                  </div>
-                  {r.comment && (
-                    <p className="text-xs text-slate-300 italic bg-[#0F0B1A]/50 p-2.5 rounded-xl border border-[#2B1F4D]/30">
-                      "{r.comment}"
-                    </p>
-                  )}
-                  <span className="text-[10px] text-slate-500 block text-right">
-                    {new Date(r.createdAt).toLocaleDateString()}
-                  </span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div>
+                  <label style={labelStyle}>Contact Person</label>
+                  <input
+                    type="text" required value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    style={inputStyle}
+                  />
                 </div>
-              ))}
-            </div>
-          )}
+                <div>
+                  <label style={labelStyle}>Phone Number</label>
+                  <input
+                    type="tel" value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+91 98765 43210"
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Physical Warehouse / Store Address</label>
+                <textarea
+                  rows={3} value={formData.address}
+                  onChange={e => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Street, Landmark, Market Area, City, Pin"
+                  style={{ ...inputStyle, resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div>
+                  <label style={labelStyle}>Latitude (GPS)</label>
+                  <input
+                    type="number" step="any" value={formData.lat}
+                    onChange={e => setFormData({ ...formData, lat: Number(e.target.value) })}
+                    style={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Longitude (GPS)</label>
+                  <input
+                    type="number" step="any" value={formData.lng}
+                    onChange={e => setFormData({ ...formData, lng: Number(e.target.value) })}
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+
+              <div style={{ paddingTop: 8 }}>
+                <button
+                  type="submit" disabled={saving}
+                  className="stitch-btn-primary"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    padding: '12px 24px', fontSize: 13, borderRadius: 4,
+                    opacity: saving ? 0.6 : 1,
+                  }}
+                >
+                  <Save size={15} />
+                  {saving ? 'Saving...' : 'Save Profile Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Feedback & Ratings Column */}
+          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: 24 }}>
+            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', margin: '0 0 16px' }}>
+              Counterparty Reviews ({ratings.length})
+            </h3>
+
+            {loading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
+                <div style={{ width: 24, height: 24, border: '2px solid #3d4947', borderTopColor: '#6bd8cb', borderRadius: '50%' }} className="animate-stitch-spin" />
+              </div>
+            ) : ratings.length === 0 ? (
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', margin: 0 }}>
+                No transaction reviews yet. Reviews will appear here once counterparties complete trades.
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {ratings.map((r) => (
+                  <div key={r.id} style={{ background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 4, padding: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 12, fontWeight: 600, color: '#e5e2e1' }}>
+                        {r.fromUser?.businessName || r.fromUser?.name || 'Verified Merchant'}
+                      </span>
+                      <RatingStars rating={r.score} size={12} />
+                    </div>
+                    {r.comment && (
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#bcc9c6', margin: '0 0 4px', fontStyle: 'italic' }}>
+                        "{r.comment}"
+                      </p>
+                    )}
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, color: '#879391' }}>
+                      {new Date(r.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

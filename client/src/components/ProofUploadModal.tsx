@@ -57,53 +57,84 @@ export const ProofUploadModal: React.FC<ProofUploadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-[#1A1330] border border-[#2B1F4D] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#2B1F4D] flex items-center justify-between bg-[#1A1330]">
-          <div className="flex items-center gap-2 text-purple-400">
-            <CheckCircle2 size={20} />
-            <h3 className="font-semibold text-white">Complete Handover</h3>
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 999,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
+      padding: 16,
+    }}>
+      <div style={{
+        background: '#1c1b1b', border: '1px solid #3d4947',
+        borderRadius: 8, width: '100%', maxWidth: 440,
+        overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '16px 20px', borderBottom: '1px solid #3d4947',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: '#1c1b1b',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <CheckCircle2 size={18} color="#6bd8cb" />
+            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 15, color: '#e5e2e1', margin: 0 }}>
+              Complete Handover
+            </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white transition-colors"
+            style={{
+              background: 'transparent', border: 'none', color: '#879391',
+              cursor: 'pointer', padding: 6, borderRadius: 4, display: 'flex',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#e5e2e1')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#879391')}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          <p className="text-sm text-slate-300">
-            Confirm goods receipt or delivery. You can optionally attach a proof photograph (invoice, receipt, or goods photo) for records.
+        {/* Form */}
+        <form onSubmit={handleSubmit} style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#bcc9c6', lineHeight: 1.5, margin: 0 }}>
+            Confirm goods receipt or physical delivery. You can optionally attach proof (invoice, signed receipt, or goods photo).
           </p>
 
-          <div className="border-2 border-dashed border-[#2B1F4D] hover:border-purple-400/60 transition-colors rounded-xl p-6 flex flex-col items-center justify-center text-center bg-[#0F0B1A]/40 relative cursor-pointer group">
+          <div style={{
+            border: '2px dashed #3d4947', borderRadius: 6, padding: '24px 16px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            textAlign: 'center', background: '#131313', position: 'relative', cursor: 'pointer',
+          }}>
             <input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
             />
             {previewUrl ? (
-              <div className="space-y-2">
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                 <img
                   src={previewUrl}
                   alt="Proof Preview"
-                  className="max-h-40 rounded-lg object-contain mx-auto border border-[#2B1F4D]"
+                  style={{ maxHeight: 150, borderRadius: 4, objectFit: 'contain', border: '1px solid #3d4947' }}
                 />
-                <p className="text-xs text-purple-300 flex items-center justify-center gap-1">
-                  <FileImage size={14} /> Click or drag to change image
+                <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#6bd8cb', display: 'flex', alignItems: 'center', gap: 4, margin: 0 }}>
+                  <FileImage size={13} /> Click to change image
                 </p>
               </div>
             ) : (
               <>
-                <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 mb-2 group-hover:scale-110 transition-transform">
-                  <Upload size={22} />
+                <div style={{
+                  width: 44, height: 44, borderRadius: '50%',
+                  background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.25)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#6bd8cb', marginBottom: 12,
+                }}>
+                  <Upload size={20} />
                 </div>
-                <p className="text-sm font-medium text-slate-200">
+                <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600, color: '#e5e2e1', margin: 0 }}>
                   Upload Handover Proof (Optional)
                 </p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391', margin: '4px 0 0' }}>
                   PNG, JPG, WebP up to 10MB
                 </p>
               </>
@@ -111,23 +142,33 @@ export const ProofUploadModal: React.FC<ProofUploadModalProps> = ({
           </div>
 
           {error && (
-            <p className="text-xs text-rose-400 bg-rose-950/40 p-2.5 rounded-lg border border-rose-800/60">
+            <p style={{
+              fontFamily: 'Work Sans, sans-serif', fontSize: 12,
+              color: '#ffb4ab', background: 'rgba(255,180,171,0.08)',
+              border: '1px solid rgba(255,180,171,0.2)', borderRadius: 4,
+              padding: '10px 12px', margin: 0,
+            }}>
               {error}
             </p>
           )}
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 4 }}>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-xl transition-colors"
+              style={{
+                padding: '9px 18px', background: 'transparent', border: '1px solid #3d4947',
+                borderRadius: 4, color: '#bcc9c6', fontFamily: 'Work Sans, sans-serif',
+                fontSize: 13, fontWeight: 500, cursor: 'pointer',
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 text-sm font-semibold text-navy-950 bg-purple-400 hover:bg-purple-300 disabled:opacity-50 rounded-xl transition-colors cursor-pointer shadow-lg shadow-purple-400/20"
+              className="stitch-btn-primary"
+              style={{ padding: '9px 20px', borderRadius: 4, opacity: loading ? 0.6 : 1 }}
             >
               {loading ? 'Confirming...' : 'Mark Completed'}
             </button>

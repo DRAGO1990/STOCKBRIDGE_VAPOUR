@@ -33,7 +33,6 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     setLoading(true);
     setError('');
 
-    // Fetch initial chat history
     api
       .get(`/messages/reservation/${reservationId}`)
       .then((res) => {
@@ -46,7 +45,6 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         setLoading(false);
       });
 
-    // Connect socket and join room
     const socket = connectSocket();
     socket.emit('join-reservation', reservationId);
 
@@ -84,43 +82,82 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-[#1A1330] border border-[#2B1F4D] w-full max-w-lg rounded-2xl shadow-2xl flex flex-col h-[550px] overflow-hidden">
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 999,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
+      padding: 16,
+    }}>
+      <div style={{
+        background: '#1c1b1b', border: '1px solid #3d4947',
+        borderRadius: 8, width: '100%', maxWidth: 520, height: 560,
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+      }}>
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#2B1F4D] flex items-center justify-between bg-[#1A1330]">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
+        <div style={{
+          padding: '16px 20px', borderBottom: '1px solid #3d4947',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: '#1c1b1b',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 4,
+              background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#6bd8cb',
+            }}>
               <MessageSquare size={18} />
             </div>
             <div>
-              <h3 className="font-semibold text-white text-sm">{title}</h3>
-              <p className="text-xs text-slate-400">Chatting with {counterpartyName}</p>
+              <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 14, color: '#e5e2e1', margin: 0 }}>
+                {title}
+              </h3>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', margin: '2px 0 0' }}>
+                Chatting with <span style={{ color: '#bcc9c6', fontWeight: 500 }}>{counterpartyName}</span>
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-slate-800/60 text-slate-400 hover:text-white transition-colors"
+            style={{
+              background: 'transparent', border: 'none', color: '#879391',
+              cursor: 'pointer', padding: 6, borderRadius: 4, display: 'flex',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#e5e2e1')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#879391')}
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Messages Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#0F0B1A]/50">
+        <div style={{
+          flex: 1, overflowY: 'auto', padding: 20,
+          display: 'flex', flexDirection: 'column', gap: 12,
+          background: '#131313',
+        }}>
           {loading ? (
-            <div className="h-full flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-400"></div>
+            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 28, height: 28, border: '2px solid #3d4947', borderTopColor: '#6bd8cb', borderRadius: '50%' }} className="animate-stitch-spin" />
             </div>
           ) : error ? (
-            <div className="flex items-center gap-2 p-3 text-sm text-rose-300 bg-rose-950/40 border border-rose-800 rounded-lg">
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8, padding: 12,
+              fontFamily: 'Work Sans, sans-serif', fontSize: 13,
+              color: '#ffb4ab', background: 'rgba(255,180,171,0.08)',
+              border: '1px solid rgba(255,180,171,0.2)', borderRadius: 4,
+            }}>
               <AlertCircle size={16} />
               <span>{error}</span>
             </div>
           ) : messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-              <Bot size={36} className="text-purple-400/60 mb-2" />
-              <p className="text-sm font-medium text-slate-300">No messages yet</p>
-              <p className="text-xs text-slate-500 max-w-xs mt-1">
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 24 }}>
+              <Bot size={36} color="#3d4947" style={{ marginBottom: 12 }} />
+              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 15, fontWeight: 600, color: '#e5e2e1', marginBottom: 4 }}>
+                No messages yet
+              </p>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', maxWidth: 280 }}>
                 Coordinate pickup time, logistics, payment terms, or final verification here in real-time.
               </p>
             </div>
@@ -135,19 +172,34 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               return (
                 <div
                   key={msg.id}
-                  className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}
+                  style={{
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: isMine ? 'flex-end' : 'flex-start',
+                  }}
                 >
-                  <span className="text-[10px] text-slate-400 mb-1 px-1">
+                  <span style={{
+                    fontFamily: 'Work Sans, sans-serif', fontSize: 11,
+                    color: '#879391', marginBottom: 4, padding: '0 4px',
+                  }}>
                     {isMine ? 'You' : msg.sender?.name || 'Counterparty'} • {formattedTime}
                   </span>
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-md ${
-                      isMine
-                        ? 'bg-purple-600 text-white rounded-br-none'
-                        : 'bg-[#2B1F4D] text-slate-100 rounded-bl-none border border-[#2B1F4D]'
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                  <div style={{
+                    maxWidth: '80%', padding: '10px 14px', borderRadius: 6,
+                    fontFamily: 'Work Sans, sans-serif', fontSize: 13, lineHeight: 1.5,
+                    wordBreak: 'break-word',
+                    ...(isMine
+                      ? {
+                          background: '#003732',
+                          color: '#6bd8cb',
+                          border: '1px solid rgba(107,216,203,0.3)',
+                        }
+                      : {
+                          background: '#2a2a2a',
+                          color: '#e5e2e1',
+                          border: '1px solid #3d4947',
+                        }),
+                  }}>
+                    {msg.text}
                   </div>
                 </div>
               );
@@ -159,21 +211,35 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         {/* Input Footer */}
         <form
           onSubmit={handleSendMessage}
-          className="p-3 border-t border-[#2B1F4D] bg-[#1A1330] flex items-center gap-2"
+          style={{
+            padding: '12px 16px', borderTop: '1px solid #3d4947',
+            background: '#1c1b1b', display: 'flex', alignItems: 'center', gap: 10,
+          }}
         >
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Type your message (negotiate pickup, details)..."
-            className="flex-1 bg-[#0F0B1A] border border-[#2B1F4D] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition-colors"
+            style={{
+              flex: 1, background: '#2a2a2a', border: '1px solid #3d4947',
+              borderRadius: 4, padding: '10px 14px',
+              fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1',
+              outline: 'none',
+            }}
           />
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className="p-2.5 bg-purple-500 hover:bg-purple-400 disabled:opacity-40 disabled:hover:bg-purple-500 text-navy-950 font-bold rounded-xl transition-all shadow-md cursor-pointer disabled:cursor-not-allowed"
+            className="stitch-btn-primary"
+            style={{
+              padding: '10px 16px', borderRadius: 4,
+              opacity: !inputText.trim() ? 0.4 : 1,
+              cursor: !inputText.trim() ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
           >
-            <Send size={18} />
+            <Send size={15} />
           </button>
         </form>
       </div>

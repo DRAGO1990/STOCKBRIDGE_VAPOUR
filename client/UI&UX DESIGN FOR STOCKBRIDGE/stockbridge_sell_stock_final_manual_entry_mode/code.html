@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StockBridge - Post Surplus Voice Listing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&amp;family=Work+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#353534",
+                        "inverse-on-surface": "#313030",
+                        "on-surface-variant": "#bcc9c6",
+                        "on-primary-fixed-variant": "#005049",
+                        "on-secondary-container": "#d6a9ff",
+                        "outline": "#879391",
+                        "surface-container-high": "#2a2a2a",
+                        "inverse-primary": "#006a61",
+                        "inverse-surface": "#e5e2e1",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container-highest": "#353534",
+                        "on-secondary-fixed": "#2c0051",
+                        "on-surface": "#e5e2e1",
+                        "on-primary": "#003732",
+                        "outline-variant": "#3d4947",
+                        "on-secondary-fixed-variant": "#6900b3",
+                        "on-error": "#690005",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-tertiary-fixed": "#191c1e",
+                        "secondary-fixed-dim": "#ddb7ff",
+                        "background": "#131313",
+                        "tertiary-fixed": "#e1e2e4",
+                        "on-primary-fixed": "#00201d",
+                        "primary-container": "#29a195",
+                        "surface-bright": "#393939",
+                        "surface-tint": "#6bd8cb",
+                        "secondary-container": "#6f00be",
+                        "tertiary-fixed-dim": "#c5c6c8",
+                        "on-tertiary-container": "#272a2c",
+                        "primary-fixed": "#89f5e7",
+                        "tertiary-container": "#8f9193",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#00302b",
+                        "on-background": "#e5e2e1",
+                        "secondary": "#ddb7ff",
+                        "on-error-container": "#ffdad6",
+                        "primary": "#6bd8cb",
+                        "secondary-fixed": "#f0dbff",
+                        "surface": "#131313",
+                        "on-tertiary": "#2e3132",
+                        "surface-container": "#201f1f",
+                        "primary-fixed-dim": "#6bd8cb",
+                        "tertiary": "#c5c6c8",
+                        "surface-dim": "#131313",
+                        "on-secondary": "#490080",
+                        "surface-container-low": "#1c1b1b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "container-margin": "24px",
+                        "section-gap": "64px",
+                        "stack-sm": "8px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Sora"],
+                        "headline-lg-mobile": ["Sora"],
+                        "body-sm": ["Work Sans"],
+                        "headline-lg": ["Sora"],
+                        "label-md": ["Work Sans"],
+                        "body-md": ["Work Sans"],
+                        "display-lg": ["Sora"],
+                        "body-lg": ["Work Sans"],
+                        "headline-sm": ["Sora"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant flex justify-between items-center px-container-margin py-4 w-full max-w-7xl mx-auto z-50 sticky top-0">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">storefront</span>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">StockBridge</span>
+<span class="bg-surface-variant text-on-surface-variant font-label-md text-label-md px-2 py-0.5 rounded-sm ml-2">B2B</span>
+</div>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary hover:text-primary-fixed-dim transition-colors duration-200 cursor-pointer active:scale-95 transition-transform font-label-md text-label-md uppercase" href="#">Buy Stock</a>
+<a class="text-primary dark:text-primary-fixed-dim border-b-2 border-primary font-bold pb-1 cursor-pointer active:scale-95 transition-transform font-label-md text-label-md uppercase" href="#">Sell Stock</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary hover:text-primary-fixed-dim transition-colors duration-200 cursor-pointer active:scale-95 transition-transform font-label-md text-label-md uppercase" href="#">My Stock</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">location_on</span>
+<span class="font-label-md text-label-md hidden md:inline">Location</span>
+</button>
+<div class="h-6 w-px bg-outline-variant mx-2"></div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-container-margin py-section-gap grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Workflow -->
+<div class="lg:col-span-8 flex flex-col gap-stack-lg">
+<div class="mb-4">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">Tell us what you have</h1>
+<p class="font-body-md text-on-surface-variant">List your excess inventory and find verified buyers ready to purchase.</p>
+</div>
+<!-- Mode Switcher Tabs -->
+<div class="flex bg-surface-container rounded-lg p-1 border border-outline-variant w-fit mb-2">
+<button class="px-6 py-2 text-sm font-medium bg-primary text-on-primary rounded uppercase">Manual Entry</button>
+<button class="px-6 py-2 text-sm font-medium text-on-surface-variant hover:text-on-surface uppercase flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">mic</span> Voice Listing
+                </button>
+</div>
+<!-- Workflow Container -->
+<div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col gap-8">
+<div class="flex flex-col gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="md:col-span-2 flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Product Name</label>
+<input class="bg-surface border border-outline-variant rounded-lg p-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="e.g. Fortune Sunflower Oil 1L Pouch" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Category</label>
+<select class="bg-surface border border-outline-variant rounded-lg p-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option>Groceries</option>
+<option>Food &amp; Bakery</option>
+<option>Packaging</option>
+<option>Electronics</option>
+<option>Cleaning</option>
+<option>Stationery</option>
+<option>Textiles</option>
+<option>Hardware</option>
+</select>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Quantity</label>
+<input class="bg-surface border border-outline-variant rounded-lg p-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="0" type="number" value="50"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Unit</label>
+<select class="bg-surface border border-outline-variant rounded-lg p-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option>packets</option>
+<option>kg</option>
+<option>litres</option>
+<option>units</option>
+<option>boxes</option>
+</select>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Price per unit (₹)</label>
+<input class="bg-surface border border-outline-variant rounded-lg p-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="0.00" type="number" value="110"/>
+</div>
+<div class="flex flex-col gap-2 justify-end pb-2">
+<div class="bg-surface p-3 rounded-lg border border-outline-variant/50 flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Total Lot Value</span>
+<span class="font-headline-sm text-headline-sm text-primary">₹5,500</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Expiry Date</label>
+<input class="bg-surface border border-outline-variant rounded-lg p-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" type="date"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Selling Speed</label>
+<div class="flex bg-surface border border-outline-variant rounded-lg p-1">
+<button class="flex-1 py-2 text-sm font-medium bg-primary text-on-primary rounded">Standard</button>
+<button class="flex-1 py-2 text-sm font-medium text-on-surface-variant hover:text-on-surface">Fast</button>
+<button class="flex-1 py-2 text-sm font-medium text-on-surface-variant hover:text-on-surface">Urgent</button>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Stock Location</label>
+<input class="bg-surface border border-outline-variant rounded-lg p-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="e.g. Mumbai" type="text"/>
+</div>
+</div>
+<div class="flex flex-col gap-4 pt-4 border-t border-outline-variant">
+<div class="flex flex-col gap-1">
+<h2 class="font-label-md text-label-md text-on-surface uppercase flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">add_a_photo</span>
+                                Add a photo of your stock
+                            </h2>
+<p class="font-body-sm text-on-surface-variant">Take a picture or drag &amp; drop a photo here.</p>
+</div>
+<div class="bg-surface-container-high border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center gap-4 text-center hover:border-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">photo_camera</span>
+<div class="flex gap-4">
+<button class="bg-surface border border-outline-variant text-on-surface font-label-md px-4 py-2 rounded-md hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">camera_alt</span> Take Photo
+                                </button>
+<button class="bg-surface border border-outline-variant text-on-surface font-label-md px-4 py-2 rounded-md hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">upload</span> Upload Photo
+                                </button>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant flex flex-col gap-2">
+<p class="font-label-md text-on-surface-variant text-center uppercase">Everything looks correct?</p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="flex-1 bg-gradient-to-r from-primary to-primary-fixed-dim text-on-primary font-headline-sm text-headline-sm py-4 rounded-xl shadow-lg hover:shadow-primary/20 hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">publish</span>
+                                Publish Listing
+                                <span class="material-symbols-outlined ml-2">arrow_forward</span>
+</button>
+<button class="px-6 py-4 rounded-xl border border-outline-variant text-on-surface hover:bg-surface-variant transition-colors font-headline-sm text-headline-sm">
+                                Start Over
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Live Preview -->
+<div class="lg:col-span-4 relative">
+<div class="sticky top-24">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">visibility</span> Live Preview Card
+                </h3>
+<!-- Card Component -->
+<div class="bg-surface rounded-xl border border-outline-variant overflow-hidden shadow-lg shadow-black/50">
+<!-- Image Area -->
+<div class="relative h-48 w-full bg-surface-variant flex flex-col items-center justify-center border-b border-outline-variant">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">image</span>
+<span class="font-body-sm text-on-surface-variant">Your stock photo will appear here</span>
+<div class="absolute top-3 left-3 flex gap-2">
+<span class="bg-background/80 backdrop-blur-sm text-on-surface font-label-md text-[10px] px-2 py-1 rounded-sm border border-outline-variant/50 uppercase">Groceries</span>
+</div>
+<div class="absolute top-3 right-3 flex gap-2">
+<span class="bg-surface-container-highest/90 backdrop-blur-sm text-on-surface-variant font-label-md text-[10px] px-2 py-1 rounded-sm border border-outline-variant/50 uppercase">Standard</span>
+</div>
+</div>
+<!-- Content -->
+<div class="p-5 flex flex-col gap-4">
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface line-clamp-2 leading-tight">Fortune Sunflower Oil 1L Pouch</h4>
+</div>
+<div class="flex justify-between items-end border-b border-outline-variant pb-4">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase block mb-1">Unit Price</span>
+<span class="font-headline-md text-headline-md text-primary leading-none">₹110</span>
+<span class="font-body-sm text-on-surface-variant">/ packet</span>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase block mb-1">Quantity</span>
+<span class="font-body-lg text-on-surface font-semibold">50 packets</span>
+</div>
+</div>
+<div class="flex flex-col gap-2 font-body-sm text-on-surface-variant">
+<div class="flex items-center justify-between">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">calculate</span> Total Value</span>
+<span class="text-on-surface font-medium">₹5,500</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">near_me</span> Location</span>
+<span class="text-on-surface font-medium">Current Location</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">event</span> Expiry</span>
+<span class="text-on-surface font-medium">90 days left</span>
+</div>
+</div>
+<div class="pt-4 border-t border-outline-variant flex items-center justify-between gap-2">
+<span class="bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1 font-label-md text-[10px] uppercase border border-primary/20">
+<span class="material-symbols-outlined text-[14px]">verified</span> Verified Seller
+                            </span>
+<span class="font-label-md text-[10px] text-on-surface-variant uppercase">StockBridge Admin</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-surface-container-low border-t border-outline-variant dark:border-outline-variant flex flex-col md:flex-row justify-between items-center px-container-margin py-stack-lg w-full mt-auto">
+<div class="flex flex-col md:flex-row items-center gap-4 w-full justify-between">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">StockBridge</span>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Trust Center</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Contact Support</a>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">© 2024 StockBridge B2B. All rights reserved.</span>
+</div>
+</footer>
+</body></html>

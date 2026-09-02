@@ -22,6 +22,7 @@ export interface Listing {
   id: string;
   sellerId: string;
   title: string;
+  description?: string | null;
   category: string;
   quantity: number;
   unit: string;
@@ -30,6 +31,7 @@ export interface Listing {
   urgency: 'low' | 'medium' | 'high';
   status: 'active' | 'reserved' | 'sold' | 'expired';
   active: boolean;
+  imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
   distanceKm?: number;

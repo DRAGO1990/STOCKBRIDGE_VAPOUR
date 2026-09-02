@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StockBridge - Verified B2B Marketplace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Work+Sans:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "inverse-primary": "#006a61",
+                "surface": "#131313",
+                "primary": "#0d9488",
+                "secondary-fixed": "#f0dbff",
+                "on-error": "#690005",
+                "surface-dim": "#131313",
+                "on-tertiary": "#2e3132",
+                "surface-bright": "#393939",
+                "inverse-surface": "#e5e2e1",
+                "secondary": "#ddb7ff",
+                "primary-container": "#29a195",
+                "surface-container-highest": "#353534",
+                "on-tertiary-fixed-variant": "#444749",
+                "secondary-fixed-dim": "#ddb7ff",
+                "on-primary-fixed-variant": "#005049",
+                "on-surface": "#e5e2e1",
+                "on-primary-container": "#00302b",
+                "surface-container": "#201f1f",
+                "primary-fixed": "#89f5e7",
+                "outline": "#879391",
+                "surface-tint": "#0d9488",
+                "on-primary-fixed": "#00201d",
+                "on-tertiary-fixed": "#191c1e",
+                "error-container": "#93000a",
+                "primary-fixed-dim": "#0d9488",
+                "surface-container-low": "#1c1b1b",
+                "on-surface-variant": "#bcc9c6",
+                "on-secondary-fixed-variant": "#6900b3",
+                "surface-variant": "#353534",
+                "secondary-container": "#6f00be",
+                "tertiary-fixed": "#e1e2e4",
+                "surface-container-lowest": "#0e0e0e",
+                "on-secondary-container": "#d6a9ff",
+                "background": "#131313",
+                "on-background": "#e5e2e1",
+                "surface-container-high": "#2a2a2a",
+                "on-primary": "#003732",
+                "on-error-container": "#ffdad6",
+                "tertiary": "#c5c6c8",
+                "on-tertiary-container": "#272a2c",
+                "error": "#ffb4ab",
+                "tertiary-fixed-dim": "#c5c6c8",
+                "outline-variant": "#3d4947",
+                "tertiary-container": "#8f9193",
+                "on-secondary-fixed": "#2c0051",
+                "inverse-on-surface": "#313030",
+                "on-secondary": "#490080"
+        },
+        "borderRadius": {
+                "DEFAULT": "1rem",
+                "lg": "1.5rem",
+                "xl": "2rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "gutter": "16px",
+                "container-margin": "24px",
+                "stack-sm": "8px",
+                "stack-md": "16px",
+                "section-gap": "64px",
+                "unit": "4px",
+                "stack-lg": "32px"
+        },
+        "fontFamily": {
+                "body-lg": [
+                        "Work Sans"
+                ],
+                "headline-lg": [
+                        "Sora"
+                ],
+                "body-sm": [
+                        "Work Sans"
+                ],
+                "body-md": [
+                        "Work Sans"
+                ],
+                "display-lg": [
+                        "Sora"
+                ],
+                "headline-sm": [
+                        "Sora"
+                ],
+                "label-md": [
+                        "Work Sans"
+                ],
+                "headline-md": [
+                        "Sora"
+                ],
+                "headline-lg-mobile": [
+                        "Sora"
+                ]
+        },
+        "fontSize": {
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-sm": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "56px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-sm": [
+                        "20px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-md": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "500"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "28px",
+                        {
+                                "lineHeight": "36px",
+                                "fontWeight": "600"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen pt-20">
+<!-- TopNavBar -->
+<header class="bg-background/80 backdrop-blur-md border-b border-outline-variant fixed top-0 w-full z-50 flex justify-between items-center px-container-margin py-4 max-w-full mx-auto">
+<div class="flex items-center gap-gutter">
+<span class="text-headline-md font-headline-md font-bold text-primary">StockBridge</span>
+<nav class="hidden md:flex gap-gutter ml-stack-lg">
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-low transition-all px-3 py-2 rounded-DEFAULT font-label-md text-label-md" href="#">How It Works</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-low transition-all px-3 py-2 rounded-DEFAULT font-label-md text-label-md" href="#">Buy Stock</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-low transition-all px-3 py-2 rounded-DEFAULT font-label-md text-label-md" href="#">Sell Stock</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-low transition-all px-3 py-2 rounded-DEFAULT font-label-md text-label-md" href="#">Help</a>
+</nav>
+</div>
+<div class="flex items-center gap-stack-sm">
+<button class="font-label-md text-label-md text-primary hover:bg-surface-container-low transition-all px-4 py-2 rounded-DEFAULT">Sign In</button>
+<button class="font-label-md text-label-md bg-primary text-background hover:bg-surface-tint transition-all px-4 py-2 rounded-DEFAULT font-semibold">Get Started</button>
+</div>
+</header>
+<main class="w-full max-w-7xl mx-auto px-container-margin">
+<!-- Hero Section -->
+<section class="py-section-gap flex flex-col lg:flex-row items-center gap-section-gap mt-8 border-b border-outline-variant">
+<div class="flex-1 space-y-stack-lg">
+<h1 class="font-display-lg text-display-lg text-on-surface">Buy and sell extra stock from businesses near you.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Find discounted inventory nearby or turn surplus stock into cash before it loses value.</p>
+<div class="flex flex-col sm:flex-row gap-stack-md">
+<button class="bg-primary text-background font-label-md text-label-md px-6 py-3 rounded-lg font-semibold hover:bg-surface-tint transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+                        Find Stock
+                    </button>
+<button class="border border-outline-variant text-on-surface font-label-md text-label-md px-6 py-3 rounded-lg font-semibold hover:bg-surface-container-high transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">storefront</span>
+                        Sell Extra Stock
+                    </button>
+</div>
+</div>
+<div class="flex-1 w-full relative">
+<!-- Marketplace Preview -->
+<div class="relative h-[450px] w-full">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-xl border border-outline-variant"></div>
+<!-- Card 1 (Top Left) -->
+<div class="absolute top-8 left-4 w-64 bg-surface-container rounded-xl p-3 border border-outline-variant shadow-2xl z-20 transform -rotate-2 hover:rotate-0 transition-transform">
+<div class="flex gap-3">
+<div class="w-16 h-16 rounded-lg bg-surface-container-highest overflow-hidden shrink-0">
+<img alt="Cooking Oil" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA82VtgtrjYdYYrMHc8q3kJ4bBKPHoTo3LdV53ZjilNIprdkcxHgcaW3MRIkkCQjTGbN9rMmqTB73A7goGhZfWqKn6mGvnheo_vzC_04FdGjbvZSYgOuIphii7W0fh-Yh0TiDAFYKFAFGx5Qg3JQRqZJDKjx0AlJaMnpO7lc_DGj7-CE58ETDdKLDyDMIKjejoc-dAhsqQwPYfWtMaaC-kTreiDj6TGRYTVXOjubOZwXMEeg5cQpT8D"/>
+</div>
+<div>
+<div class="font-headline-sm text-sm font-bold text-on-surface mb-1">Premium Cooking Oil</div>
+<div class="flex items-center gap-1 text-label-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">storefront</span> Kumar Groceries
+                                </div>
+<div class="flex items-center gap-1 text-label-md text-primary mt-1">
+<span class="material-symbols-outlined text-[14px]">star</span> 4.8 · Verified
+                                </div>
+</div>
+</div>
+<div class="mt-3 flex justify-between items-end border-t border-outline-variant pt-2">
+<div>
+<div class="text-label-md text-on-surface-variant">PRICE</div>
+<div class="font-bold text-lg text-primary">₹1,800 <span class="text-xs font-normal">/can</span></div>
+</div>
+<div class="text-right">
+<div class="text-label-md text-on-surface-variant flex items-center gap-1 justify-end"><span class="material-symbols-outlined text-[14px]">location_on</span> 1.2 km</div>
+</div>
+</div>
+</div>
+<!-- Card 2 (Bottom Right) -->
+<div class="absolute bottom-8 right-4 w-64 bg-surface-container rounded-xl p-3 border border-outline-variant shadow-2xl z-10 transform rotate-2 hover:rotate-0 transition-transform">
+<div class="flex gap-3">
+<div class="w-16 h-16 rounded-lg bg-surface-container-highest overflow-hidden shrink-0">
+<img alt="Basmati Rice" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByNCmojagafw5uLxb_A4t5nMNI1iVl5oGEdvAXWvruNBaAMLywmVG5VAni_sAGJxDdy17s69fVqd6l1bxx47O1erv4zkAhnPPrbHSuxQyXZh6AtRfEtgRKqsvJo_nhBtNUigFe6lSqZs5bKxRuB2PpsYVG75MQ6ssW_NIpXOXWK6lBcMZQGxt8_LTxsArye-vaIRkEw4GVR1whprB3nnrZQBLo6DqqgB07RZmlnlxNfCzXlET5vlpn"/>
+</div>
+<div>
+<div class="font-headline-sm text-sm font-bold text-on-surface mb-1">Basmati Rice (25kg)</div>
+<div class="flex items-center gap-1 text-label-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">storefront</span> Singh Traders
+                                </div>
+<div class="flex items-center gap-1 text-label-md text-primary mt-1">
+<span class="material-symbols-outlined text-[14px]">star</span> 4.5 · Verified
+                                </div>
+</div>
+</div>
+<div class="mt-3 flex justify-between items-end border-t border-outline-variant pt-2">
+<div>
+<div class="text-label-md text-on-surface-variant">PRICE</div>
+<div class="font-bold text-lg text-primary">₹1,200 <span class="text-xs font-normal">/bag</span></div>
+</div>
+<div class="text-right">
+<div class="text-label-md text-on-surface-variant flex items-center gap-1 justify-end"><span class="material-symbols-outlined text-[14px]">location_on</span> 3.5 km</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- What can I do -->
+<section class="py-section-gap border-b border-outline-variant">
+<div class="text-center mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg mb-2">What can I do with StockBridge?</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<div class="bg-surface-container p-6 rounded-lg border border-outline-variant hover:border-primary transition-colors group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl">shopping_bag</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">search</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-2">Buy Stock</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Find useful inventory nearby at attractive business prices.</p>
+</div>
+<div class="bg-surface-container p-6 rounded-lg border border-outline-variant hover:border-primary transition-colors group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl">sell</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">add_circle</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-2">Sell Extra Stock</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Turn unused or excess inventory into cash.</p>
+</div>
+<div class="bg-surface-container p-6 rounded-lg border border-outline-variant hover:border-primary transition-colors group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl">mic</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">mic</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-2">Sell with your Voice</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Speak naturally instead of filling in a long listing form.</p>
+</div>
+<div class="bg-surface-container p-6 rounded-lg border border-outline-variant hover:border-primary transition-colors group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl">handshake</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">radar</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-2">Find Better Matches</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Tell us what you need and discover suitable nearby stock.</p>
+</div>
+</div>
+</section>
+<!-- How StockBridge Works -->
+<section class="py-section-gap border-b border-outline-variant">
+<div class="text-center mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg mb-2">How StockBridge Works</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">A simple process, whether you are buying or selling.</p>
+</div>
+<div class="grid md:grid-cols-2 gap-section-gap">
+<!-- Buying Flow -->
+<div class="bg-surface-container p-8 rounded-xl border border-outline-variant">
+<h3 class="font-headline-md text-headline-md mb-stack-lg text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">shopping_cart</span> Buying Process
+        </h3>
+<div class="space-y-6">
+<div class="flex gap-4 items-start">
+<div class="w-8 h-8 rounded-full bg-primary text-background flex items-center justify-center font-bold shrink-0 mt-1">1</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm mb-1">Tell us what you need</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Search or describe your inventory requirements.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start">
+<div class="w-8 h-8 rounded-full bg-primary text-background flex items-center justify-center font-bold shrink-0 mt-1">2</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm mb-1">See suitable stock nearby</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Discover listings matching your needs in your area.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start">
+<div class="w-8 h-8 rounded-full bg-primary text-background flex items-center justify-center font-bold shrink-0 mt-1">3</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm mb-1">Compare and evaluate</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Check price, quantity, expiry, and distance.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start">
+<div class="w-8 h-8 rounded-full bg-primary text-background flex items-center justify-center font-bold shrink-0 mt-1">4</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm mb-1">Reserve and connect</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Secure the stock and contact the seller to complete.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Selling Flow -->
+<div class="bg-surface-container p-8 rounded-xl border border-outline-variant">
+<h3 class="font-headline-md text-headline-md mb-stack-lg text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">storefront</span> Selling Process
+        </h3>
+<div class="space-y-6">
+<div class="flex gap-4 items-start">
+<div class="w-8 h-8 rounded-full bg-primary text-background flex items-center justify-center font-bold shrink-0 mt-1">1</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm mb-1">Enter or speak details</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Use voice or text to quickly describe your surplus.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start">
+<div class="w-8 h-8 rounded-full bg-primary text-background flex items-center justify-center font-bold shrink-0 mt-1">2</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm mb-1">AI creates the listing</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">We format it perfectly with categories and details.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start">
+<div class="w-8 h-8 rounded-full bg-primary text-background flex items-center justify-center font-bold shrink-0 mt-1">3</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm mb-1">Nearby businesses discover it</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Your listing is shown to local buyers who need it.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start">
+<div class="w-8 h-8 rounded-full bg-primary text-background flex items-center justify-center font-bold shrink-0 mt-1">4</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm mb-1">Connect and complete trade</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Agree on terms and finalize the transaction.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Stock Near You -->
+<section class="py-section-gap border-b border-outline-variant">
+<div class="flex justify-between items-end mb-stack-lg">
+<div>
+<h2 class="font-headline-lg text-headline-lg mb-2">Stock Near You</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Fresh listings from verified local businesses.</p>
+</div>
+<a class="text-primary hover:underline font-label-md text-label-md flex items-center gap-1" href="#">View All <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+<div class="bg-surface-container rounded-xl overflow-hidden border border-outline-variant hover:border-primary transition-all flex flex-col">
+<div class="h-48 bg-surface-container-highest relative">
+<img alt="Cooking Oil" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA82VtgtrjYdYYrMHc8q3kJ4bBKPHoTo3LdV53ZjilNIprdkcxHgcaW3MRIkkCQjTGbN9rMmqTB73A7goGhZfWqKn6mGvnheo_vzC_04FdGjbvZSYgOuIphii7W0fh-Yh0TiDAFYKFAFGx5Qg3JQRqZJDKjx0AlJaMnpO7lc_DGj7-CE58ETDdKLDyDMIKjejoc-dAhsqQwPYfWtMaaC-kTreiDj6TGRYTVXOjubOZwXMEeg5cQpT8D"/>
+<div class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm text-primary text-xs font-bold px-2 py-1 rounded flex items-center gap-1 border border-primary/20">
+<span class="material-symbols-outlined text-xs">verified</span> Verified
+            </div>
+</div>
+<div class="p-5 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-sm text-headline-sm line-clamp-1">Cooking Oil (15 cans)</h3>
+</div>
+<p class="text-primary font-bold text-headline-md mb-1">₹1,800 <span class="text-body-sm font-normal text-on-surface-variant">/ can</span></p>
+<div class="text-label-md text-on-surface-variant mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">storefront</span> Kumar Groceries <span class="text-primary ml-1">★ 4.8</span>
+</div>
+<div class="space-y-2 mb-6 flex-grow">
+<div class="flex items-center justify-between text-body-sm border-b border-outline-variant/50 pb-2">
+<span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">inventory_2</span> Quantity</span>
+<span class="font-medium text-on-surface">15 units</span>
+</div>
+<div class="flex items-center justify-between text-body-sm border-b border-outline-variant/50 pb-2">
+<span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">location_on</span> Distance</span>
+<span class="font-medium text-on-surface">3.2 km</span>
+</div>
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">warning</span> Expiry</span>
+<span class="font-medium text-error">14 days left</span>
+</div>
+</div>
+<button class="w-full border border-outline-variant text-on-surface font-label-md py-3 rounded-lg hover:bg-surface-container-high transition-colors font-semibold">View Details</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container rounded-xl overflow-hidden border border-outline-variant hover:border-primary transition-all flex flex-col">
+<div class="h-48 bg-surface-container-highest relative">
+<img alt="Basmati Rice" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByNCmojagafw5uLxb_A4t5nMNI1iVl5oGEdvAXWvruNBaAMLywmVG5VAni_sAGJxDdy17s69fVqd6l1bxx47O1erv4zkAhnPPrbHSuxQyXZh6AtRfEtgRKqsvJo_nhBtNUigFe6lSqZs5bKxRuB2PpsYVG75MQ6ssW_NIpXOXWK6lBcMZQGxt8_LTxsArye-vaIRkEw4GVR1whprB3nnrZQBLo6DqqgB07RZmlnlxNfCzXlET5vlpn"/>
+<div class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm text-primary text-xs font-bold px-2 py-1 rounded flex items-center gap-1 border border-primary/20">
+<span class="material-symbols-outlined text-xs">verified</span> Verified
+            </div>
+</div>
+<div class="p-5 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-sm text-headline-sm line-clamp-1">Basmati Rice (25kg bags)</h3>
+</div>
+<p class="text-primary font-bold text-headline-md mb-1">₹1,200 <span class="text-body-sm font-normal text-on-surface-variant">/ bag</span></p>
+<div class="text-label-md text-on-surface-variant mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">storefront</span> Singh Traders <span class="text-primary ml-1">★ 4.5</span>
+</div>
+<div class="space-y-2 mb-6 flex-grow">
+<div class="flex items-center justify-between text-body-sm border-b border-outline-variant/50 pb-2">
+<span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">inventory_2</span> Quantity</span>
+<span class="font-medium text-on-surface">8 units</span>
+</div>
+<div class="flex items-center justify-between text-body-sm border-b border-outline-variant/50 pb-2">
+<span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">location_on</span> Distance</span>
+<span class="font-medium text-on-surface">1.5 km</span>
+</div>
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">warning</span> Expiry</span>
+<span class="font-medium text-on-surface">6 months</span>
+</div>
+</div>
+<button class="w-full border border-outline-variant text-on-surface font-label-md py-3 rounded-lg hover:bg-surface-container-high transition-colors font-semibold">View Details</button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container rounded-xl overflow-hidden border border-outline-variant hover:border-primary transition-all flex flex-col">
+<div class="h-48 bg-surface-container-highest relative">
+<img alt="Premium Biscuits" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiepidsjuTIknjVSd_b02p2zIvPq7TkF97INTOOtym7ZBPbTz2sgT8cnQQBr8GrkG5B-vxk_r18dXvtuByO1s-eErng28Ug9HJ5ivpw7WY7cTyaNieRexc95jX17WN7K34edWMvOK_tnUv8dqfBNN_ur0uYS2nnfN79AkXXtV75EMwTICc30Z35WysnQ1RYo1tv7q4Ybr9ukfQianoZWkfLbxnKZccBVlPdgpAU1ifBbhxYlYDoGtw"/>
+<div class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm text-primary text-xs font-bold px-2 py-1 rounded flex items-center gap-1 border border-primary/20">
+<span class="material-symbols-outlined text-xs">verified</span> Verified
+            </div>
+</div>
+<div class="p-5 flex flex-col flex-grow">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-sm text-headline-sm line-clamp-1">Premium Biscuits</h3>
+</div>
+<p class="text-primary font-bold text-headline-md mb-1">₹15 <span class="text-body-sm font-normal text-on-surface-variant">/ packet</span></p>
+<div class="text-label-md text-on-surface-variant mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">storefront</span> Daily Mart <span class="text-primary ml-1">★ 4.2</span>
+</div>
+<div class="space-y-2 mb-6 flex-grow">
+<div class="flex items-center justify-between text-body-sm border-b border-outline-variant/50 pb-2">
+<span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">inventory_2</span> Quantity</span>
+<span class="font-medium text-on-surface">40 units</span>
+</div>
+<div class="flex items-center justify-between text-body-sm border-b border-outline-variant/50 pb-2">
+<span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">location_on</span> Distance</span>
+<span class="font-medium text-on-surface">4.8 km</span>
+</div>
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">warning</span> Expiry</span>
+<span class="font-medium text-error">12 days left</span>
+</div>
+</div>
+<button class="w-full border border-outline-variant text-on-surface font-label-md py-3 rounded-lg hover:bg-surface-container-high transition-colors font-semibold">View Details</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Category Discovery -->
+<section class="py-section-gap border-b border-outline-variant">
+<div class="text-center mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg mb-2">Explore by Category</h2>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<a class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-all group relative h-40" href="#">
+<img alt="Groceries" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwu_OMqmos3xytmKTMew7ia3qXugboz1bAndg0gwacVnO2kH1gJGaakasjWpAz1otCHYOfcv-pCkaYLqEtGXno4EV_nKYSUadhmelap9QmIhV3Iv3X9aE331GdnmrYpGI-jhWN-cqBK3LRB8FPBTUl0JPJKfgmVi1rO4CAbGtcBFIVr3ue21vRUdWN45d1uI6soO7SgqpSdbILGC9SO2ecMspD3KQZ3LggOcv0IQs9kc2ZU-VUtk-R"/>
+<div class="absolute inset-0 flex flex-col items-center justify-center gap-2">
+<span class="font-headline-sm text-headline-sm text-white font-bold drop-shadow-md">Groceries</span>
+</div>
+</a>
+<a class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-all group relative h-40" href="#">
+<img alt="Food &amp; Bakery" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFNgquoHPE6wYdMwf4tXSl2ta--wb8T-hE52PI7ymUUdfFhTEnwZVm0RTP1mNL8gLudgSHMt9nM9F_O_sYi3pr_ZXIQjPLKT8lf6UiFDX3M6BV2wk7Y9nhW64BWrpKKeRJRDh_c48gB6LwWDk8LTP4Fzeb5tLZIuMdQBA6Y2Z2QOGi6VBDnqHn7Z40HlLCHvLk_ao9G-O5KltztjDG-tDhjhYXKG8VDkz4st8NO7-gMouaQJzvw0_j"/>
+<div class="absolute inset-0 flex flex-col items-center justify-center gap-2">
+<span class="font-headline-sm text-headline-sm text-white font-bold drop-shadow-md">Food &amp; Bakery</span>
+</div>
+</a>
+<a class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-all group relative h-40" href="#">
+<img alt="Packaging" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQMzNHZZeayvdtEnD2_bvn6zYKOwqRbkRJ6yJlauW2l50fM0rrf8PE-zHMMSwWzPnceZvDokXhlT2ta_pDrOKjVxwsyomvcGStags0vPbU7M9zWFrRK8jsPpcaFu5UJEmCFJ2iQz-wGBEk_ri017V373fYL6QgT3hgBffo4TUxayPWOEv3sZoNg7oDjnsisW0nJXVxXBEnaw0qXWtBdyF_G-VRzxNL6tifVsH7dlUfb2Mzvb2RZvtc"/>
+<div class="absolute inset-0 flex flex-col items-center justify-center gap-2">
+<span class="font-headline-sm text-headline-sm text-white font-bold drop-shadow-md">Packaging</span>
+</div>
+</a>
+<a class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-all group relative h-40" href="#">
+<img alt="Electronics" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdIsAdEujQhHPRXtPwPX0miI-GPPiQE0NBqsWBNT6vvmAzoErMT-ugOckwcvih5X_WydoRc7XZAMjGXigF_OS5Kw5mWgcjcIOB4WV6bdf97PHOH1XCnBU45bcaFlucYzIZVhqtaZpdaoV72RgEN1JpFUaw7nuljF1eR3tvjFgh1gRb472fYsSn22VOW8NgPwQAlTeA2vVrHZD5IpQaRliVVFnA4SGXUzNIAXa7tJ3EGcG_aAYOcc2Z"/>
+<div class="absolute inset-0 flex flex-col items-center justify-center gap-2">
+<span class="font-headline-sm text-headline-sm text-white font-bold drop-shadow-md">Electronics</span>
+</div>
+</a>
+</div>
+</section>
+<!-- Voice Listing Demonstration -->
+<section class="py-section-gap border-b border-outline-variant">
+<div class="flex flex-col lg:flex-row items-center gap-section-gap">
+<div class="flex-1 space-y-6">
+<h2 class="font-display-lg text-display-lg">Don't type.<br/><span class="text-primary">Just speak.</span></h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">Listing your extra stock is as easy as sending a voice note. Our AI instantly turns your words into a professional listing.</p>
+<div class="bg-surface-container p-6 rounded-xl border border-outline-variant inline-block w-full max-w-md">
+<div class="flex items-center gap-4 mb-4">
+<button class="w-12 h-12 rounded-full bg-primary text-background flex items-center justify-center animate-pulse shrink-0">
+<span class="material-symbols-outlined">mic</span>
+</button>
+<div class="h-8 flex items-center gap-1 opacity-70">
+<div class="w-1 bg-primary h-3 rounded-full"></div>
+<div class="w-1 bg-primary h-6 rounded-full"></div>
+<div class="w-1 bg-primary h-4 rounded-full"></div>
+<div class="w-1 bg-primary h-8 rounded-full"></div>
+<div class="w-1 bg-primary h-5 rounded-full"></div>
+<div class="w-1 bg-primary h-2 rounded-full"></div>
+<div class="w-1 bg-primary h-6 rounded-full"></div>
+<div class="w-1 bg-primary h-4 rounded-full"></div>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface italic">"Mere paas 50 biscuit ke packets hain, ₹15 packet, expiry 12 din mein hai."</p>
+</div>
+</div>
+<div class="flex-1 w-full flex justify-center lg:justify-end">
+<!-- Generated Card Mockup -->
+<div class="bg-surface-container rounded-xl overflow-hidden border border-primary relative shadow-[0_0_30px_rgba(13,148,136,0.15)] w-full max-w-sm flex flex-col">
+<div class="absolute top-3 right-3 bg-primary text-background text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-lg z-10">
+<span class="material-symbols-outlined text-sm">auto_awesome</span> AI Generated
+            </div>
+<div class="h-40 relative">
+<img alt="Premium Biscuits" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiepidsjuTIknjVSd_b02p2zIvPq7TkF97INTOOtym7ZBPbTz2sgT8cnQQBr8GrkG5B-vxk_r18dXvtuByO1s-eErng28Ug9HJ5ivpw7WY7cTyaNieRexc95jX17WN7K34edWMvOK_tnUv8dqfBNN_ur0uYS2nnfN79AkXXtV75EMwTICc30Z35WysnQ1RYo1tv7q4Ybr9ukfQianoZWkfLbxnKZccBVlPdgpAU1ifBbhxYlYDoGtw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container to-transparent"></div>
+</div>
+<div class="p-5 flex flex-col flex-grow -mt-8 relative z-10">
+<h4 class="font-headline-sm text-headline-sm mb-1 text-on-surface">Premium Biscuits</h4>
+<p class="text-on-surface-variant text-label-md mb-4">Food &amp; Bakery</p>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div>
+<div class="text-label-md text-on-surface-variant mb-1">PRICE</div>
+<div class="font-headline-sm text-primary">₹15 <span class="text-sm font-normal text-on-surface-variant">/pkt</span></div>
+</div>
+<div>
+<div class="text-label-md text-on-surface-variant mb-1">QUANTITY</div>
+<div class="font-headline-sm text-on-surface">50 pkts</div>
+</div>
+<div class="col-span-2 bg-surface-container-highest p-3 rounded-lg border border-outline-variant flex justify-between items-center">
+<div class="text-label-md text-on-surface-variant">EXPIRY</div>
+<div class="text-error font-medium flex items-center gap-1"><span class="material-symbols-outlined text-sm">warning</span> 12 Days Left</div>
+</div>
+</div>
+<button class="w-full bg-primary text-background font-label-md py-3 rounded-lg font-semibold hover:bg-surface-tint transition-colors">Publish Listing</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Your Local Surplus Network -->
+<section class="py-section-gap border-b border-outline-variant">
+<div class="flex flex-col lg:flex-row-reverse items-center gap-section-gap">
+<div class="flex-1 space-y-6">
+<h2 class="font-display-lg text-display-lg">Your Local <br/><span class="text-primary">Surplus Network</span></h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">StockBridge connects you directly with businesses in your immediate vicinity, minimizing transport costs and time.</p>
+<ul class="space-y-4 mt-6">
+<li class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-on-surface">Discover inventory within a 10km radius.</span>
+</li>
+<li class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-on-surface">Build relationships with neighboring businesses.</span>
+</li>
+<li class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-on-surface">Reduce carbon footprint with local sourcing.</span>
+</li>
+</ul>
+</div>
+<div class="flex-1 w-full flex justify-center lg:justify-start">
+<div class="bg-surface-container p-8 rounded-xl border border-outline-variant w-full max-w-md flex items-center justify-center">
+<img alt="Local Network Map" class="w-full max-w-[300px]" src="https://lh3.googleusercontent.com/aida/AEtjO1UAGMsM0VMDkifPwS8vcbUQ3jvxo5aqNfKKq6I2emMhKr83X5jl8IuKcrLMkhxa5iG3C---0FtkkY99MltONOCID9y7zNVT2l7nNeP7xRRcmhWqfA-LqwC-L1kkogqX0HA_tjae9gpiMggkFzN2Vk4LBgx2CE9JYM49WXDmFkUBaGUHiP2kxO2D3MqzAhXZ6lLtswC9FC8NO_z_baANfAPrw0gS7f-ZG4NcpvQNZizmSPeYgxsQ_XvNHgk"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Why StockBridge -->
+<section class="py-section-gap border-b border-outline-variant">
+<div class="text-center mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg mb-2">Why StockBridge?</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<div class="bg-surface-container p-6 rounded-lg border border-outline-variant text-center">
+<div class="w-16 h-16 mx-auto rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-3xl">delete_sweep</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-2">Reduce Wasted Stock</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Monetize inventory before it perishes or becomes obsolete.</p>
+</div>
+<div class="bg-surface-container p-6 rounded-lg border border-outline-variant text-center">
+<div class="w-16 h-16 mx-auto rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-3xl">savings</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-2">Buy at Better Prices</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Access discounted surplus stock to improve your margins.</p>
+</div>
+<div class="bg-surface-container p-6 rounded-lg border border-outline-variant text-center">
+<div class="w-16 h-16 mx-auto rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-3xl">map</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-2">Trade Nearby</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Find trading partners in your immediate local area.</p>
+</div>
+<div class="bg-surface-container p-6 rounded-lg border border-outline-variant text-center">
+<div class="w-16 h-16 mx-auto rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-3xl">verified_user</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-2">Verified Businesses</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Trade safely with vetted and verified local partners.</p>
+</div>
+</div>
+</section>
+<!-- Final Call to Action -->
+<section class="py-section-gap text-center">
+<h2 class="font-display-lg text-display-lg mb-6">Ready to start trading?</h2>
+<div class="flex flex-col sm:flex-row justify-center gap-stack-md">
+<button class="bg-primary text-background font-label-md text-label-md px-8 py-4 rounded-lg font-semibold hover:bg-surface-tint transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+            Find Stock
+        </button>
+<button class="border border-outline-variant text-on-surface font-label-md text-label-md px-8 py-4 rounded-lg font-semibold hover:bg-surface-container-high transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">storefront</span>
+            Sell Extra Stock
+        </button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant w-full px-container-margin py-stack-lg flex flex-col md:flex-row justify-between items-center gap-gutter mt-section-gap">
+<div class="text-headline-sm font-headline-sm font-bold text-on-surface">StockBridge</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">© 2024 StockBridge. Verified B2B Marketplace.</div>
+<div class="flex flex-wrap justify-center gap-4">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:underline transition-all opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:underline transition-all opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:underline transition-all opacity-80 hover:opacity-100" href="#">Contact Support</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:underline transition-all opacity-80 hover:opacity-100" href="#">Trust Guarantee</a>
+</div>
+</footer>
+</body></html>

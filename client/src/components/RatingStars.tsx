@@ -12,12 +12,12 @@ interface RatingStarsProps {
 export const RatingStars: React.FC<RatingStarsProps> = ({
   rating,
   max = 5,
-  size = 16,
+  size = 14,
   interactive = false,
   onChange,
 }) => {
   return (
-    <div className="flex items-center gap-1">
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
       {Array.from({ length: max }).map((_, i) => {
         const starValue = i + 1;
         const isFilled = rating >= starValue;
@@ -29,22 +29,28 @@ export const RatingStars: React.FC<RatingStarsProps> = ({
             type="button"
             disabled={!interactive}
             onClick={() => interactive && onChange && onChange(starValue)}
-            className={`transition-colors ${interactive ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
+            style={{
+              background: 'transparent', border: 'none', padding: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: interactive ? 'pointer' : 'default',
+              transition: 'transform 0.1s',
+            }}
           >
             <Star
               size={size}
-              className={`${
-                isFilled
-                  ? 'fill-amber-400 text-amber-400'
-                  : isHalf
-                  ? 'fill-amber-400/50 text-amber-400'
-                  : 'fill-transparent text-slate-500'
-              }`}
+              style={{
+                fill: isFilled ? '#f6b351' : isHalf ? 'rgba(246,179,81,0.5)' : 'transparent',
+                color: isFilled || isHalf ? '#f6b351' : '#3d4947',
+              }}
             />
           </button>
         );
       })}
-      <span className="ml-1 text-xs font-semibold text-amber-300">
+      <span style={{
+        fontFamily: 'Work Sans, sans-serif',
+        fontSize: 12, fontWeight: 600,
+        color: '#f6b351', marginLeft: 4,
+      }}>
         {rating > 0 ? rating.toFixed(1) : 'New'}
       </span>
     </div>

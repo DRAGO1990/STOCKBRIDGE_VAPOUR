@@ -1,9 +1,11 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { HomePage } from './pages/HomePage';
-import { SmartMatchPage } from './pages/SmartMatchPage';
+import { LandingPage } from './pages/LandingPage';
+import { HowItWorksPage } from './pages/HowItWorksPage';
+import { MarketplacePage } from './pages/MarketplacePage';
 import { ListingDetailPage } from './pages/ListingDetailPage';
 import { CreateListingPage } from './pages/CreateListingPage';
 import { MyListingsPage } from './pages/MyListingsPage';
@@ -14,88 +16,84 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { useAuthStore } from './stores/authStore';
 
+// Page transition wrapper
+const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -6 }}
+    transition={{ duration: 0.22, ease: 'easeOut' }}
+  >
+    {children}
+  </motion.div>
+);
+
 // Protected Route Wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const user = useAuthStore((state) => state.user);
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 
 // Admin Route Wrapper
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const user = useAuthStore((state) => state.user);
-  if (!user || !user.isAdmin) {
-    return <Navigate to="/" replace />;
-  }
+  if (!user || !user.isAdmin) return <Navigate to="/" replace />;
   return <>{children}</>;
 };
 
-export const App: React.FC = () => {
+// Inner router component (needs useLocation inside BrowserRouter)
+const AppRoutes: React.FC = () => {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
+
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-[#0F0B1A] text-[#e8eaf0] flex flex-col selection:bg-purple-500 selection:text-navy-950">
-        <Navbar />
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/match" element={<SmartMatchPage />} />
-            <Route path="/listings/:id" element={<ListingDetailPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+    <div className="min-h-screen flex flex-col" style={{ background: '#131313', color: '#e5e2e1' }}>
+      {!isAdminPage && <Navbar />}
+      <main className="flex-1">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            {/* Public */}
+            <Route path="/" element={<PageWrapper><LandingPage /></PageWrapper>} />
+            <Route path="/how-it-works" element={<PageWrapper><HowItWorksPage /></PageWrapper>} />
+            <Route path="/marketplace" element={<PageWrapper><MarketplacePage /></PageWrapper>} />
+            <Route path="/buy" element={<Navigate to="/marketplace" replace />} />
+            <Route path="/listings/:id" element={<PageWrapper><ListingDetailPage /></PageWrapper>} />
+            <Route path="/login" element={<PageWrapper><LoginPage /></PageWrapper>} />
+            <Route path="/register" element={<PageWrapper><RegisterPage /></PageWrapper>} />
 
-            {/* Merchant Protected Routes */}
-            <Route
-              path="/create-listing"
-              element={
-                <ProtectedRoute>
-                  <CreateListingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/my-listings"
-              element={
-                <ProtectedRoute>
-                  <MyListingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reservations"
-              element={
-                <ProtectedRoute>
-                  <ReservationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
+            {/* Protected */}
+            <Route path="/create-listing" element={
+              <ProtectedRoute><PageWrapper><CreateListingPage /></PageWrapper></ProtectedRoute>
+            } />
+            <Route path="/sell" element={<Navigate to="/create-listing" replace />} />
+            <Route path="/my-listings" element={
+              <ProtectedRoute><PageWrapper><MyListingsPage /></PageWrapper></ProtectedRoute>
+            } />
+            <Route path="/reservations" element={
+              <ProtectedRoute><PageWrapper><ReservationsPage /></PageWrapper></ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute><PageWrapper><ProfilePage /></PageWrapper></ProtectedRoute>
+            } />
 
-            {/* Admin Route */}
-            <Route
-              path="/admin"
-              element={
-                <AdminRoute>
-                  <AdminDashboardPage />
-                </AdminRoute>
-              }
-            />
+            {/* Admin */}
+            <Route path="/admin" element={
+              <AdminRoute><PageWrapper><AdminDashboardPage /></PageWrapper></AdminRoute>
+            } />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </main>
-        <Footer />
-      </div>
-    </BrowserRouter>
+        </AnimatePresence>
+      </main>
+      {!isAdminPage && <Footer />}
+    </div>
   );
 };
+
+export const App: React.FC = () => (
+  <BrowserRouter>
+    <AppRoutes />
+  </BrowserRouter>
+);

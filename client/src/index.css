@@ -1,117 +1,335 @@
 @import "tailwindcss";
 
+/* ============================================================
+   STITCH DESIGN SYSTEM — StockBridge B2B
+   Primary: Emerald Teal #6bd8cb  |  BG: Charcoal #131313
+   Accent:  Purple #ddb7ff (≤5% of screen)
+   Fonts:   Sora (headlines)  +  Work Sans (body/UI)
+   ============================================================ */
+
 @theme {
-  --color-navy-50: #f0e8f4;
-  --color-navy-100: #d9c5e5;
-  --color-navy-200: #c09fd4;
-  --color-navy-300: #a779c3;
-  --color-navy-400: #8e5cb0;
-  --color-navy-500: #6B3FA0;
-  --color-navy-600: #5A3590;
-  --color-navy-700: #4A2B7A;
-  --color-navy-800: #3A2165;
-  --color-navy-900: #2B1F4D;
-  --color-navy-950: #0F0B1A;
+  /* ── Surfaces ── */
+  --color-surface:              #131313;
+  --color-surface-dim:          #131313;
+  --color-surface-bright:       #393939;
+  --color-surface-lowest:       #0e0e0e;
+  --color-surface-low:          #1c1b1b;
+  --color-surface-base:         #201f1f;
+  --color-surface-high:         #2a2a2a;
+  --color-surface-highest:      #353534;
 
-  --color-teal-400: #C084FC;
-  --color-teal-500: #A855F7;
-  --color-teal-600: #9333EA;
+  /* ── On-surface text ── */
+  --color-on-surface:           #e5e2e1;
+  --color-on-surface-variant:   #bcc9c6;
 
-  --color-cyan-400: #F472B6;
-  --color-cyan-500: #EC4899;
+  /* ── Brand: Emerald Teal ── */
+  --color-primary:              #6bd8cb;
+  --color-primary-dim:          #6bd8cb;
+  --color-primary-container:    #29a195;
+  --color-on-primary:           #003732;
+  --color-on-primary-container: #00302b;
+  --color-primary-fixed:        #89f5e7;
 
-  --color-gold-400: #fbbf24;
-  --color-gold-500: #f59e0b;
-  --color-gold-600: #d97706;
+  /* ── Accent: Purple (premium only) ── */
+  --color-secondary:            #ddb7ff;
+  --color-secondary-container:  #6f00be;
+  --color-on-secondary:         #490080;
 
-  --color-background: #0F0B1A;
-  --color-foreground: #F8FAFC;
-  --color-card: #1A1330;
-  --color-card-foreground: #F8FAFC;
-  --color-popover: #1A1330;
-  --color-popover-foreground: #F8FAFC;
-  --color-primary: #A855F7;
-  --color-primary-foreground: #0F0B1A;
-  --color-secondary: #2B1F4D;
-  --color-secondary-foreground: #F8FAFC;
-  --color-muted: #2B1F4D;
-  --color-muted-foreground: #CBD5E1;
-  --color-accent: #EC4899;
-  --color-accent-foreground: #0F0B1A;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #2B1F4D;
-  --color-input: #2B1F4D;
-  --color-ring: #A855F7;
+  /* ── Borders / Outlines ── */
+  --color-outline:              #879391;
+  --color-outline-variant:      #3d4947;
 
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+  /* ── Semantic ── */
+  --color-error:                #ffb4ab;
+  --color-error-container:      #93000a;
+  --color-success:              #6bd8cb;
+  --color-warning:              #f6b351;
 
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  /* ── Tailwind semantic aliases ── */
+  --color-background:           #131313;
+  --color-foreground:           #e5e2e1;
+  --color-card:                 #1c1b1b;
+  --color-card-foreground:      #e5e2e1;
+  --color-border:               #3d4947;
+  --color-input:                #2a2a2a;
+  --color-ring:                 #6bd8cb;
+  --color-muted:                #201f1f;
+  --color-muted-foreground:     #bcc9c6;
+  --color-accent:               #ddb7ff;
+  --color-accent-foreground:    #490080;
+  --color-destructive:          #ffb4ab;
+  --color-destructive-foreground: #690005;
+
+  /* ── Border radius (8px grid) ── */
+  --radius-sm:  0.125rem;  /* 2px  */
+  --radius-md:  0.25rem;   /* 4px  */
+  --radius-lg:  0.5rem;    /* 8px  */
+  --radius-xl:  0.75rem;   /* 12px */
+  --radius-2xl: 1rem;      /* 16px */
+
+  /* ── Fonts ── */
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-sans:    'Work Sans', system-ui, sans-serif;
 }
 
+/* ============================================================
+   BASE LAYER
+   ============================================================ */
 @layer base {
-  * {
+  *, *::before, *::after {
     border-color: var(--color-border);
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Scrollbar styling */
-  ::-webkit-scrollbar {
-    width: 8px;
+  /* ── Sora headlines ── */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--color-on-surface);
   }
-  ::-webkit-scrollbar-track {
-    background: var(--color-navy-950);
+
+  /* ── Tabular numbers for financial data ── */
+  .tabular-nums, [data-price], .price {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-navy-600);
-    border-radius: 4px;
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-surface-lowest); }
+  ::-webkit-scrollbar-thumb { background: #3d4947; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #879391; }
+
+  /* ── Selection ── */
+  ::selection {
+    background: rgba(107, 216, 203, 0.25);
+    color: #e5e2e1;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-navy-500);
-  }
 }
 
-/* Animations */
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ============================================================
+   STITCH TYPOGRAPHY UTILITIES
+   ============================================================ */
+.font-display  { font-family: var(--font-display); }
+.font-body     { font-family: var(--font-sans); }
+
+/* Display */
+.text-display-lg {
+  font-family: var(--font-display);
+  font-size: 48px; font-weight: 700;
+  line-height: 56px; letter-spacing: -0.02em;
 }
 
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Headlines */
+.text-headline-lg {
+  font-family: var(--font-display);
+  font-size: 32px; font-weight: 600;
+  line-height: 40px; letter-spacing: -0.01em;
+}
+.text-headline-md {
+  font-family: var(--font-display);
+  font-size: 24px; font-weight: 600;
+  line-height: 32px;
+}
+.text-headline-sm {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 600;
+  line-height: 28px;
 }
 
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(168, 85, 247, 0); }
+/* Body */
+.text-body-lg { font-size: 18px; font-weight: 400; line-height: 28px; }
+.text-body-md { font-size: 16px; font-weight: 400; line-height: 24px; }
+.text-body-sm { font-size: 14px; font-weight: 400; line-height: 20px; }
+
+/* Label — uppercase tracking */
+.text-label-md {
+  font-size: 12px; font-weight: 500;
+  line-height: 16px; letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.text-label-sm {
+  font-size: 11px; font-weight: 500;
+  line-height: 14px; letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+/* ============================================================
+   STITCH COMPONENT UTILITIES
+   ============================================================ */
+
+/* ── Cards ── */
+.stitch-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.stitch-card-sm {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
-.animate-slide-up {
-  animation: slide-up 0.4s ease-out;
+/* ── Buttons ── */
+.stitch-btn-primary {
+  background: var(--color-primary-container);
+  color: var(--color-on-primary);
+  font-family: var(--font-sans);
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+.stitch-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.stitch-btn-primary:active { transform: translateY(0); }
+
+.stitch-btn-ghost {
+  background: transparent;
+  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  font-size: 13px; font-weight: 500;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.stitch-btn-ghost:hover {
+  background: var(--color-surface-high);
+  border-color: var(--color-outline);
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s infinite;
+/* ── Inputs ── */
+.stitch-input {
+  background: var(--color-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+.stitch-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(107, 216, 203, 0.12);
+}
+.stitch-input::placeholder { color: var(--color-outline); }
+
+/* ── Badges (Low-Alpha approach) ── */
+.badge-active {
+  color: #6bd8cb;
+  background: rgba(107, 216, 203, 0.10);
+  border: 1px solid rgba(107, 216, 203, 0.20);
+}
+.badge-pending {
+  color: #f6b351;
+  background: rgba(246, 179, 81, 0.10);
+  border: 1px solid rgba(246, 179, 81, 0.20);
+}
+.badge-reserved {
+  color: #ddb7ff;
+  background: rgba(221, 183, 255, 0.10);
+  border: 1px solid rgba(221, 183, 255, 0.20);
+}
+.badge-suspended {
+  color: #ffb4ab;
+  background: rgba(255, 180, 171, 0.10);
+  border: 1px solid rgba(255, 180, 171, 0.20);
+}
+.badge-completed {
+  color: #bcc9c6;
+  background: rgba(188, 201, 198, 0.10);
+  border: 1px solid rgba(188, 201, 198, 0.20);
+}
+.badge-urgent {
+  color: #ffb4ab;
+  background: rgba(255, 180, 171, 0.15);
+  border: 1px solid rgba(255, 180, 171, 0.25);
 }
 
-@keyframes pulse-glow-red {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
-  50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+/* ── Nav underline active indicator ── */
+.nav-link-active::after {
+  content: '';
+  display: block;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: 1px;
+  margin-top: 2px;
 }
 
-.animate-pulse-glow-red {
-  animation: pulse-glow-red 1.5s infinite;
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes stitch-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes stitch-slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes stitch-slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes stitch-pulse-teal {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(107, 216, 203, 0.35); }
+  50%       { box-shadow: 0 0 0 8px rgba(107, 216, 203, 0); }
+}
+@keyframes stitch-spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-stitch-fade-in      { animation: stitch-fade-in 0.3s ease-out both; }
+.animate-stitch-slide-up     { animation: stitch-slide-up 0.4s ease-out both; }
+.animate-stitch-slide-right  { animation: stitch-slide-in-right 0.35s ease-out both; }
+.animate-stitch-pulse        { animation: stitch-pulse-teal 2s infinite; }
+.animate-stitch-spin         { animation: stitch-spin 0.7s linear infinite; }
+
+/* Stagger helpers */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+/* ── Teal glow (for CTA buttons) ── */
+.glow-teal {
+  box-shadow: 0 4px 24px rgba(107, 216, 203, 0.20);
+}
+.glow-teal:hover {
+  box-shadow: 0 6px 32px rgba(107, 216, 203, 0.30);
+}
+
+/* ── Divider ── */
+.stitch-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ── Section header separator ── */
+.card-header-divider {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
 }

@@ -1,0 +1,409 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>StockBridge - Orders &amp; Reservations</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;family=Work+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-on-surface": "#313030",
+                      "on-surface-variant": "#bcc9c6",
+                      "on-secondary-fixed": "#2c0051",
+                      "on-secondary-fixed-variant": "#6900b3",
+                      "on-primary": "#003732",
+                      "secondary-fixed-dim": "#ddb7ff",
+                      "on-error-container": "#ffdad6",
+                      "surface-dim": "#131313",
+                      "error": "#ffb4ab",
+                      "on-tertiary-fixed": "#191c1e",
+                      "primary-container": "#29a195",
+                      "surface-bright": "#393939",
+                      "on-secondary": "#490080",
+                      "surface-container-highest": "#353534",
+                      "surface-container-lowest": "#0e0e0e",
+                      "tertiary-fixed-dim": "#c5c6c8",
+                      "surface-variant": "#353534",
+                      "secondary-container": "#6f00be",
+                      "on-primary-fixed": "#00201d",
+                      "outline": "#879391",
+                      "secondary-fixed": "#f0dbff",
+                      "tertiary-container": "#8f9193",
+                      "on-tertiary": "#2e3132",
+                      "outline-variant": "#3d4947",
+                      "on-background": "#e5e2e1",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "surface": "#131313",
+                      "inverse-surface": "#e5e2e1",
+                      "secondary": "#ddb7ff",
+                      "on-secondary-container": "#d6a9ff",
+                      "primary": "#6bd8cb",
+                      "primary-fixed": "#89f5e7",
+                      "tertiary": "#c5c6c8",
+                      "on-primary-container": "#00302b",
+                      "primary-fixed-dim": "#6bd8cb",
+                      "error-container": "#93000a",
+                      "on-surface": "#e5e2e1",
+                      "on-error": "#690005",
+                      "on-tertiary-container": "#272a2c",
+                      "surface-container": "#201f1f",
+                      "surface-tint": "#6bd8cb",
+                      "tertiary-fixed": "#e1e2e4",
+                      "surface-container-low": "#1c1b1b",
+                      "background": "#131313",
+                      "on-primary-fixed-variant": "#005049",
+                      "surface-container-high": "#2a2a2a",
+                      "inverse-primary": "#006a61"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "stack-sm": "8px",
+                      "stack-md": "16px",
+                      "section-gap": "64px",
+                      "unit": "4px",
+                      "stack-lg": "32px",
+                      "gutter": "16px",
+                      "container-margin": "24px"
+              },
+              "fontFamily": {
+                      "body-sm": [
+                              "Work Sans"
+                      ],
+                      "body-lg": [
+                              "Work Sans"
+                      ],
+                      "label-md": [
+                              "Work Sans"
+                      ],
+                      "display-lg": [
+                              "Sora"
+                      ],
+                      "headline-lg": [
+                              "Sora"
+                      ],
+                      "body-md": [
+                              "Work Sans"
+                      ],
+                      "headline-sm": [
+                              "Sora"
+                      ],
+                      "headline-md": [
+                              "Sora"
+                      ],
+                      "headline-lg-mobile": [
+                              "Sora"
+                      ]
+              },
+              "fontSize": {
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: #121212;
+            color: #e5e2e1;
+        }
+        .text-emerald-primary { color: #6bd8cb; }
+        .bg-emerald-primary { background-color: #6bd8cb; }
+        .bg-emerald-primary-dim { background-color: rgba(107, 216, 203, 0.1); }
+        .border-emerald-primary { border-color: #6bd8cb; }
+    </style>
+</head>
+<body class="font-body-md text-body-md bg-background min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<nav class="bg-background border-b border-outline-variant px-container-margin py-stack-md flex justify-between items-center w-full max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-8">
+<div class="font-headline-md text-headline-md font-bold text-primary tracking-tight">
+                StockBridge
+            </div>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-on-surface-variant font-medium hover:text-primary-fixed transition-colors duration-200 cursor-pointer active:opacity-80 font-label-md text-label-md" href="#">Marketplace</a>
+<a class="text-on-surface-variant font-medium hover:text-primary-fixed transition-colors duration-200 cursor-pointer active:opacity-80 font-label-md text-label-md" href="#">Sell Stock</a>
+<a class="text-on-surface-variant font-medium hover:text-primary-fixed transition-colors duration-200 cursor-pointer active:opacity-80 font-label-md text-label-md" href="#">My Stock</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 cursor-pointer active:opacity-80 font-label-md text-label-md" href="#">Orders</a>
+</div>
+<div class="hidden md:flex items-center gap-1 text-on-surface-variant font-label-md text-label-md ml-4"><span class="material-symbols-outlined text-sm">location_on</span> Mumbai</div></div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">account_circle</span>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-screen-2xl mx-auto px-container-margin py-section-gap">
+<!-- Page Header -->
+<header class="mb-stack-lg">
+<h1 class="font-headline-lg text-headline-lg mb-stack-sm md:font-display-lg md:text-display-lg">Orders &amp; Reservations</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl">Coordinate inventory handover, negotiate logistics in direct chat, and confirm completed transactions.</p>
+</header>
+<!-- Workspace Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-gutter">
+<!-- Filters & Controls (Sidebar on Desktop) -->
+<aside class="lg:col-span-1 space-y-stack-md">
+<!-- Search & Sort -->
+<div class="rounded-lg p-stack-md border border-outline-variant bg-surface-container-low">
+<div class="relative mb-stack-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="w-full bg-surface border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary text-body-sm pl-10 pr-3 py-2 text-on-surface placeholder-on-surface-variant" placeholder="Search my orders" type="text">
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase">Sort By</label>
+<select class="w-full bg-surface border border-outline-variant rounded focus:border-primary focus:ring-1 focus:ring-primary text-body-sm px-3 py-2 text-on-surface appearance-none">
+<option>Most recent</option>
+<option>Urgent handover</option>
+</select>
+</div>
+</div>
+<!-- Tabs -->
+<div class="flex flex-col gap-2">
+<button class="flex items-center justify-between p-3 rounded-md bg-emerald-primary-dim border border-emerald-primary text-emerald-primary font-medium text-body-sm transition-colors text-left w-full">
+<span class="">Orders Placed (Buying)</span>
+<span class="bg-emerald-primary text-on-primary text-xs px-2 py-0.5 rounded-full font-bold">2</span>
+</button>
+<button class="flex items-center justify-between p-3 rounded-md bg-surface border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors text-left w-full text-body-sm">
+<span class="">Orders Received (Selling)</span>
+<span class="bg-surface-container-highest text-on-surface text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+</button>
+</div>
+</aside>
+<!-- Transaction Listing -->
+<div class="lg:col-span-3 space-y-stack-md"><div class="flex items-center justify-between mb-stack-md px-1"><div class="text-body-sm text-on-surface-variant">3 transactions</div><div class="flex items-center gap-2 text-emerald-primary font-medium text-body-sm"><span class="w-2 h-2 rounded-full bg-emerald-primary animate-pulse"></span> 1 needs action</div></div>
+<!-- Row 1: Awaiting Handover -->
+<article class="bg-surface-container rounded-lg border border-outline-variant p-stack-md flex flex-col md:flex-row gap-stack-md items-start md:items-center hover:border-outline transition-colors relative overflow-hidden group">
+<div class="absolute inset-y-0 left-0 w-1 bg-emerald-primary hidden md:block"></div>
+<!-- Thumbnail -->
+<div class="w-24 h-24 shrink-0 rounded bg-surface border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional bulk container of cooking oil, 15 liters, high quality, clean studio lighting, dark background, emerald teal accents. B2B product photography." src="https://lh3.googleusercontent.com/aida/AEtjO1UDRzCkpbFJPoj_fFN4YFKztzNKlD6hvnLlfGLTM5rlgdsJFVefO2mLfFY6wi8EUP3UjonuYUQ2-hssSETGvNaOsdok4CVn4TXbrMb9lZGOeGHJryUZsHW-KqymD75pbzTXbieBMZ7S-B_gQZY3fsIfjS0iltpIssUeu7b0PyLdtfE6vQCOBy6a_IOQ8Uds5dLIaKs3c66d2Yn_5CflfQTi1-K_dsdaxti121KBJoHJpsY90wN7eaSFJGM">
+</div>
+<!-- Core Info -->
+<div class="flex-grow min-w-0 flex flex-col justify-between h-full space-y-2">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-emerald-primary-dim text-emerald-primary border border-emerald-primary/30 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span> Awaiting Handover
+                                </span>
+<span class="text-label-md text-on-surface-variant">Reserved: 28 Aug 2026</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Premium Cooking Oil</h3>
+<div class="flex items-center gap-2 text-body-sm text-on-surface-variant mt-1">
+<span class="material-symbols-outlined text-sm">storefront</span>
+<span class="">Kumar Groceries</span>
+<span class="inline-flex items-center text-secondary-fixed-dim text-xs"><span class="material-symbols-outlined text-[12px] mr-0.5" style="font-variation-settings: 'FILL' 1;">star</span> 4.8</span>
+</div>
+</div>
+</div>
+<!-- Financials -->
+<div class="shrink-0 md:text-right border-t md:border-t-0 md:border-l border-outline-variant pt-3 md:pt-0 md:pl-stack-md w-full md:w-auto grid grid-cols-3 md:block gap-4 items-center">
+<div class="md:mb-2">
+<div class="text-label-md text-on-surface-variant uppercase">Quantity</div>
+<div class="font-medium text-body-sm">15 cans</div>
+</div>
+<div class="md:mb-2">
+<div class="text-label-md text-on-surface-variant uppercase">Unit Price</div>
+<div class="font-medium text-body-sm">₹200</div>
+</div>
+<div>
+<div class="text-label-md text-on-surface-variant uppercase">Total Value</div>
+<div class="font-headline-sm text-headline-sm text-primary">₹3,000</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="shrink-0 flex flex-col gap-2 w-full md:w-[160px] border-t md:border-t-0 border-outline-variant pt-3 md:pt-0 mt-3 md:mt-0">
+<button class="w-full bg-emerald-primary text-on-primary font-label-md text-label-md font-bold py-2 px-4 rounded hover:bg-primary-fixed transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">chat</span> Open Trade Chat
+                        </button>
+<button class="w-full border border-outline-variant text-on-surface font-label-md text-label-md py-2 px-4 rounded hover:bg-surface-container-high transition-colors">
+                            View Order
+                        </button>
+</div>
+</article>
+<!-- Row 2: Pending Confirmation -->
+<article class="bg-surface-container rounded-lg border border-outline-variant p-stack-md flex flex-col md:flex-row gap-stack-md items-start md:items-center hover:border-outline transition-colors relative overflow-hidden group opacity-90">
+<!-- Thumbnail -->
+<div class="w-24 h-24 shrink-0 rounded bg-surface border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 transition-all" data-alt="A bulk carton of premium biscuits, 50 packets, professional commercial shot, dark background. B2B product photography." src="https://lh3.googleusercontent.com/aida/AEtjO1W_CoCCoAEM6KRpiOXn3TsQZhZO_CmFyaNJ-vcAw6cGi1tZ5gN2sXqxgI9E9UqzuKZjvmM8lN_83L0umQ6l4fQ7G4t94cEstbKmOZ9KwDZMvhRoWnCDG-OYMMfbUYT5ck59LVa_1EaKgNztWAzMri_lwCgu9ZQR-qn0z_3xvQyVuJ9XS9GspBs2JEg91AZzYynYWAyUT1NuTXSjRv3S-5emnQVN9sxJoFKnHZg5e5AK_dXxkABiMg-jfrE">
+</div>
+<!-- Core Info -->
+<div class="flex-grow min-w-0 flex flex-col justify-between h-full space-y-2">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-[#332a1a] text-[#ffd68a] border border-[#ffd68a]/30 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">pending</span> Pending Confirmation
+                                </span>
+<span class="text-label-md text-on-surface-variant">Reserved: 01 Sep 2026</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Premium Glucose Biscuits</h3>
+<div class="flex items-center gap-2 text-body-sm text-on-surface-variant mt-1">
+<span class="material-symbols-outlined text-sm">storefront</span>
+<span class="">Singh Supplies</span>
+</div>
+</div>
+</div>
+<!-- Financials -->
+<div class="shrink-0 md:text-right border-t md:border-t-0 md:border-l border-outline-variant pt-3 md:pt-0 md:pl-stack-md w-full md:w-auto grid grid-cols-3 md:block gap-4 items-center">
+<div class="md:mb-2">
+<div class="text-label-md text-on-surface-variant uppercase">Quantity</div>
+<div class="font-medium text-body-sm">50 packets</div>
+</div>
+<div class="md:mb-2">
+<div class="text-label-md text-on-surface-variant uppercase">Unit Price</div>
+<div class="font-medium text-body-sm">₹15</div>
+</div>
+<div>
+<div class="text-label-md text-on-surface-variant uppercase">Total Value</div>
+<div class="font-headline-sm text-headline-sm text-on-surface">₹750</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="shrink-0 flex flex-col gap-2 w-full md:w-[160px] border-t md:border-t-0 border-outline-variant pt-3 md:pt-0 mt-3 md:mt-0">
+<button class="w-full bg-surface-bright text-on-surface font-label-md text-label-md font-bold py-2 px-4 rounded border border-outline-variant hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">chat</span> Trade Chat
+                        </button>
+<button class="w-full text-error font-label-md text-label-md py-2 px-4 rounded hover:bg-error/10 transition-colors">
+                            Cancel Reservation
+                        </button>
+</div>
+</article>
+<!-- Row 3: Completed -->
+<article class="bg-surface-container-low rounded-lg border border-outline-variant p-stack-md flex flex-col md:flex-row gap-stack-md items-start md:items-center hover:border-outline transition-colors relative overflow-hidden opacity-75 grayscale hover:grayscale-0 transition-all duration-300">
+<!-- Thumbnail -->
+<div class="w-24 h-24 shrink-0 rounded bg-surface border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A large 25kg bag of premium Basmati rice, professional packaging, studio lighting, dark background. B2B product photography." src="https://lh3.googleusercontent.com/aida/AEtjO1Ur1dJAzjqy6Gw4Rmd9GSCvsO2_RJ4D6vE6OZ_S3NcGVUC_ZpSldHoqsrmOHfgaE_v1EFXmvyH3fRUiE62J9CwmFvBJ0gODHs8rq4AvID2TZoymADak8W9U06FKL0Ftxiyac6aYTTG0JW5FZhQD5auFiiDLJEHJVpPBnBzqF061EogzMIJCIVYd2r0SX7DuQ8NrTe61Db-YqBmYIt8UPK2m-McvdosGqBiW6sCNv_PZVA2xvKspkQuu_Hc">
+</div>
+<!-- Core Info -->
+<div class="flex-grow min-w-0 flex flex-col justify-between h-full space-y-2">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-surface-variant text-on-surface-variant border border-outline-variant px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">check_circle</span> Completed
+                                </span>
+<span class="text-label-md text-on-surface-variant">Completed: 20 Aug 2026</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Basmati Rice 25kg</h3>
+<div class="flex items-center gap-2 text-body-sm text-on-surface-variant mt-1">
+<span class="material-symbols-outlined text-sm">storefront</span>
+<span class="">Rao Fresh Foods</span>
+</div>
+</div>
+</div>
+<!-- Financials -->
+<div class="shrink-0 md:text-right border-t md:border-t-0 md:border-l border-outline-variant pt-3 md:pt-0 md:pl-stack-md w-full md:w-auto grid grid-cols-3 md:block gap-4 items-center">
+<div class="md:mb-2">
+<div class="text-label-md text-on-surface-variant uppercase">Quantity</div>
+<div class="font-medium text-body-sm">5 bags</div>
+</div>
+<div class="md:mb-2">
+<div class="text-label-md text-on-surface-variant uppercase">Unit Price</div>
+<div class="font-medium text-body-sm">₹2,250</div>
+</div>
+<div>
+<div class="text-label-md text-on-surface-variant uppercase">Total Value</div>
+<div class="font-headline-sm text-headline-sm text-on-surface-variant">₹11,250</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="shrink-0 flex flex-col gap-2 w-full md:w-[160px] border-t md:border-t-0 border-outline-variant pt-3 md:pt-0 mt-3 md:mt-0">
+<button class="w-full border border-outline-variant text-on-surface font-label-md text-label-md py-2 px-4 rounded hover:bg-surface-container-high transition-colors">
+                            View Details
+                        </button>
+<button class="w-full text-emerald-primary font-label-md text-label-md py-2 px-4 rounded hover:bg-emerald-primary-dim transition-colors flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">star_rate</span> Rate Trade</button>
+</div>
+</article>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant w-full px-container-margin py-stack-lg flex flex-col md:flex-row justify-between items-center gap-stack-md mt-auto">
+<div class="font-headline-sm text-headline-sm font-bold text-on-surface">
+            StockBridge
+        </div>
+<div class="flex gap-4 font-label-md text-label-md text-on-surface-variant">
+<a class="hover:text-primary transition-all duration-300" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-all duration-300" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-all duration-300" href="#">Support</a>
+<a class="hover:text-primary transition-all duration-300" href="#">Contact Us</a>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">
+            © 2024 StockBridge B2B Marketplace. All rights reserved.
+        </div>
+</footer>
+
+
+</body></html>
