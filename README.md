@@ -1,310 +1,178 @@
 # StockBridge 📦🔄
 
-**Hyper-Local B2B Dead Stock & Surplus Inventory Redistribution Platform**
+> **Hyperlocal B2B Dead Stock & Surplus Inventory Liquidation Engine**  
+> *Transforming stranded wholesale stock into immediate working capital in under 24 hours.*
 
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 [![React 19](https://img.shields.io/badge/Frontend-React_19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Express 5](https://img.shields.io/badge/Backend-Express_5-000000?logo=express&logoColor=white)](https://expressjs.com/)
 [![Prisma ORM](https://img.shields.io/badge/ORM-Prisma_5-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
-[![Google Gemini](https://img.shields.io/badge/AI-Gemini_3.6_Flash-8E75B2?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Tailwind CSS 4](https://img.shields.io/badge/Styles-Tailwind_4-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
-StockBridge connects manufacturers, wholesalers, distributors, and retail merchants to liquidate surplus inventory, closeout batches, and near-expiry goods. The platform integrates **geospatial proximity matchmaking, real-time WebSocket negotiation, double-blind peer trust ratings, synthetic marketplace generation, and a multilingual voice-to-listing engine with regional audio voiceovers**.
+---
+
+## 📌 Executive Summary
+
+Every year, Indian wholesalers, distributors, and kirana stores lose over **₹2.4 Lakh Crore ($30B+)** in dead inventory, slow-moving items, and near-expiry goods. Traditional supply chains provide no local outlet for quick liquidation, forcing merchants to write off stock or dump products into landfill streams.
+
+**StockBridge** is a hyperlocal B2B secondary exchange that connects manufacturers, distributors, and neighborhood retailers. Using **voice-first listing in 4 Indian languages**, **geo-proximity discovery within 2–50 km**, and a **zero-advance 24-hour reservation window**, StockBridge allows sellers to unlock cash flow while giving retail buyers 30%–70% gross margins.
 
 ---
 
-## 📑 Table of Contents
+## 🚀 Core Highlights & Features
 
-- [🌟 Platform Overview](#-platform-overview)
-- [🌿 Branch Architecture & Ecosystem](#-branch-architecture--ecosystem)
-- [✨ Core Capabilities](#-core-capabilities)
-  - [1. Surplus Marketplace & Proximity Search](#1-surplus-marketplace--proximity-search)
-  - [2. Smart Matchmaking Algorithm](#2-smart-matchmaking-algorithm)
-  - [3. Multilingual AI Voice-to-Listing Pipeline](#3-multilingual-ai-voice-to-listing-pipeline)
-  - [4. AI Native Voiceover Summary Synthesizer](#4-ai-native-voiceover-summary-synthesizer)
-  - [5. Real-Time Deal Negotiation & WebSocket Chat](#5-real-time-deal-negotiation--websocket-chat)
-  - [6. Escrow-Style Reservation State Machine](#6-escrow-style-reservation-state-machine)
-  - [7. Double-Blind Peer Review & Trust Ratings](#7-double-blind-peer-review--trust-ratings)
-  - [8. Administrative Operations & Analytics Center](#8-administrative-operations--analytics-center)
-- [🛠 Tech Stack & Architecture](#-tech-stack--architecture)
-- [📁 Monorepo Directory Structure](#-monorepo-directory-structure)
-- [🚀 Quick Start Guide](#-quick-start-guide)
-- [⚙️ Environment Configuration](#️-environment-configuration)
-- [🔑 Demo Accounts & Credentials](#-demo-accounts--credentials)
-- [📜 Available Scripts & Simulation](#-available-scripts--simulation)
-- [📡 API Reference](#-api-reference)
-- [📄 Branch Documentation Index](#-branch-documentation-index)
+### 1. 🎙️ Multilingual Voice-to-Listing
+- **Zero-Typing Creation**: Merchants tap the mic and speak naturally in **Hindi/Hinglish, English, Kannada, or Punjabi**.
+- **Instant AI Extraction**: Automatically parses title, category, lot quantity, unit price (₹), units (*packets, boxes, bags, quintals*), expiry date, and urgency level.
+- **Zero-Downtime Fallback**: Built-in regex extraction guarantees uninterrupted listing creation even during network interruptions.
+
+### 2. 📍 Hyperlocal Discovery & Proximity Filter
+- **Zero Long-Haul Friction**: Search nearby lots within **2 km, 5 km, 15 km, or 50 km** using GPS warehouse coordinates.
+- **City Hub Selector**: Instant city switching across major wholesale corridors (*Hyderabad, Mumbai, Bengaluru, Delhi NCR, Pune, Chennai*).
+- **Fast Local Logistics**: Products move via local tempo, auto, or direct pickup within hours instead of multi-day freight.
+
+### 3. ⏱️ 24-Hour Zero-Advance Reservation Guarantee
+- **Risk-Free Booking**: Retailers can lock an entire lot or partial volume for 24 hours **without paying any advance deposit**.
+- **Direct Trade Chat**: Real-time messaging opens between buyer and seller to agree on physical handover time and payment method.
+- **Auto-Release Timer**: If the trade is not completed within 24 hours, the stock lot automatically returns to the live marketplace.
+
+### 4. 📸 Proof-Verified Handover
+- **Physical Inspection Safeguard**: Upon meeting at the warehouse or storefront, the buyer physically inspects the lot.
+- **Handover Proof Upload**: Upload an inspection photo and confirm delivery before marking the reservation completed.
+
+### 5. ⭐️ Double-Blind Merchant Trust Score
+- **Unbiased Peer Reviews**: Both buyer and seller submit 1-to-5 star ratings and reviews.
+- **Simultaneous Release**: Reviews are kept hidden until both parties have submitted, preventing retaliatory scores.
+
+### 6. 🛡️ Admin Command Center
+- **Merchant Dossier Inspection**: Detailed operational oversight of verified merchants, active lots, dispute history, and transaction logs.
+- **Platform Health Monitoring**: Live metrics on gross merchandise value (GMV), active listings, and completion rates.
 
 ---
 
-## 🌟 Platform Overview
+## 🎨 Design System: Stitch UI
 
-Every year, Indian supply chains lose billions of dollars due to dead stock, overproduction, seasonal clearance gluts, and near-expiry goods dumped into waste streams. StockBridge resolves this by creating a **frictionless, hyper-local liquidation network** that converts trapped inventory into cash flow while offering buyers 30%–75% margins on verified goods.
+StockBridge is built with the custom **Stitch UI** design language:
+- **Matte Charcoal Foundation**: Primary background `#131313`, card surfaces `#1c1b1b`, inset containers `#2a2a2a`, and subtle borders `#3d4947`.
+- **Accents**: Primary Stitch Teal `#6bd8cb` (with `#003732` on-primary), Warning Amber `#f6b351`, and Alert Rose `#ffb4ab`.
+- **Typography**: **Sora** for headlines, valuations, and quantitative metrics; **Work Sans** for clean labels, navigation, and body copy.
+- **Micro-Animations**: Framer Motion smooth transitions (`0.25s` ease-outs) designed for clarity and speed without intrusive popups.
 
 ---
 
-## 🌿 Branch Architecture & Ecosystem
+## 📂 Project Architecture
 
-The StockBridge repository is structured into 3 specialized branches:
+StockBridge is organized as a unified monorepo:
 
 ```
-STOCKBRIDGE_ANTIGRAVITY (Repository)
-│
-├── 🏛️ main                ─── Core production platform, proximity search, real-time negotiation chat,
-│                              escrow reservations, trust scoring & admin analytics dashboard.
-│
-├── 🎲 random-generator    ─── High-fidelity synthetic data engine, commercial counterparty generator,
-│                              APMC mandi/industrial estate clusters, and continuous simulator stream.
-│
-└── 🎙️ ai-features          ─── Multilingual Speech-to-Listing Engine (Gemini 3.6 Flash), 10 regional Indian
-                               languages, dynamic match scoring, smart urgency/expiry, and AI Voiceover Audio.
-```
-
-- **[Main Branch Documentation](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/MAIN_README.md)** | **[Main Pitch](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/MAIN_PITCH.md)**
-- **[Random Generator Documentation](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/RANDOM_GENERATOR_README.md)** | **[Random Generator Pitch](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/RANDOM_GENERATOR_PITCH.md)**
-- **[AI Features Documentation](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/AI_FEATURES_README.md)** | **[AI Features Pitch](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/AI_FEATURES_PITCH.md)**
-
----
-
-## ✨ Core Capabilities
-
-### 1. Surplus Marketplace & Proximity Search
-- **Taxonomy**: Groceries, Dairy & Beverages, Prepared Food & Bakery, Packaging, Stationery, Electronics, Textiles, Hardware.
-- **Geospatial Range**: Search within 5 km, 15 km, 30 km, 50 km, or 100+ km using GPS coordinates to eliminate long-haul logistics.
-- **Rich Inventory Cards**: Display unit pricing, total lot valuations, minimum order quantities (MOQs), and urgency indicators.
-
-### 2. Smart Matchmaking Algorithm
-Calculates an automated **0% to 100% Match Score** pairing buyer requirements with active inventory:
-
-$$\text{Match Score} = (0.30 \times \text{Distance}) + (0.25 \times \text{Discount}) + (0.15 \times \text{Expiry}) + (0.15 \times \text{Urgency}) + (0.15 \times \text{Trust})$$
-
-- **Distance (30%)**: Uses the Haversine geodesic formula between buyer and seller warehouse coordinates.
-- **Discount (25%)**: Rewards deeper liquidation discounts relative to original market rates.
-- **Expiry Window (15%)**: Prioritizes near-expiry perishables to prevent commercial food waste.
-- **Urgency (15%)**: Escalates distressed liquidation lots.
-- **Seller Trust (15%)**: Boosts verified merchants with 4.5+ star peer ratings.
-
-### 3. Multilingual AI Voice-to-Listing Pipeline
-- **Zero-Typing Creation**: Merchants tap the microphone and speak naturally in **Hindi, Tamil, Telugu, Marathi, Bengali, Gujarati, Kannada, Malayalam, Punjabi, or English**.
-- **Gemini 3.6 Flash Extraction**: Extracts structured product titles, categories, units, quantities, per-unit prices, expiry dates, and urgency levels.
-- **Dialect & Unit Normalization**: Maps regional terms (*"bori"*, *"katte"*, *"peti"*, *"darjan"*, *"pauchi"*) into standard metric/imperial units.
-- **Dynamic Confidence Scoring**: Calculates live match percentages between **45% and 98% Match** based on spoken detail completeness.
-- **Zero-Downtime Fallback**: Local regex extractors guarantee uninterrupted listing extraction even during network outages.
-
-### 4. AI Native Voiceover Summary Synthesizer
-- **Spoken Confirmation**: Generates a natural, conversational audio summary in the merchant's chosen regional language before publishing.
-- **10 Indian Languages**: Native script rendering ensures genuine regional pronunciation.
-- **Player Controls**: Play, Pause, Resume, Stop, and Speed controls (`1.0x` / `1.25x`) with live animated audio equalizer waves.
-- **Clean Commercial Narration**: Speaks essential listing parameters (Product, Quantity, Unit, Price, Total Valuation, Expiry Date, Urgency) while keeping internal notes clean.
-
-### 5. Real-Time Deal Negotiation & WebSocket Chat
-- Encrypted, room-based instant messaging powered by **Socket.io**.
-- In-chat deal terms adjustment, live counterparty typing indicators, read receipts, and system event notifications.
-
-### 6. Escrow-Style Reservation State Machine
-- **Lifecycle**: `pending` $\rightarrow$ `confirmed` $\rightarrow$ `completed` / `cancelled`.
-- **Auto-Release Safety**: Automated background timeout releases unconfirmed reserved stock back to the public catalog.
-- **Proof Attachments**: Delivery and warehouse pickup photo uploads for audit trails.
-
-### 7. Double-Blind Peer Review & Trust Ratings
-- 1 to 5 star rating system with qualitative feedback submitted by both counterparties post-deal.
-- Eliminates retaliatory bias and generates transparent merchant trust badges.
-
-### 8. Administrative Operations & Analytics Center
-- Real-time Gross Merchandise Value (GMV), active batch counts, trade completion rates, and user registration analytics.
-- Listing moderation, merchant verification, dispute arbitration, and audit logs.
-
----
-
-## 🛠 Tech Stack & Architecture
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                      FRONTEND (React 19 + Vite 8)                      │
-│   • TailwindCSS 4 • Zustand Store • TanStack Query • Socket.io Client │
-│   • Web Speech API (STT & Multilingual Audio Synthesis) • Lucide Icons │
-└───────────────────▲────────────────────────────────▲───────────────────┘
-                    │                                │
-                    │ HTTP REST API Proxy            │ WebSocket Events
-                    │ (/api via Axios)               │ (/socket.io)
-                    ▼                                ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                   BACKEND ENGINE (Node.js & Express 5)                 │
-│   • Google Gemini 3.6 Flash SDK   • Smart Matchmaking Engine (Haversine)│
-│   • JWT Auth (HTTP-Only Cookies)  • Multi-Tier Rule-Based Fallback      │
-│   • Socket.io Server              • Multer File Upload Handler          │
-└───────────────────────────────────▲────────────────────────────────────┘
-                                    │
-                                    │ Prisma ORM (Type-Safe Client)
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                        DATA STORAGE (SQLite / PostgreSQL)              │
-│   • User • Listing • Reservation • Message • Rating • Analytics        │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 📁 Monorepo Directory Structure
-
-```text
 STOCKBRIDGE_ANTIGRAVITY/
-├── .env.example                       # Reference environment variables
-├── package.json                       # Root monorepo scripts & dependencies
-├── PITCH.md                           # Master Executive Pitch & Architecture
-├── README.md                          # Master Project Documentation
+├── client/                     # React 19 Frontend
+│   ├── src/
+│   │   ├── components/         # Stitch UI components (Navbar, Footer, VoiceListingPanel, Modals)
+│   │   ├── pages/              # LandingPage, MarketplacePage, HowItWorksPage, ListingDetailPage,
+│   │   │                       # CreateListingPage, MyListingsPage, ReservationsPage, AdminDashboardPage
+│   │   ├── stores/             # Zustand persistent client state (authStore)
+│   │   ├── lib/                # Axios API client & Socket.IO instance
+│   │   └── types/              # TypeScript models & API interfaces
+│   ├── index.html              # HTML shell with Sora & Work Sans Google Fonts
+│   └── package.json            # Frontend dependencies (React 19, Tailwind v4, Framer Motion)
 │
-├── client/                            # Frontend Single Page Application
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.ts                 # Vite config & API reverse proxy
-│   └── src/
-│       ├── components/                # UI Components (VoiceListingPanel, Navbar, etc.)
-│       ├── lib/                       # Axios instance, socket client, speech utils
-│       ├── pages/                     # Pages (CreateListing, SmartMatch, Admin, etc.)
-│       ├── stores/                    # Zustand stores (authStore)
-│       └── types/                     # TypeScript interfaces
-│
-├── server/                            # Backend REST API & Realtime Server
-│   ├── package.json
+├── server/                     # Node.js & Express Backend
+│   ├── src/
+│   │   ├── routes/             # REST endpoints (auth, listings, reservations, chat, voice, admin)
+│   │   ├── services/           # Matching engine, Gemini voice parser, socket handlers
+│   │   ├── validators.ts       # Strict Zod schema validation
+│   │   └── index.ts            # Express server initialization & Socket.IO mounting
 │   ├── prisma/
-│   │   ├── schema.prisma              # Database schema definitions
-│   │   └── seed.ts                    # Canonical database seeder
-│   └── src/
-│       ├── config.ts                  # Centralized configuration & Gemini keys
-│       ├── index.ts                   # Express server & Socket.io entrypoint
-│       ├── routes/                    # API Routes (auth, listings, voice, chat, etc.)
-│       ├── services/                  # Business Logic (voiceService, matchEngine)
-│       └── validators.ts              # Zod validation schemas
+│   │   ├── schema.prisma       # Database schema (User, Listing, Reservation, Message, Rating)
+│   │   └── seed.ts             # Realistic Indian wholesale demo seed data
+│   └── package.json            # Backend dependencies (Express 5, Prisma, Zod, Socket.IO)
 │
-├── docs/                              # Detailed Documentation
-│   └── branches/
-│       ├── MAIN_README.md             # Main branch technical guide
-│       ├── MAIN_PITCH.md              # Main branch pitch
-│       ├── RANDOM_GENERATOR_README.md # Random generator guide
-│       ├── RANDOM_GENERATOR_PITCH.md  # Random generator pitch
-│       ├── AI_FEATURES_README.md      # AI features technical guide
-│       └── AI_FEATURES_PITCH.md       # AI features pitch
-│
-└── scripts/                           # Simulation & Utility Scripts
-    ├── README.md                      # Script usage reference
-    └── random_generator.py            # Python synthetic data generator
+├── README.md                   # Master project guide (this document)
+├── PITCH.md                    # Business pitch deck & investor presentation
+├── TECHNOLOGY_ARCHITECTURE.md  # Detailed technical specifications & system design
+└── ENDPOINTS_AND_FEATURES.md   # API route inventory & feature status
 ```
 
 ---
 
-## 🚀 Quick Start Guide
+## ⚡ Quick Start Guide
 
 ### Prerequisites
-- **Node.js**: `v18.0.0` or higher (Node 20+ recommended)
-- **npm**: `v9.0.0` or higher
-- **Python**: `3.9+` (optional, for standalone simulator script)
+- **Node.js** (v18.0.0 or higher)
+- **npm** (v9.0.0 or higher)
 
-### 1. Clone & Install Dependencies
+### 1. Clone & Setup Backend
 ```bash
-# Install root, client, and server dependencies
+# Navigate to server directory
+cd server
+
+# Install dependencies
 npm install
-npm run postinstall
-```
 
-### 2. Configure Environment Variables
-Copy `.env.example` to root, `server/`, and `client/`:
-```bash
-# Windows PowerShell
-copy .env.example .env
-copy .env.example server\.env
-```
+# Initialize database schema & run migrations
+npx prisma db push
 
-### 3. Initialize Database
-```bash
-npm run db:push
-npm run db:seed
-```
+# Seed realistic demo merchants & stock lots
+npm run seed
 
-### 4. Start Full Development Server
-```bash
-# Runs both Frontend (Vite :5173) and Backend (Express :3001) concurrently
+# Start backend server (runs on http://localhost:5000)
 npm run dev
 ```
-Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 
----
-
-## ⚙️ Environment Configuration
-
-| Variable | Default Value | Description |
-| :--- | :--- | :--- |
-| `PORT` | `3001` | Backend HTTP & WebSocket server port |
-| `CLIENT_URL` | `http://localhost:5173` | Frontend application URL for CORS |
-| `DATABASE_URL` | `file:./dev.db` | SQLite database connection string |
-| `JWT_SECRET` | `stockbridge_dev_secret_jwt` | Secret key for signing JWT tokens |
-| `GEMINI_API_KEY` | *(Optional)* | Google Gemini API Key for AI voice parsing |
-| `GEMINI_MODEL` | `gemini-3.6-flash` | Gemini model for structured inventory extraction |
-
----
-
-## 🔑 Demo Accounts & Credentials
-
-| Role | Email | Password | Coordinates / Cluster |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@stockbridge.com` | `admin123` | Mumbai MMR (`19.0760, 72.8777`) |
-| **Wholesaler (Seller)** | `seller@stockbridge.com` | `seller123` | Bhiwandi Logistics Hub (`19.2967, 73.0631`) |
-| **Retailer (Buyer)** | `buyer@stockbridge.com` | `buyer123` | Andheri Commercial Zone (`19.1197, 72.8468`) |
-
----
-
-## 📜 Available Scripts & Simulation
-
+### 2. Setup Frontend Client
 ```bash
-# Start full application (Frontend + Backend)
+# In a new terminal window, navigate to client directory
+cd client
+
+# Install frontend dependencies
+npm install
+
+# Start development server (runs on http://localhost:5173 or 5174)
 npm run dev
-
-# Start frontend only
-npm run dev:client
-
-# Start backend only
-npm run dev:server
-
-# Build production bundles
-npm run build
-
-# Generate synthetic marketplace data (TypeScript)
-npm run generate
-
-# Run Python standalone simulator
-python scripts/random_generator.py --mode stream --interval 5
 ```
 
----
-
-## 📡 API Reference
-
-### 🎙️ AI Voice Endpoints
-- `POST /api/voice/parse`: Parses raw voice transcript into structured listing fields.
-- `POST /api/voice/voiceover`: Generates a natural regional spoken confirmation script in 10 native Indian languages.
-
-### 📦 Surplus Listing Endpoints
-- `GET /api/listings`: Paginated catalog with category, proximity, search, and urgency filters.
-- `POST /api/listings`: Create a new surplus batch listing.
-- `GET /api/listings/:id`: Fetch listing details with seller trust metrics.
-- `PUT /api/listings/:id`: Update listing price, quantity, or status.
-- `DELETE /api/listings/:id`: Soft delete / archive listing.
-
-### 🧠 Smart Match Endpoints
-- `POST /api/matches`: Multi-factor algorithmic ranking of inventory matching buyer criteria.
-
-### 🤝 Reservation & Chat Endpoints
-- `POST /api/reservations`: Initiate a new stock reservation.
-- `PUT /api/reservations/:id/confirm`: Seller confirms trade reservation.
-- `PUT /api/reservations/:id/complete`: Finalize deal and release escrow locks.
-- `GET /api/messages/thread/:reservationId`: Retrieve chat conversation history.
+Open your browser and navigate to:
+**`http://localhost:5173`** (or the port shown in your terminal).
 
 ---
 
-## 📄 Branch Documentation Index
+## 🔑 Demo Accounts & Test Credentials
 
-| Branch Name | Primary Functionality | Documentation Link | Pitch Document |
+All demo accounts share the password: **`password123`**
+
+| Role | Business Name | Email | Focus Area |
 | :--- | :--- | :--- | :--- |
-| **`main`** | Core B2B Marketplace & Escrow | [MAIN_README.md](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/MAIN_README.md) | [MAIN_PITCH.md](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/MAIN_PITCH.md) |
-| **`random-generator`** | Synthetic Trade Simulator | [RANDOM_GENERATOR_README.md](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/RANDOM_GENERATOR_README.md) | [RANDOM_GENERATOR_PITCH.md](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/RANDOM_GENERATOR_PITCH.md) |
-| **`ai-features`** | Multilingual Voice AI Engine | [AI_FEATURES_README.md](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/AI_FEATURES_README.md) | [AI_FEATURES_PITCH.md](file:///d:/STOCKBRIDGE_ANTIGRAVITY/docs/branches/AI_FEATURES_PITCH.md) |
+| **Seller** | Khan Trading Co | `seller@demo.com` | Wholesaler (FMCG, Groceries, Oil) |
+| **Buyer** | Rajesh General Store | `buyer@demo.com` | Neighborhood Kirana Retailer |
+| **Super Admin** | Platform Admin | `admin@demo.com` | Oversight, Verification & Moderation |
+
+---
+
+## 📡 Core API Summary
+
+| Endpoint | Method | Description | Auth Required |
+| :--- | :---: | :--- | :---: |
+| `/api/auth/login` | `POST` | Merchant login & JWT issuance | No |
+| `/api/auth/register` | `POST` | Register new business account | No |
+| `/api/listings` | `GET` | Browse active stock with proximity filter | No |
+| `/api/listings/:id` | `GET` | Fetch single lot specifications & merchant details | No |
+| `/api/listings` | `POST` | Create new stock lot (Manual or Voice) | Yes |
+| `/api/listings/:id` | `PUT` | Update price, quantity, or urgency for existing lot | Yes (Owner) |
+| `/api/listings/:id` | `DELETE`| Deactivate stock lot | Yes (Owner/Admin) |
+| `/api/voice/parse` | `POST` | Extract structured listing from transcript | Yes |
+| `/api/reservations` | `POST` | Create 24h zero-advance holding reservation | Yes |
+| `/api/reservations/my` | `GET` | Fetch user's buying and selling orders | Yes |
+| `/api/admin/metrics` | `GET` | Platform KPI cards & active GMV | Yes (Admin) |
+
+*Full endpoint catalog available in [ENDPOINTS_AND_FEATURES.md](file:///d:/STOCKBRIDGE_ANTIGRAVITY/ENDPOINTS_AND_FEATURES.md).*
+
+---
+
+## 📄 Documentation Links
+- 📊 **[PITCH.md](file:///d:/STOCKBRIDGE_ANTIGRAVITY/PITCH.md)** — Investment thesis, market sizing, competitive advantage & business model.
+- 🏗️ **[TECHNOLOGY_ARCHITECTURE.md](file:///d:/STOCKBRIDGE_ANTIGRAVITY/TECHNOLOGY_ARCHITECTURE.md)** — Deep technical breakdown of system architecture, data models, and algorithms.
+
+---
+
+**StockBridge** • Empowering local commerce through smart, liquid inventory.
