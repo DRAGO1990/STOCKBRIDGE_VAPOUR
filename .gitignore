@@ -1,11 +1,93 @@
+# ==========================================
+# Dependencies & Package Managers
+# ==========================================
 node_modules/
+.pnp
+.pnp.js
+
+# ==========================================
+# Secrets, Environment Variables & API Keys
+# ==========================================
 .env
+.env.*
+*.env
+!.env.example
+client/.env
+client/.env.*
+server/.env
+server/.env.*
+
+# ==========================================
+# Private Keys, Certificates & Auth Tokens
+# ==========================================
+*.pem
+*.key
+*.crt
+*.cert
+*.pfx
+*.p12
+id_rsa*
+id_ed25519*
+*credentials*.json
+*service-account*.json
+*client_secret*.json
+google-services*.json
+*.token
+
+# ==========================================
+# Databases, Migrations & SQLite Journaling
+# ==========================================
 *.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.sqlite-journal
 dev.db
+server/dev.db
+server/prisma/*.db
+server/prisma/*.db-journal
+
+# ==========================================
+# User Uploads & Sensitive PII (Invoices, Proofs, Photos)
+# ==========================================
+server/uploads/*/*
+!server/uploads/*/.gitkeep
+!server/uploads/**/.gitkeep
+
+# ==========================================
+# Build Outputs & Bundles
+# ==========================================
 dist/
+dist-ssr/
 build/
 .vite/
 coverage/
+*.tsbuildinfo
+
+# ==========================================
+# Logs & Debugging Dumps
+# ==========================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==========================================
+# Operating System & IDE Artifacts
+# ==========================================
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 *.zip
-server/uploads/products/*
-!server/uploads/products/.gitkeep
+*.tar.gz
