@@ -26,25 +26,44 @@ Every year, Indian wholesalers, distributors, and kirana stores lose over **₹2
 - **Instant AI Extraction**: Automatically parses title, category, lot quantity, unit price (₹), units (*packets, boxes, bags, quintals*), expiry date, and urgency level.
 - **Zero-Downtime Fallback**: Built-in regex extraction guarantees uninterrupted listing creation even during network interruptions.
 
-### 2. 📍 Hyperlocal Discovery & Proximity Filter
+### 2. 🧾 AI Invoice OCR & Mandatory MRP Protection
+- **No More Fake Discounts**: Sellers upload wholesale tax invoices or purchase bills. **Gemini Vision OCR** extracts supplier name, invoice date, line items, and original retail MRP.
+- **Mandatory Price Safeguards**: Listings strictly enforce `pricePerUnit <= originalMrp` to guarantee that listed markdowns reflect authentic commercial discounts.
+- **Verified Invoice Badge**: Authenticated lots display a green verified badge on marketplace cards, boosting buyer confidence and trade velocity.
+
+### 3. 📊 Smart Inventory & Dead-Stock Predictor
+- **Store-Level Inventory Analytics**: Merchants track warehouse batches with purchase costs, selling prices, minimum thresholds, and expiry timelines.
+- **LWMA Sales Velocity Forecasting**: Uses Linear Weighted Moving Average on daily sales logs to forecast exact days until stockout and calculate dead-stock risk before critical urgency thresholds.
+- **One-Click Liquidation**: At-risk inventory includes a direct "Liquidate Surplus on StockBridge" button that pre-fills lot specifications for instant listing creation.
+
+### 4. 📍 Hyperlocal Discovery & Proximity Filter
 - **Zero Long-Haul Friction**: Search nearby lots within **2 km, 5 km, 15 km, or 50 km** using GPS warehouse coordinates.
 - **City Hub Selector**: Instant city switching across major wholesale corridors (*Hyderabad, Mumbai, Bengaluru, Delhi NCR, Pune, Chennai*).
 - **Fast Local Logistics**: Products move via local tempo, auto, or direct pickup within hours instead of multi-day freight.
 
-### 3. ⏱️ 24-Hour Zero-Advance Reservation Guarantee
+### 5. ⏱️ 24-Hour Zero-Advance Reservation Guarantee
 - **Risk-Free Booking**: Retailers can lock an entire lot or partial volume for 24 hours **without paying any advance deposit**.
 - **Direct Trade Chat**: Real-time messaging opens between buyer and seller to agree on physical handover time and payment method.
 - **Auto-Release Timer**: If the trade is not completed within 24 hours, the stock lot automatically returns to the live marketplace.
 
-### 4. 📸 Proof-Verified Handover
+### 6. 🛡️ Dynamic Urgency & Expiry Auto-Unlisting
+- **Automated Urgency Tiers**: Lots dynamically transition across urgency levels (11–25 days: `HIGH`, 26–50 days: `MEDIUM`, > 50 days: `LOW`).
+- **Auto-Unlist Safety Guard**: Stock with less than 11 days of shelf life is automatically marked `expiry_unlisted` and hidden from public search, protecting buyers from receiving unsellable merchandise.
+
+### 7. 📸 Proof-Verified Handover & Product Photos
+- **Real Product Photos**: Sellers upload actual lot images (WebP/PNG/JPEG) for buyer transparency.
 - **Physical Inspection Safeguard**: Upon meeting at the warehouse or storefront, the buyer physically inspects the lot.
 - **Handover Proof Upload**: Upload an inspection photo and confirm delivery before marking the reservation completed.
 
-### 5. ⭐️ Double-Blind Merchant Trust Score
+### 8. 🔔 Real-Time Notification Center
+- **Instant Trade Alerts**: WebSockets push instant notifications for new reservations, accepted trades, chat messages, and dead-stock inventory warnings with an unread badge counter in the top navigation.
+
+### 9. ⭐️ Double-Blind Merchant Trust Score
 - **Unbiased Peer Reviews**: Both buyer and seller submit 1-to-5 star ratings and reviews.
 - **Simultaneous Release**: Reviews are kept hidden until both parties have submitted, preventing retaliatory scores.
 
-### 6. 🛡️ Admin Command Center
+### 10. 🛡️ Admin Command Center & Merchant KYC
+- **Merchant KYC Verification**: Admins review GSTIN and business credentials with 1-click verification or rejection.
 - **Merchant Dossier Inspection**: Detailed operational oversight of verified merchants, active lots, dispute history, and transaction logs.
 - **Platform Health Monitoring**: Live metrics on gross merchandise value (GMV), active listings, and completion rates.
 
@@ -68,9 +87,9 @@ StockBridge is organized as a unified monorepo:
 STOCKBRIDGE_ANTIGRAVITY/
 ├── client/                     # React 19 Frontend
 │   ├── src/
-│   │   ├── components/         # Stitch UI components (Navbar, Footer, VoiceListingPanel, Modals)
+│   │   ├── components/         # Stitch UI components (Navbar, NotificationCenter, InvoiceUploadModal, ListingCard)
 │   │   ├── pages/              # LandingPage, MarketplacePage, HowItWorksPage, ListingDetailPage,
-│   │   │                       # CreateListingPage, MyListingsPage, ReservationsPage, AdminDashboardPage
+│   │   │                       # CreateListingPage, MyListingsPage, InventoryPage, ReservationsPage, AdminDashboardPage
 │   │   ├── stores/             # Zustand persistent client state (authStore)
 │   │   ├── lib/                # Axios API client & Socket.IO instance
 │   │   └── types/              # TypeScript models & API interfaces
@@ -79,14 +98,14 @@ STOCKBRIDGE_ANTIGRAVITY/
 │
 ├── server/                     # Node.js & Express Backend
 │   ├── src/
-│   │   ├── routes/             # REST endpoints (auth, listings, reservations, chat, voice, admin)
-│   │   ├── services/           # Matching engine, Gemini voice parser, socket handlers
+│   │   ├── routes/             # REST endpoints (auth, listings, invoices, inventory, notifications, chat, admin)
+│   │   ├── services/           # Matching engine, Gemini invoice OCR, inventory predictor, expiry monitor
 │   │   ├── validators.ts       # Strict Zod schema validation
 │   │   └── index.ts            # Express server initialization & Socket.IO mounting
 │   ├── prisma/
-│   │   ├── schema.prisma       # Database schema (User, Listing, Reservation, Message, Rating)
+│   │   ├── schema.prisma       # Database schema (User, Listing, InvoiceVerification, InventoryBatch, Notification, etc.)
 │   │   └── seed.ts             # Realistic Indian wholesale demo seed data
-│   └── package.json            # Backend dependencies (Express 5, Prisma, Zod, Socket.IO)
+│   └── package.json            # Backend dependencies (Express 5, Prisma, Zod, Socket.IO, Multer)
 │
 ├── README.md                   # Master project guide (this document)
 ├── PITCH.md                    # Business pitch deck & investor presentation
@@ -157,13 +176,19 @@ All demo accounts share the password: **`password123`**
 | `/api/auth/register` | `POST` | Register new business account | No |
 | `/api/listings` | `GET` | Browse active stock with proximity filter | No |
 | `/api/listings/:id` | `GET` | Fetch single lot specifications & merchant details | No |
-| `/api/listings` | `POST` | Create new stock lot (Manual or Voice) | Yes |
+| `/api/listings` | `POST` | Create new stock lot with mandatory MRP & Invoice | Yes |
+| `/api/listings/upload-image` | `POST` | Upload product photo image | Yes |
 | `/api/listings/:id` | `PUT` | Update price, quantity, or urgency for existing lot | Yes (Owner) |
 | `/api/listings/:id` | `DELETE`| Deactivate stock lot | Yes (Owner/Admin) |
-| `/api/voice/parse` | `POST` | Extract structured listing from transcript | Yes |
+| `/api/invoices/verify` | `POST` | Gemini Vision OCR extraction of wholesale invoices | Yes |
+| `/api/inventory` | `GET` | Store inventory batches with LWMA velocity & risk | Yes |
+| `/api/inventory` | `POST` | Track new warehouse inventory batch | Yes |
+| `/api/inventory/:id/log` | `POST` | Log daily sales units to update predictive velocity | Yes |
+| `/api/notifications` | `GET` | Fetch real-time in-app user notifications | Yes |
 | `/api/reservations` | `POST` | Create 24h zero-advance holding reservation | Yes |
-| `/api/reservations/my` | `GET` | Fetch user's buying and selling orders | Yes |
-| `/api/admin/metrics` | `GET` | Platform KPI cards & active GMV | Yes (Admin) |
+| `/api/reservations/my/buying` | `GET` | Fetch user's buying reservations | Yes |
+| `/api/admin/stats` | `GET` | Platform KPI cards & active GMV | Yes (Admin) |
+| `/api/admin/users/:id/verify` | `POST` | Approve/Reject merchant KYC verification | Yes (Admin) |
 
 *Full endpoint catalog available in [ENDPOINTS_AND_FEATURES.md](file:///d:/STOCKBRIDGE_ANTIGRAVITY/ENDPOINTS_AND_FEATURES.md).*
 

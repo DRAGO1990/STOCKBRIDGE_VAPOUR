@@ -49,10 +49,12 @@ StockBridge builds a **frictionless, hyperlocal liquidation rail** that operates
                      Liquidated in under 24 hours!
 ```
 
-### The 3 Unfair Advantages:
+### The 5 Unfair Advantages:
 1. **Frictionless Voice Capture**: A busy wholesaler in a noisy warehouse doesn't fill out 20-field web forms. They tap the mic, speak in Hindi, English, Kannada, or Punjabi, and our AI automatically extracts product title, lot quantity, price, unit, and expiry date.
-2. **Hyperlocal Proximity (2–50 km)**: Moving goods across town by auto or tempo takes 2 hours and costs almost nothing, making low-ticket liquidation highly profitable.
-3. **Zero-Advance 24h Holding Guarantee**: Buyers reserve lots risk-free for 24 hours without upfront lock-in, eliminating payment disputes before physical inspection.
+2. **AI Invoice OCR & Fraud-Proof MRP**: Sellers upload authentic purchase bills. Gemini Vision extracts the verified MRP and supplier details, locking selling price $\le$ MRP and preventing deceptive markups.
+3. **Smart Inventory Predictor**: Wholesalers monitor warehouse batches with LWMA sales velocity, identifying at-risk dead stock weeks before expiry with 1-click seamless listing onto StockBridge.
+4. **Hyperlocal Proximity (2–50 km)**: Moving goods across town by auto or tempo takes 2 hours and costs almost nothing, making low-ticket liquidation highly profitable.
+5. **Zero-Advance 24h Holding Guarantee**: Buyers reserve lots risk-free for 24 hours without upfront lock-in, eliminating payment disputes before physical inspection.
 
 ---
 
@@ -112,6 +114,8 @@ StockBridge operates a high-velocity transactional marketplace model:
 | Feature | StockBridge | IndiaMART | Udaan | Offline Scrap Brokers |
 | :--- | :---: | :---: | :---: | :---: |
 | **Listing Speed** | **10s Voice (4 Langs)** | 10 min manual form | Supplier catalog sync | Days of calling |
+| **Price Authenticity** | **Gemini OCR Invoice Check** | Unverified claims | Fixed wholesale catalog | Word of mouth |
+| **Dead Stock Forecast**| **LWMA Velocity Engine** | None | None | None |
 | **Proximity Discovery** | **Exact km radius (2–50 km)** | City/State level | Regional hub | Word of mouth |
 | **Holding Guarantee** | **24h Zero-Advance** | None | Upfront payment | Unreliable |
 | **Handover Security** | **Photo Proof Verification** | None | Delivery agent | Manual inspection |
@@ -122,7 +126,7 @@ StockBridge operates a high-velocity transactional marketplace model:
 
 ## 8. 🎬 10-Second Elevator Pitch & Demo Script
 
-> *"StockBridge is Quick Commerce for B2B dead stock. We let Indian wholesalers turn trapped, near-expiry inventory into liquid cash in under 24 hours. A seller taps a mic and speaks in their regional language; our AI parses the lot instantly; nearby kiranas reserve it within 5 km with zero advance risk; and physical handover is verified with photo proof. We make stuck inventory liquid, local, and profitable."*
+> *"StockBridge is Quick Commerce for B2B dead stock. We let Indian wholesalers turn trapped, near-expiry inventory into liquid cash in under 24 hours. A seller taps a mic and speaks in their regional language; our AI parses the lot instantly; authentic wholesale bills are OCR-verified with Gemini Vision to guarantee honest discounts; nearby kiranas reserve it within 5 km with zero advance risk; and physical handover is verified with photo proof. We make stuck inventory liquid, local, and profitable."*
 
 ---
 
@@ -131,9 +135,13 @@ StockBridge operates a high-velocity transactional marketplace model:
 - **Phase 1 (Completed ✅)**:
   - Stitch UI high-fidelity desktop & mobile responsive application.
   - Multilingual voice extraction in 4 Indian languages (Hindi, English, Kannada, Punjabi).
-  - Hyperlocal proximity search engine with Haversine GPS radius.
-  - Zero-advance 24h holding state machine and WebSocket negotiation chat.
-  - Double-blind peer reviews and Admin Command Center with merchant dossiers.
+  - Hyperlocal proximity search engine with Haversine GPS radius and city hubs.
+  - AI Invoice OCR verification via Gemini Vision & mandatory original MRP enforcement.
+  - Smart Inventory Risk Predictor with LWMA sales velocity forecasting and 1-click liquidation.
+  - Dynamic urgency tiers and automated < 11-day expiry unlisting safeguard.
+  - In-app real-time notification center and WebSocket negotiation chat.
+  - Zero-advance 24h holding state machine with photo handover proof.
+  - Double-blind peer reviews and Admin Command Center with KYC moderation.
 
 - **Phase 2 (Next 6 Months 🚀)**:
   - WhatsApp Business Bot integration (listing and reservation via WhatsApp audio notes).

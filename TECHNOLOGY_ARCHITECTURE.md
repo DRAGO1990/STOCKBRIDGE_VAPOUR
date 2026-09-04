@@ -12,7 +12,8 @@ StockBridge follows a clean, decoupled client-server architecture designed for h
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           CLIENT LAYER                                  │
 │   React 19 SPA • Vite • Tailwind v4 • Stitch UI Tokens • Framer Motion  │
-│   Zustand (State) • Web Speech API (Client-side STT) • Socket.IO Client │
+│   Zustand (State) • Web Speech API (Voice STT) • Socket.IO Client       │
+│   Smart Inventory Predictor • Invoice OCR Modal • Live Notification Bar │
 └────────────────────┬───────────────────────────────▲────────────────────┘
                      │ HTTPS (REST)                  │ WebSockets (WSS)
                      ▼                               │
@@ -21,12 +22,16 @@ StockBridge follows a clean, decoupled client-server architecture designed for h
 │   Node.js 20+ • Express 5 • TypeScript • Socket.IO Server Engine        │
 │                                                                         │
 │   ┌──────────────────┐  ┌──────────────────┐  ┌─────────────────────┐  │
-│   │  Auth & Users    │  │ Matching Engine  │  │ Voice Extraction AI │  │
-│   │  JWT & Bcrypt    │  │ Haversine Search │  │ Gemini & Regex Fall │  │
+│   │  Auth & KYC      │  │ Matching Engine  │  │ Voice Extraction AI │  │
+│   │  JWT, Bcrypt, KYC│  │ Haversine Search │  │ Gemini & Regex Fall │  │
+│   └──────────────────┘  └──────────────────┘  └─────────────────────┘  │
+│   ┌──────────────────┐  ┌──────────────────┐  ┌─────────────────────┐  │
+│   │ Invoice OCR (AI) │  │ Inventory Engine │  │ Expiry Monitor      │  │
+│   │ Gemini Vision 1.5│  │ LWMA Velocity    │  │ Auto-Unlist Daemon  │  │
 │   └──────────────────┘  └──────────────────┘  └─────────────────────┘  │
 │   ┌──────────────────┐  ┌──────────────────┐  ┌─────────────────────┐  │
 │   │ Listing Pipeline │  │ 24h Reservation  │  │ Double-Blind Rating │  │
-│   │ Validation (Zod) │  │ State Machine    │  │ Trust Engine        │  │
+│   │ Mandatory MRP/Zod│  │ State Machine    │  │ Trust Ledger        │  │
 │   └──────────────────┘  └──────────────────┘  └─────────────────────┘  │
 └────────────────────────────────────┬────────────────────────────────────┘
                                      │ Prisma ORM 5
@@ -34,7 +39,8 @@ StockBridge follows a clean, decoupled client-server architecture designed for h
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                            PERSISTENCE LAYER                            │
 │   Relational Database (SQLite for Dev / PostgreSQL for Production)      │
-│   Tables: User • Listing • Reservation • Message • Rating               │
+│   Tables: User • Listing • InvoiceVerification • InventoryBatch •       │
+│           DailyInventoryLog • Reservation • Message • Rating • Notif    │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -79,7 +85,9 @@ StockBridge follows a clean, decoupled client-server architecture designed for h
 | **Language** | **TypeScript 5** | Strict type safety spanning shared API requests, responses, and DB schemas. |
 | **Database ORM** | **Prisma 5** | Type-safe query building, auto-generated migrations, and relational joins. |
 | **Validation** | **Zod** | Runtime schema enforcement for API payloads preventing malformed data. |
-| **Real-time** | **Socket.IO 4** | Bidirectional low-latency messaging rooms for buyer-seller negotiations. |
+| **Vision AI** | **Gemini 1.5 Flash** | Multimodal OCR and structured line-item extraction for wholesale tax invoices. |
+| **Real-time** | **Socket.IO 4** | Bidirectional low-latency messaging rooms and instant trade notification dispatch. |
+| **File Storage** | **Multer** | Multipart stream parsing for product photos and invoice documents with disk storage. |
 | **Security** | **JWT + Bcrypt.js** | Stateless authentication tokens and salted password hashing (10 rounds). |
 
 ---
@@ -92,7 +100,12 @@ Managed via **Prisma ORM** (`server/prisma/schema.prisma`):
 erDiagram
     USER ||--o{ LISTING : "owns"
     USER ||--o{ RESERVATION : "reserves as buyer"
+    USER ||--o{ INVENTORY_BATCH : "tracks store stock"
+    USER ||--o{ INVOICE_VERIFICATION : "uploads bills"
+    USER ||--o{ NOTIFICATION : "receives"
+    LISTING ||--o| INVOICE_VERIFICATION : "verified by"
     LISTING ||--o{ RESERVATION : "booked under"
+    INVENTORY_BATCH ||--o{ DAILY_INVENTORY_LOG : "records daily sales"
     RESERVATION ||--o{ MESSAGE : "contains negotiation"
     RESERVATION ||--o{ RATING : "yields peer review"
 
@@ -106,6 +119,8 @@ erDiagram
         float lat
         float lng
         boolean isVerified
+        string kycStatus
+        string kycDocumentUrl
         boolean isAdmin
         float rating
         datetime createdAt
@@ -114,15 +129,55 @@ erDiagram
     LISTING {
         string id PK
         string sellerId FK
+        string invoiceVerificationId FK
         string title
         string category
         float quantity
         string unit
         float pricePerUnit
+        float originalMrp
         datetime expiryDate
         string urgency
         string status
         string imageUrl
+        datetime createdAt
+    }
+
+    INVOICE_VERIFICATION {
+        string id PK
+        string merchantId FK
+        string invoiceNumber
+        string supplierName
+        datetime invoiceDate
+        json extractedData
+        string rawOcrText
+        float confidence
+        datetime verifiedAt
+        datetime createdAt
+    }
+
+    INVENTORY_BATCH {
+        string id PK
+        string merchantId FK
+        string productName
+        string category
+        float currentStock
+        string unit
+        float costPrice
+        float originalMrp
+        float sellingPrice
+        datetime expiryDate
+        float minThreshold
+        datetime createdAt
+    }
+
+    DAILY_INVENTORY_LOG {
+        string id PK
+        string batchId FK
+        datetime date
+        float unitsSold
+        float spoilage
+        string notes
         datetime createdAt
     }
 
@@ -154,6 +209,17 @@ erDiagram
         string ratedId FK
         int score
         string comment
+        datetime createdAt
+    }
+
+    NOTIFICATION {
+        string id PK
+        string userId FK
+        string title
+        string message
+        string type
+        boolean isRead
+        string linkUrl
         datetime createdAt
     }
 ```
@@ -249,17 +315,93 @@ stateDiagram-v2
 
 ---
 
-## 8. 🔒 Security & Data Integrity
+## 8. 📊 Smart Inventory & LWMA Sales Velocity Prediction Engine
+
+To prevent dead stock before it happens, the inventory prediction service (`server/src/services/inventoryPredictionService.ts`) implements a **Linear Weighted Moving Average (LWMA)** across recorded daily sales:
+
+$$\text{Velocity} = \frac{\sum_{i=1}^{n} w_i \cdot S_i}{\sum_{i=1}^{n} w_i}$$
+
+Where:
+- $S_i$ is the sales volume on day $i$
+- $w_i = i$ assigns higher weight to recent daily transactions ($w_n > w_{n-1} > \dots > w_1$)
+- If fewer than 2 sales logs exist, the engine defaults to a conservative fallback baseline: $\text{FallbackVelocity} = \max(0.5, \frac{\text{CurrentStock}}{30})$.
+
+### Days to Stockout & Dead-Stock Risk Classification:
+$$\text{DaysToStockout} = \frac{\text{CurrentStock}}{\text{Velocity}}$$
+$$\text{DaysToExpiry} = \frac{\text{ExpiryDate} - \text{Today}}{86,400,000\text{ ms}}$$
+
+| Risk Tier | Condition | Actionable Recommendation |
+| :--- | :--- | :--- |
+| **CRITICAL** | $\text{DaysToStockout} > \text{DaysToExpiry}$ and $\text{DaysToExpiry} \le 25$ | High dead-stock risk. Immediate 1-click liquidation recommended on StockBridge. |
+| **HIGH_RISK** | $\text{DaysToStockout} > \text{DaysToExpiry}$ and $\text{DaysToExpiry} \le 45$ | Stockout will not occur before expiry; liquidate surplus quantity. |
+| **MODERATE** | $\text{DaysToStockout} > 0.8 \times \text{DaysToExpiry}$ | Monitor velocity; consider promotional markdown. |
+| **HEALTHY** | $\text{DaysToStockout} \le 0.8 \times \text{DaysToExpiry}$ | Stock will safely sell out well before expiry. |
+
+---
+
+## 9. 🧾 AI Invoice OCR & Mandatory MRP Enforcement
+
+StockBridge eliminates counterfeit discounts and predatory markups by binding surplus lots to authenticated wholesale tax bills:
+
+```
+[Merchant Tax Invoice / Bill Photo]
+                 │
+                 ▼
+┌────────────────────────────────────────────────────────┐
+│  Multipart File Upload via Multer (/api/invoices/verify)│
+│  Validated format: PNG, JPEG, WebP (Max 5MB)           │
+└────────────────────────┬───────────────────────────────┘
+                         │ Binary Buffer
+                         ▼
+┌────────────────────────────────────────────────────────┐
+│  Gemini 1.5 Flash Vision Multimodal Extraction         │
+│  Prompt-engineered schema extraction:                  │
+│  • supplierName, invoiceNumber, invoiceDate            │
+│  • lineItems[]: { productName, quantity, unit,         │
+│                   unitPrice, originalMrp, total }       │
+│  • overallConfidence (0.00 – 1.00)                     │
+└────────────────────────┬───────────────────────────────┘
+                         │ Structured Verification Record
+                         ▼
+┌────────────────────────────────────────────────────────┐
+│  Prisma InvoiceVerification Table                      │
+│  Listing requires invoiceVerificationId & originalMrp  │
+│  Zod Check: pricePerUnit <= originalMrp (Strict)       │
+│  UI: Green "Verified Invoice" Badge on Listing Card    │
+└────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 10. 🛡️ Dynamic Urgency Engine & Expiry Auto-Unlisting Daemon
+
+Surplus inventory shelf life is protected by automated lifecycle rules:
+
+1. **Dynamic Urgency Calculation**:
+   $$\text{DaysRemaining} = \left\lfloor \frac{\text{ExpiryDate} - \text{Now}}{86,400,000} \right\rfloor$$
+   - $\text{DaysRemaining} \in [11, 25] \implies \text{HIGH Urgency}$
+   - $\text{DaysRemaining} \in [26, 50] \implies \text{MEDIUM Urgency}$
+   - $\text{DaysRemaining} > 50 \implies \text{LOW Urgency}$
+
+2. **Automated Expiry Unlisting Daemon (`server/src/services/expiryMonitor.ts`)**:
+   - Runs periodically in the background.
+   - Any active listing where $\text{DaysRemaining} < 11$ is automatically transitioned to status `expiry_unlisted`.
+   - Hidden from public marketplace search and queries to guarantee retail buyers never receive distressed goods incapable of neighborhood turnaround.
+
+---
+
+## 11. 🔒 Security & Data Integrity
 
 - **Stateless Authentication**: Cryptographically signed JSON Web Tokens (`HMAC-SHA256`) with configurable expiration.
 - **Password Security**: Passwords salted and hashed with `bcryptjs` (work factor: 10).
 - **Double-Blind Reviews**: Rating records contain a `released` flag. The system only exposes scores on a seller or buyer profile when both counterparties have submitted their review, preventing retaliatory bias.
 - **SQL Injection Prevention**: Prisma ORM executes parameterized queries for all database interactions.
 - **Input Sanitization**: Zod schemas validate and strip unexpected payload attributes across all mutating routes (`POST`, `PUT`, `PATCH`).
+- **File Validation**: Multer storage filters enforce mime-type integrity and reject files exceeding 5MB.
 
 ---
 
-## 9. 🚀 Deployment & DevOps Setup
+## 12. 🚀 Deployment & DevOps Setup
 
 - **Frontend Build**: Vite compiles to optimized static assets in `/client/dist/`. Can be hosted on Vercel, Netlify, or AWS CloudFront/S3.
 - **Backend Build**: TypeScript compiled via `tsc` to `/server/dist/`. Can run in any Node.js container (AWS ECS, Render, Fly.io, or DigitalOcean Droplet).
@@ -267,8 +409,9 @@ stateDiagram-v2
   - `DATABASE_URL`: Connection string for SQLite (`file:./dev.db`) or PostgreSQL (`postgresql://...`).
   - `JWT_SECRET`: Secret key for token signing.
   - `PORT`: Default `5000`.
-  - `GEMINI_API_KEY`: Optional key for enhanced AI voice parsing.
+  - `GEMINI_API_KEY`: Key for enhanced AI voice parsing and invoice OCR.
 
 ---
 
 **StockBridge Architecture Team** • *Built for speed, reliability, and hyperlocal scale.*
+
