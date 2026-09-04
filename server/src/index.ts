@@ -83,7 +83,7 @@ app.get('/api/health', (_req, res) => {
 const clientDistPath = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientDistPath));
 
-app.get('*', (req, res, next) => {
+app.use((req, res, next) => {
   if (
     req.path.startsWith('/api') ||
     req.path.startsWith('/uploads') ||
