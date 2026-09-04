@@ -436,17 +436,17 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       
       {/* ─── Step 1: Language Selection ─── */}
-      <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: 20 }}>
+      <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, padding: 20, boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Globe size={16} color="#6bd8cb" />
-            <h4 style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#bcc9c6', margin: 0 }}>
+            <Globe size={16} color="var(--sb-primary, #6F8F69)" />
+            <h4 style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--sb-text-secondary, #4F5A51)', margin: 0 }}>
               Step 1 — Speech Language
             </h4>
           </div>
           <span style={{
             fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
-            color: '#6bd8cb', background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.25)',
+            color: 'var(--sb-primary, #6F8F69)', background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
             borderRadius: 4, padding: '2px 8px',
           }}>
             {currentLang?.nativeName}
@@ -466,9 +466,9 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
                 }}
                 disabled={isRecording}
                 style={{
-                  background: active ? 'rgba(107,216,203,0.12)' : '#2a2a2a',
-                  border: `1px solid ${active ? '#6bd8cb' : '#3d4947'}`,
-                  color: active ? '#6bd8cb' : '#bcc9c6',
+                  background: active ? 'var(--sb-primary-pale, #EAF1E7)' : 'var(--sb-surface-soft, #F2F6EF)',
+                  border: `1px solid ${active ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-border, #D8E0D5)'}`,
+                  color: active ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-primary, #182018)',
                   borderRadius: 4, padding: '10px 12px', textAlign: 'left',
                   cursor: isRecording ? 'not-allowed' : 'pointer',
                   opacity: isRecording ? 0.6 : 1, transition: 'all 0.15s',
@@ -477,7 +477,7 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
                 <span style={{ display: 'block', fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 600 }}>
                   {lang.nativeName}
                 </span>
-                <span style={{ display: 'block', fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391', marginTop: 2 }}>
+                <span style={{ display: 'block', fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', marginTop: 2 }}>
                   {lang.name}
                 </span>
               </button>
@@ -487,28 +487,28 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       </div>
 
       {/* ─── Step 2: Live Mic Recording ─── */}
-      <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: 24 }}>
+      <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, padding: 24, boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Volume2 size={16} color="#6bd8cb" />
-            <h4 style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#bcc9c6', margin: 0 }}>
+            <Volume2 size={16} color="var(--sb-primary, #6F8F69)" />
+            <h4 style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--sb-text-secondary, #4F5A51)', margin: 0 }}>
               Step 2 — Speak Details
             </h4>
           </div>
           {isRecording && (
             <span style={{
               fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700,
-              color: '#ffb4ab', background: 'rgba(255,180,171,0.1)', border: '1px solid rgba(255,180,171,0.3)',
+              color: 'var(--sb-danger, #A65C55)', background: 'rgba(166,92,85,0.1)', border: '1px solid rgba(166,92,85,0.3)',
               borderRadius: 4, padding: '2px 8px', display: 'flex', alignItems: 'center', gap: 4,
             }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ffb4ab' }} className="animate-pulse" />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--sb-danger, #A65C55)' }} className="animate-pulse" />
               Recording
             </span>
           )}
         </div>
 
-        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', lineHeight: 1.5, margin: '0 0 20px' }}>
-          Speak naturally in <strong style={{ color: '#6bd8cb' }}>{currentLang?.nativeName}</strong>. State your product name, lot quantity, price per unit (₹), and expiry date.
+        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)', lineHeight: 1.5, margin: '0 0 20px' }}>
+          Speak naturally in <strong style={{ color: 'var(--sb-primary, #6F8F69)' }}>{currentLang?.nativeName}</strong>. State your product name, lot quantity, price per unit (₹), and expiry date.
         </p>
 
         {/* Big Mic Button */}
@@ -519,12 +519,12 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
             disabled={!sttSupported}
             style={{
               width: 72, height: 72, borderRadius: 36,
-              background: isRecording ? 'rgba(255,180,171,0.15)' : '#6bd8cb',
-              border: `2px solid ${isRecording ? '#ffb4ab' : '#6bd8cb'}`,
-              color: isRecording ? '#ffb4ab' : '#003732',
+              background: isRecording ? 'rgba(166,92,85,0.15)' : 'var(--sb-primary, #6F8F69)',
+              border: `2px solid ${isRecording ? 'var(--sb-danger, #A65C55)' : 'var(--sb-primary, #6F8F69)'}`,
+              color: isRecording ? 'var(--sb-danger, #A65C55)' : '#FFFFFF',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: !sttSupported ? 'not-allowed' : 'pointer',
-              boxShadow: isRecording ? '0 0 24px rgba(255,180,171,0.3)' : '0 0 20px rgba(107,216,203,0.2)',
+              boxShadow: isRecording ? '0 0 24px rgba(166,92,85,0.3)' : '0 0 20px rgba(111,143,105,0.25)',
               transition: 'all 0.2s',
             }}
           >
@@ -541,7 +541,7 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
                     key={i}
                     style={{
                       width: 3, height: dynamicHeight,
-                      background: '#ffb4ab', borderRadius: 2,
+                      background: 'var(--sb-danger, #A65C55)', borderRadius: 2,
                       transition: 'height 0.08s ease',
                     }}
                   />
@@ -549,22 +549,22 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
               })}
             </div>
           ) : (
-            <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391' }}>
+            <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)' }}>
               Tap microphone to begin speaking
             </span>
           )}
         </div>
 
         {/* Transcript Box */}
-        <div style={{ marginTop: 20, background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 6, padding: 16 }}>
+        <div style={{ marginTop: 20, background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 6, padding: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Edit3 size={13} color="#6bd8cb" />
-              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#bcc9c6' }}>
+              <Edit3 size={13} color="var(--sb-primary, #6F8F69)" />
+              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--sb-text-secondary, #4F5A51)' }}>
                 Transcript
               </span>
               {wordCount > 0 && (
-                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, color: '#879391' }}>
+                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, color: 'var(--sb-text-muted, #7A847A)' }}>
                   ({wordCount} words)
                 </span>
               )}
@@ -579,14 +579,14 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
-                  style={{ background: 'transparent', border: 'none', color: '#879391', fontSize: 11, cursor: 'pointer' }}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--sb-text-muted, #7A847A)', fontSize: 11, cursor: 'pointer' }}
                 >
                   {copied ? 'Copied' : 'Copy'}
                 </button>
                 <button
                   type="button"
                   onClick={handleReset}
-                  style={{ background: 'transparent', border: 'none', color: '#879391', fontSize: 11, cursor: 'pointer' }}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--sb-text-muted, #7A847A)', fontSize: 11, cursor: 'pointer' }}
                 >
                   Clear
                 </button>
@@ -601,22 +601,22 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
             placeholder={isRecording ? 'Listening in real-time...' : 'Your spoken words will appear here. You can also edit or type manually.'}
             style={{
               width: '100%', boxSizing: 'border-box',
-              background: '#131313', border: '1px solid #3d4947',
+              background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)',
               borderRadius: 4, padding: '10px 12px',
-              fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1',
+              fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-primary, #182018)',
               outline: 'none', resize: 'vertical',
             }}
           />
 
           {interimText && (
-            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#6bd8cb', fontStyle: 'italic', margin: '4px 0 0' }}>
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-primary, #6F8F69)', fontStyle: 'italic', margin: '4px 0 0' }}>
               Hearing: {interimText}...
             </p>
           )}
 
           {/* Quick Try Sample Prompts */}
-          <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid #3d4947' }}>
-            <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#879391', display: 'block', marginBottom: 8 }}>
+          <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--sb-border, #D8E0D5)' }}>
+            <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--sb-text-muted, #7A847A)', display: 'block', marginBottom: 8 }}>
               Try sample voice inputs:
             </span>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -631,18 +631,18 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
                     setError('');
                   }}
                   style={{
-                    background: '#1c1b1b', border: '1px solid #3d4947',
+                    background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)',
                     borderRadius: 4, padding: '4px 10px',
-                    fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#bcc9c6',
+                    fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-secondary, #4F5A51)',
                     cursor: 'pointer', transition: 'all 0.12s',
                   }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = '#6bd8cb';
-                    (e.currentTarget as HTMLButtonElement).style.color = '#6bd8cb';
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--sb-primary, #6F8F69)';
+                    (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-primary, #6F8F69)';
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = '#3d4947';
-                    (e.currentTarget as HTMLButtonElement).style.color = '#bcc9c6';
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--sb-border, #D8E0D5)';
+                    (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-text-secondary, #4F5A51)';
                   }}
                 >
                   {sample.label}
@@ -684,8 +684,8 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       {error && (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px',
-          background: 'rgba(255,180,171,0.08)', border: '1px solid rgba(255,180,171,0.25)',
-          borderRadius: 4, color: '#ffb4ab', fontFamily: 'Work Sans, sans-serif', fontSize: 13,
+          background: 'rgba(166,92,85,0.08)', border: '1px solid rgba(166,92,85,0.25)',
+          borderRadius: 4, color: 'var(--sb-danger, #A65C55)', fontFamily: 'Work Sans, sans-serif', fontSize: 13,
         }}>
           <AlertCircle size={15} /> {error}
         </div>
@@ -694,17 +694,17 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       {/* ─── Extraction Preview Card ─── */}
       {extraction && (
         <div style={{
-          background: '#1c1b1b', border: '1px solid #6bd8cb',
-          borderRadius: 8, padding: 24, boxShadow: '0 16px 36px rgba(107,216,203,0.08)',
+          background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-primary, #6F8F69)',
+          borderRadius: 8, padding: 24, boxShadow: '0 16px 36px rgba(111,143,105,0.08)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingBottom: 12, borderBottom: '1px solid #3d4947' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingBottom: 12, borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <CheckCircle size={18} color="#6bd8cb" />
+              <CheckCircle size={18} color="var(--sb-primary, #6F8F69)" />
               <div>
-                <h4 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 16, color: '#e5e2e1', margin: 0 }}>
+                <h4 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>
                   Extracted Listing Data
                 </h4>
-                <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', margin: '2px 0 0' }}>
+                <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)', margin: '2px 0 0' }}>
                   Ready to populate your listing form
                 </p>
               </div>
@@ -712,46 +712,46 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
 
             <span style={{
               fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700,
-              color: '#6bd8cb', background: 'rgba(107,216,203,0.1)',
-              border: '1px solid rgba(107,216,203,0.25)', borderRadius: 4, padding: '3px 8px',
+              color: 'var(--sb-primary, #6F8F69)', background: 'var(--sb-primary-pale, #EAF1E7)',
+              border: '1px solid var(--sb-primary-soft, #DCE8D8)', borderRadius: 4, padding: '3px 8px',
             }}>
               {Math.round(extraction.confidence * 100)}% Confidence
             </span>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 20 }}>
-            <div style={{ background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 4, padding: 12 }}>
-              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: 12 }}>
+              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Product Title
               </span>
-              <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 14, color: '#e5e2e1', margin: '4px 0 0' }}>
+              <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 14, color: 'var(--sb-text-primary, #182018)', margin: '4px 0 0' }}>
                 {extraction.title}
               </p>
             </div>
 
-            <div style={{ background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 4, padding: 12 }}>
-              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: 12 }}>
+              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Category
               </span>
-              <p style={{ fontFamily: 'Work Sans, sans-serif', fontWeight: 600, fontSize: 13, color: '#6bd8cb', margin: '4px 0 0' }}>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontWeight: 600, fontSize: 13, color: 'var(--sb-primary, #6F8F69)', margin: '4px 0 0' }}>
                 {extraction.category}
               </p>
             </div>
 
-            <div style={{ background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 4, padding: 12 }}>
-              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: 12 }}>
+              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Quantity & Unit
               </span>
-              <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 14, color: '#e5e2e1', margin: '4px 0 0' }}>
+              <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 14, color: 'var(--sb-text-primary, #182018)', margin: '4px 0 0' }}>
                 {extraction.quantity} {extraction.unit}
               </p>
             </div>
 
-            <div style={{ background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 4, padding: 12 }}>
-              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: 12 }}>
+              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Price Per Unit
               </span>
-              <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: '#6bd8cb', margin: '4px 0 0' }}>
+              <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--sb-primary, #6F8F69)', margin: '4px 0 0' }}>
                 ₹{extraction.pricePerUnit} / {extraction.unit}
               </p>
             </div>

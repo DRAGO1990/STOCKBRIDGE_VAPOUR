@@ -39,8 +39,8 @@ export const RatingStars: React.FC<RatingStarsProps> = ({
             <Star
               size={size}
               style={{
-                fill: isFilled ? '#f6b351' : isHalf ? 'rgba(246,179,81,0.5)' : 'transparent',
-                color: isFilled || isHalf ? '#f6b351' : '#3d4947',
+                fill: isFilled ? 'var(--sb-warning, #B88A45)' : isHalf ? 'rgba(184,138,69,0.5)' : 'transparent',
+                color: isFilled || isHalf ? 'var(--sb-warning, #B88A45)' : 'var(--sb-border-strong, #BEC9BA)',
               }}
             />
           </button>
@@ -49,7 +49,7 @@ export const RatingStars: React.FC<RatingStarsProps> = ({
       <span style={{
         fontFamily: 'Work Sans, sans-serif',
         fontSize: 12, fontWeight: 600,
-        color: '#f6b351', marginLeft: 4,
+        color: 'var(--sb-warning, #B88A45)', marginLeft: 4,
       }}>
         {rating > 0 ? rating.toFixed(1) : 'New'}
       </span>

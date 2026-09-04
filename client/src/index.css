@@ -2,63 +2,82 @@
 
 /* ============================================================
    STITCH DESIGN SYSTEM — StockBridge B2B
-   Primary: Emerald Teal #6bd8cb  |  BG: Charcoal #131313
-   Accent:  Purple #ddb7ff (≤5% of screen)
+   Palette: Warm Off-White / Natural Sage Green
    Fonts:   Sora (headlines)  +  Work Sans (body/UI)
    ============================================================ */
 
+:root {
+  /* ── Centralized StockBridge Design Tokens ── */
+  --sb-background:       #F7F7F2;
+  --sb-background-soft:  #EEF3EA;
+  --sb-surface:          #FFFFFF;
+  --sb-surface-soft:     #F2F6EF;
+  --sb-primary:          #6F8F69;
+  --sb-primary-hover:    #5F7E5A;
+  --sb-primary-soft:     #DCE8D8;
+  --sb-primary-pale:     #EAF1E7;
+  --sb-text-primary:     #182018;
+  --sb-text-secondary:   #4F5A51;
+  --sb-text-muted:       #7A847A;
+  --sb-border:           #D8E0D5;
+  --sb-border-strong:    #BEC9BA;
+  --sb-success:          #557A55;
+  --sb-warning:          #B88A45;
+  --sb-danger:           #A65C55;
+}
+
 @theme {
   /* ── Surfaces ── */
-  --color-surface:              #131313;
-  --color-surface-dim:          #131313;
-  --color-surface-bright:       #393939;
-  --color-surface-lowest:       #0e0e0e;
-  --color-surface-low:          #1c1b1b;
-  --color-surface-base:         #201f1f;
-  --color-surface-high:         #2a2a2a;
-  --color-surface-highest:      #353534;
+  --color-surface:              #FFFFFF;
+  --color-surface-dim:          #F7F7F2;
+  --color-surface-bright:       #FFFFFF;
+  --color-surface-lowest:       #FFFFFF;
+  --color-surface-low:          #FFFFFF;
+  --color-surface-base:         #F7F7F2;
+  --color-surface-high:         #EEF3EA;
+  --color-surface-highest:      #EAF1E7;
 
   /* ── On-surface text ── */
-  --color-on-surface:           #e5e2e1;
-  --color-on-surface-variant:   #bcc9c6;
+  --color-on-surface:           #182018;
+  --color-on-surface-variant:   #4F5A51;
 
-  /* ── Brand: Emerald Teal ── */
-  --color-primary:              #6bd8cb;
-  --color-primary-dim:          #6bd8cb;
-  --color-primary-container:    #29a195;
-  --color-on-primary:           #003732;
-  --color-on-primary-container: #00302b;
-  --color-primary-fixed:        #89f5e7;
+  /* ── Brand: Botanical Sage Green ── */
+  --color-primary:              #6F8F69;
+  --color-primary-dim:          #5F7E5A;
+  --color-primary-container:    #6F8F69;
+  --color-on-primary:           #FFFFFF;
+  --color-on-primary-container: #FFFFFF;
+  --color-primary-fixed:        #DCE8D8;
 
-  /* ── Accent: Purple (premium only) ── */
-  --color-secondary:            #ddb7ff;
-  --color-secondary-container:  #6f00be;
-  --color-on-secondary:         #490080;
+  /* ── Accent: Soft Sage Green ── */
+  --color-secondary:            #5F7E5A;
+  --color-secondary-container:  #EAF1E7;
+  --color-on-secondary:         #182018;
 
   /* ── Borders / Outlines ── */
-  --color-outline:              #879391;
-  --color-outline-variant:      #3d4947;
+  --color-outline:              #7A847A;
+  --color-outline-variant:      #D8E0D5;
 
   /* ── Semantic ── */
-  --color-error:                #ffb4ab;
-  --color-error-container:      #93000a;
-  --color-success:              #6bd8cb;
-  --color-warning:              #f6b351;
+  --color-error:                #A65C55;
+  --color-error-container:      #FBEAE8;
+  --color-success:              #557A55;
+  --color-warning:              #B88A45;
 
   /* ── Tailwind semantic aliases ── */
-  --color-background:           #131313;
-  --color-foreground:           #e5e2e1;
-  --color-card:                 #1c1b1b;
-  --color-card-foreground:      #e5e2e1;
-  --color-border:               #3d4947;
-  --color-input:                #2a2a2a;
-  --color-ring:                 #6bd8cb;
-  --color-muted:                #201f1f;
-  --color-muted-foreground:     #bcc9c6;
-  --color-accent:               #ddb7ff;
-  --color-accent-foreground:    #490080;
-  --color-destructive:          #ffb4ab;
-  --color-destructive-foreground: #690005;
+  --color-background:           #F7F7F2;
+  --color-foreground:           #182018;
+  --color-card:                 #FFFFFF;
+  --color-card-foreground:      #182018;
+  --color-border:               #D8E0D5;
+  --color-input:                #FFFFFF;
+  --color-ring:                 #6F8F69;
+  --color-muted:                #EEF3EA;
+  --color-muted-foreground:     #7A847A;
+  --color-accent:               #EAF1E7;
+  --color-accent-foreground:    #182018;
+  --color-destructive:          #A65C55;
+  --color-destructive-foreground: #FFFFFF;
 
   /* ── Border radius (8px grid) ── */
   --radius-sm:  0.125rem;  /* 2px  */
@@ -110,14 +129,14 @@
 
   /* ── Scrollbar ── */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--color-surface-lowest); }
-  ::-webkit-scrollbar-thumb { background: #3d4947; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #879391; }
+  ::-webkit-scrollbar-track { background: var(--sb-background-soft, #EEF3EA); }
+  ::-webkit-scrollbar-thumb { background: var(--sb-border-strong, #BEC9BA); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--sb-text-muted, #7A847A); }
 
   /* ── Selection ── */
   ::selection {
-    background: rgba(107, 216, 203, 0.25);
-    color: #e5e2e1;
+    background: rgba(111, 143, 105, 0.20);
+    color: #182018;
   }
 }
 
@@ -174,20 +193,20 @@
 
 /* ── Cards ── */
 .stitch-card {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
+  background: var(--sb-surface, #FFFFFF);
+  border: 1px solid var(--sb-border, #D8E0D5);
   border-radius: var(--radius-lg);
 }
 .stitch-card-sm {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
+  background: var(--sb-surface, #FFFFFF);
+  border: 1px solid var(--sb-border, #D8E0D5);
   border-radius: var(--radius-md);
 }
 
 /* ── Buttons ── */
 .stitch-btn-primary {
-  background: var(--color-primary-container);
-  color: var(--color-on-primary);
+  background: var(--sb-primary, #6F8F69);
+  color: #FFFFFF;
   font-family: var(--font-sans);
   font-size: 13px; font-weight: 600;
   letter-spacing: 0.05em;
@@ -195,76 +214,78 @@
   border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
-  transition: filter 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.15s ease, filter 0.15s ease;
 }
 .stitch-btn-primary:hover {
-  filter: brightness(1.1);
+  background: var(--sb-primary-hover, #5F7E5A);
+  filter: brightness(1.02);
   transform: translateY(-1px);
 }
 .stitch-btn-primary:active { transform: translateY(0); }
 
 .stitch-btn-ghost {
   background: transparent;
-  color: var(--color-on-surface);
+  color: var(--sb-text-primary, #182018);
   font-family: var(--font-sans);
   font-size: 13px; font-weight: 500;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--sb-border, #D8E0D5);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .stitch-btn-ghost:hover {
-  background: var(--color-surface-high);
-  border-color: var(--color-outline);
+  background: var(--sb-surface-soft, #F2F6EF);
+  border-color: var(--sb-border-strong, #BEC9BA);
+  color: var(--sb-text-primary, #182018);
 }
 
 /* ── Inputs ── */
 .stitch-input {
-  background: var(--color-input);
-  border: 1px solid var(--color-border);
+  background: var(--sb-surface, #FFFFFF);
+  border: 1px solid var(--sb-border, #D8E0D5);
   border-radius: var(--radius-md);
-  color: var(--color-on-surface);
+  color: var(--sb-text-primary, #182018);
   font-family: var(--font-sans);
   font-size: 14px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   outline: none;
 }
 .stitch-input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(107, 216, 203, 0.12);
+  border-color: var(--sb-primary, #6F8F69);
+  box-shadow: 0 0 0 2px rgba(111, 143, 105, 0.15);
 }
-.stitch-input::placeholder { color: var(--color-outline); }
+.stitch-input::placeholder { color: var(--sb-text-muted, #7A847A); }
 
 /* ── Badges (Low-Alpha approach) ── */
 .badge-active {
-  color: #6bd8cb;
-  background: rgba(107, 216, 203, 0.10);
-  border: 1px solid rgba(107, 216, 203, 0.20);
+  color: var(--sb-success, #557A55);
+  background: rgba(85, 122, 85, 0.12);
+  border: 1px solid rgba(85, 122, 85, 0.25);
 }
 .badge-pending {
-  color: #f6b351;
-  background: rgba(246, 179, 81, 0.10);
-  border: 1px solid rgba(246, 179, 81, 0.20);
+  color: var(--sb-warning, #B88A45);
+  background: rgba(184, 138, 69, 0.12);
+  border: 1px solid rgba(184, 138, 69, 0.25);
 }
 .badge-reserved {
-  color: #ddb7ff;
-  background: rgba(221, 183, 255, 0.10);
-  border: 1px solid rgba(221, 183, 255, 0.20);
+  color: var(--sb-primary, #6F8F69);
+  background: rgba(111, 143, 105, 0.12);
+  border: 1px solid rgba(111, 143, 105, 0.25);
 }
 .badge-suspended {
-  color: #ffb4ab;
-  background: rgba(255, 180, 171, 0.10);
-  border: 1px solid rgba(255, 180, 171, 0.20);
+  color: var(--sb-danger, #A65C55);
+  background: rgba(166, 92, 85, 0.12);
+  border: 1px solid rgba(166, 92, 85, 0.25);
 }
 .badge-completed {
-  color: #bcc9c6;
-  background: rgba(188, 201, 198, 0.10);
-  border: 1px solid rgba(188, 201, 198, 0.20);
+  color: var(--sb-text-secondary, #4F5A51);
+  background: rgba(79, 90, 81, 0.10);
+  border: 1px solid rgba(79, 90, 81, 0.20);
 }
 .badge-urgent {
-  color: #ffb4ab;
-  background: rgba(255, 180, 171, 0.15);
-  border: 1px solid rgba(255, 180, 171, 0.25);
+  color: var(--sb-danger, #A65C55);
+  background: rgba(166, 92, 85, 0.14);
+  border: 1px solid rgba(166, 92, 85, 0.28);
 }
 
 /* ── Nav underline active indicator ── */
@@ -272,7 +293,7 @@
   content: '';
   display: block;
   height: 2px;
-  background: var(--color-primary);
+  background: var(--sb-primary, #6F8F69);
   border-radius: 1px;
   margin-top: 2px;
 }
@@ -293,8 +314,8 @@
   to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes stitch-pulse-teal {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(107, 216, 203, 0.35); }
-  50%       { box-shadow: 0 0 0 8px rgba(107, 216, 203, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(111, 143, 105, 0.35); }
+  50%       { box-shadow: 0 0 0 8px rgba(111, 143, 105, 0); }
 }
 @keyframes stitch-spin {
   to { transform: rotate(360deg); }
@@ -313,23 +334,23 @@
 .stagger-4 { animation-delay: 0.20s; }
 .stagger-5 { animation-delay: 0.25s; }
 
-/* ── Teal glow (for CTA buttons) ── */
+/* ── Sage glow (for CTA buttons) ── */
 .glow-teal {
-  box-shadow: 0 4px 24px rgba(107, 216, 203, 0.20);
+  box-shadow: 0 4px 20px rgba(111, 143, 105, 0.22);
 }
 .glow-teal:hover {
-  box-shadow: 0 6px 32px rgba(107, 216, 203, 0.30);
+  box-shadow: 0 6px 28px rgba(111, 143, 105, 0.32);
 }
 
 /* ── Divider ── */
 .stitch-divider {
   border: none;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--sb-border, #D8E0D5);
 }
 
 /* ── Section header separator ── */
 .card-header-divider {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--sb-border, #D8E0D5);
   padding-bottom: 12px;
   margin-bottom: 16px;
 }

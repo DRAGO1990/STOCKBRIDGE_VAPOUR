@@ -11,8 +11,8 @@ const footerLinks = [
 
 export const Footer: React.FC = () => (
   <footer style={{
-    background: '#131313',
-    borderTop: '1px solid #3d4947',
+    background: 'var(--sb-surface, #FFFFFF)',
+    borderTop: '1px solid var(--sb-border, #D8E0D5)',
     marginTop: 'auto',
   }}>
     <div style={{
@@ -30,12 +30,12 @@ export const Footer: React.FC = () => (
         display: 'flex', alignItems: 'center', gap: 8,
         textDecoration: 'none',
       }}>
-        <Store size={16} color="#6bd8cb" />
+        <Store size={16} color="var(--sb-primary, #6F8F69)" />
         <span style={{
           fontFamily: 'Sora, sans-serif',
           fontWeight: 700,
           fontSize: 16,
-          color: '#e5e2e1',
+          color: 'var(--sb-text-primary, #182018)',
           letterSpacing: '-0.01em',
         }}>
           StockBridge
@@ -51,12 +51,12 @@ export const Footer: React.FC = () => (
             style={{
               fontFamily: 'Work Sans, sans-serif',
               fontSize: 13,
-              color: '#bcc9c6',
+              color: 'var(--sb-text-secondary, #4F5A51)',
               textDecoration: 'none',
               transition: 'color 0.15s',
             }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#e5e2e1'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#bcc9c6'; }}
+            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sb-text-primary, #182018)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sb-text-secondary, #4F5A51)'; }}
           >
             {l.label}
           </a>
@@ -67,7 +67,7 @@ export const Footer: React.FC = () => (
       <p style={{
         fontFamily: 'Work Sans, sans-serif',
         fontSize: 12,
-        color: '#879391',
+        color: 'var(--sb-text-muted, #7A847A)',
       }}>
         © {new Date().getFullYear()} StockBridge B2B. All rights reserved.
       </p>

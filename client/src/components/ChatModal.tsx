@@ -85,47 +85,47 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     <div style={{
       position: 'fixed', inset: 0, zIndex: 999,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
+      backgroundColor: 'rgba(24, 32, 24, 0.45)', backdropFilter: 'blur(4px)',
       padding: 16,
     }}>
       <div style={{
-        background: '#1c1b1b', border: '1px solid #3d4947',
+        background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)',
         borderRadius: 8, width: '100%', maxWidth: 520, height: 560,
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
       }}>
         {/* Header */}
         <div style={{
-          padding: '16px 20px', borderBottom: '1px solid #3d4947',
+          padding: '16px 20px', borderBottom: '1px solid var(--sb-border, #D8E0D5)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: '#1c1b1b',
+          background: 'var(--sb-surface, #FFFFFF)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 4,
-              background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.25)',
+              background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#6bd8cb',
+              color: 'var(--sb-primary, #6F8F69)',
             }}>
               <MessageSquare size={18} />
             </div>
             <div>
-              <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 14, color: '#e5e2e1', margin: 0 }}>
+              <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 14, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>
                 {title}
               </h3>
-              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', margin: '2px 0 0' }}>
-                Chatting with <span style={{ color: '#bcc9c6', fontWeight: 500 }}>{counterpartyName}</span>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)', margin: '2px 0 0' }}>
+                Chatting with <span style={{ color: 'var(--sb-text-primary, #182018)', fontWeight: 500 }}>{counterpartyName}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             style={{
-              background: 'transparent', border: 'none', color: '#879391',
+              background: 'transparent', border: 'none', color: 'var(--sb-text-muted, #7A847A)',
               cursor: 'pointer', padding: 6, borderRadius: 4, display: 'flex',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#e5e2e1')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#879391')}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--sb-text-primary, #182018)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--sb-text-muted, #7A847A)')}
           >
             <X size={20} />
           </button>
@@ -135,29 +135,29 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         <div style={{
           flex: 1, overflowY: 'auto', padding: 20,
           display: 'flex', flexDirection: 'column', gap: 12,
-          background: '#131313',
+          background: 'var(--sb-background, #F7F7F2)',
         }}>
           {loading ? (
             <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: 28, height: 28, border: '2px solid #3d4947', borderTopColor: '#6bd8cb', borderRadius: '50%' }} className="animate-stitch-spin" />
+              <div style={{ width: 28, height: 28, border: '2px solid var(--sb-border, #D8E0D5)', borderTopColor: 'var(--sb-primary, #6F8F69)', borderRadius: '50%' }} className="animate-stitch-spin" />
             </div>
           ) : error ? (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8, padding: 12,
               fontFamily: 'Work Sans, sans-serif', fontSize: 13,
-              color: '#ffb4ab', background: 'rgba(255,180,171,0.08)',
-              border: '1px solid rgba(255,180,171,0.2)', borderRadius: 4,
+              color: 'var(--sb-danger, #A65C55)', background: 'rgba(166,92,85,0.08)',
+              border: '1px solid rgba(166,92,85,0.2)', borderRadius: 4,
             }}>
               <AlertCircle size={16} />
               <span>{error}</span>
             </div>
           ) : messages.length === 0 ? (
             <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 24 }}>
-              <Bot size={36} color="#3d4947" style={{ marginBottom: 12 }} />
-              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 15, fontWeight: 600, color: '#e5e2e1', marginBottom: 4 }}>
+              <Bot size={36} color="var(--sb-border-strong, #BEC9BA)" style={{ marginBottom: 12 }} />
+              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 15, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', marginBottom: 4 }}>
                 No messages yet
               </p>
-              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', maxWidth: 280 }}>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)', maxWidth: 280 }}>
                 Coordinate pickup time, logistics, payment terms, or final verification here in real-time.
               </p>
             </div>
@@ -179,7 +179,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                 >
                   <span style={{
                     fontFamily: 'Work Sans, sans-serif', fontSize: 11,
-                    color: '#879391', marginBottom: 4, padding: '0 4px',
+                    color: 'var(--sb-text-muted, #7A847A)', marginBottom: 4, padding: '0 4px',
                   }}>
                     {isMine ? 'You' : msg.sender?.name || 'Counterparty'} • {formattedTime}
                   </span>
@@ -189,14 +189,14 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                     wordBreak: 'break-word',
                     ...(isMine
                       ? {
-                          background: '#003732',
-                          color: '#6bd8cb',
-                          border: '1px solid rgba(107,216,203,0.3)',
+                          background: 'var(--sb-primary, #6F8F69)',
+                          color: '#FFFFFF',
+                          border: '1px solid var(--sb-primary, #6F8F69)',
                         }
                       : {
-                          background: '#2a2a2a',
-                          color: '#e5e2e1',
-                          border: '1px solid #3d4947',
+                          background: 'var(--sb-surface, #FFFFFF)',
+                          color: 'var(--sb-text-primary, #182018)',
+                          border: '1px solid var(--sb-border, #D8E0D5)',
                         }),
                   }}>
                     {msg.text}
@@ -212,8 +212,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         <form
           onSubmit={handleSendMessage}
           style={{
-            padding: '12px 16px', borderTop: '1px solid #3d4947',
-            background: '#1c1b1b', display: 'flex', alignItems: 'center', gap: 10,
+            padding: '12px 16px', borderTop: '1px solid var(--sb-border, #D8E0D5)',
+            background: 'var(--sb-surface, #FFFFFF)', display: 'flex', alignItems: 'center', gap: 10,
           }}
         >
           <input
@@ -222,9 +222,9 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Type your message (negotiate pickup, details)..."
             style={{
-              flex: 1, background: '#2a2a2a', border: '1px solid #3d4947',
+              flex: 1, background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)',
               borderRadius: 4, padding: '10px 14px',
-              fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1',
+              fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-primary, #182018)',
               outline: 'none',
             }}
           />

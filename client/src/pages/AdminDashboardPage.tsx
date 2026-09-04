@@ -13,8 +13,8 @@ const TH: React.FC<{ children: React.ReactNode; right?: boolean }> = ({ children
   <th style={{
     padding: '12px 16px', textAlign: right ? 'right' : 'left',
     fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600,
-    letterSpacing: '0.06em', textTransform: 'uppercase', color: '#879391',
-    background: '#1c1b1b', borderBottom: '1px solid #3d4947',
+    letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--sb-text-muted, #7A847A)',
+    background: 'var(--sb-surface-soft, #F2F6EF)', borderBottom: '1px solid var(--sb-border, #D8E0D5)',
     whiteSpace: 'nowrap',
   }}>
     {children}
@@ -23,7 +23,7 @@ const TH: React.FC<{ children: React.ReactNode; right?: boolean }> = ({ children
 
 const labelStyle: React.CSSProperties = {
   fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600,
-  letterSpacing: '0.06em', textTransform: 'uppercase', color: '#879391', marginBottom: 6, display: 'block',
+  letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--sb-text-muted, #7A847A)', marginBottom: 6, display: 'block',
 };
 
 export const AdminDashboardPage: React.FC = () => {
@@ -79,42 +79,42 @@ export const AdminDashboardPage: React.FC = () => {
     : [];
 
   return (
-    <div style={{ background: '#131313', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--sb-background, #F7F7F2)', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 80px' }}>
 
         {/* ── Header ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 12 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <Shield size={16} color="#ffb4ab" />
-              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#ffb4ab' }}>
+              <Shield size={16} color="var(--sb-danger, #A65C55)" />
+              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--sb-danger, #A65C55)' }}>
                 Restricted Admin Command Center
               </span>
             </div>
-            <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 30, color: '#e5e2e1', letterSpacing: '-0.01em', marginBottom: 6 }}>
+            <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 30, color: 'var(--sb-text-primary, #182018)', letterSpacing: '-0.01em', marginBottom: 6 }}>
               Platform Operations
             </h1>
-            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6', margin: 0 }}>
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-secondary, #4F5A51)', margin: 0 }}>
               Audit merchant registrations, moderate surplus listings, and supervise trade fulfillment.
             </p>
           </div>
-          <Link to="/" style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#6bd8cb', textDecoration: 'none' }}>
+          <Link to="/" style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-primary, #6F8F69)', textDecoration: 'none' }}>
             ← Back to Platform
           </Link>
         </div>
 
-        <hr style={{ border: 'none', borderTop: '1px solid #3d4947', marginBottom: 28 }} />
+        <hr style={{ border: 'none', borderTop: '1px solid var(--sb-border, #D8E0D5)', marginBottom: 28 }} />
 
         {/* ── KPI cards ── */}
         {stats && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1, background: '#3d4947', borderRadius: 8, overflow: 'hidden', marginBottom: 28 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', marginBottom: 28, boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
             {[
-              { icon: <Users size={20} color="#6bd8cb" />, label: 'Total Users',        value: stats.users,        color: '#6bd8cb' },
-              { icon: <Package size={20} color="#ddb7ff" />, label: 'Active Listings',  value: stats.listings,     color: '#ddb7ff' },
-              { icon: <CalendarCheck size={20} color="#f6b351" />, label: 'Reservations', value: stats.reservations, color: '#f6b351' },
-              { icon: <CheckCircle size={20} color="#6bd8cb" />, label: 'Completed',     value: stats.completed,    color: '#6bd8cb' },
+              { icon: <Users size={20} color="var(--sb-primary, #6F8F69)" />, label: 'Total Users',        value: stats.users,        color: 'var(--sb-primary, #6F8F69)' },
+              { icon: <Package size={20} color="var(--sb-text-primary, #182018)" />, label: 'Active Listings',  value: stats.listings,     color: 'var(--sb-text-primary, #182018)' },
+              { icon: <CalendarCheck size={20} color="var(--sb-warning, #B88A45)" />, label: 'Reservations', value: stats.reservations, color: 'var(--sb-warning, #B88A45)' },
+              { icon: <CheckCircle size={20} color="var(--sb-success, #557A55)" />, label: 'Completed',     value: stats.completed,    color: 'var(--sb-success, #557A55)' },
             ].map(k => (
-              <div key={k.label} style={{ background: '#1c1b1b', padding: '22px 24px' }}>
+              <div key={k.label} style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '22px 24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                   {k.icon}
                   <p style={labelStyle}>{k.label}</p>
@@ -126,11 +126,11 @@ export const AdminDashboardPage: React.FC = () => {
         )}
 
         {/* ── Table section ── */}
-        <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
           {/* Section header */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '16px 20px', borderBottom: '1px solid #3d4947', flexWrap: 'wrap', gap: 12,
+            padding: '16px 20px', borderBottom: '1px solid var(--sb-border, #D8E0D5)', flexWrap: 'wrap', gap: 12,
           }}>
             {/* Tabs */}
             <div style={{ display: 'flex', gap: 0 }}>
@@ -141,9 +141,9 @@ export const AdminDashboardPage: React.FC = () => {
                   style={{
                     padding: '8px 16px',
                     fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: activeTab === t ? 600 : 400,
-                    color: activeTab === t ? '#6bd8cb' : '#bcc9c6',
+                    color: activeTab === t ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-muted, #7A847A)',
                     background: 'transparent', border: 'none',
-                    borderBottom: `2px solid ${activeTab === t ? '#6bd8cb' : 'transparent'}`,
+                    borderBottom: `2px solid ${activeTab === t ? 'var(--sb-primary, #6F8F69)' : 'transparent'}`,
                     cursor: 'pointer', transition: 'all 0.12s',
                   }}
                 >
@@ -153,18 +153,18 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
 
             {/* Search */}
-            <div style={{ display: 'flex', alignItems: 'center', background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 4, padding: '0 12px' }}>
-              <Search size={14} color="#879391" />
+            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '0 12px' }}>
+              <Search size={14} color="var(--sb-text-muted, #7A847A)" />
               <input
                 type="text" placeholder="Filter..." value={search} onChange={e => setSearch(e.target.value)}
-                style={{ background: 'transparent', border: 'none', outline: 'none', padding: '9px 10px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1', width: 180 }}
+                style={{ background: 'transparent', border: 'none', outline: 'none', padding: '9px 10px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-primary, #182018)', width: 180 }}
               />
             </div>
           </div>
 
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-              <div style={{ width: 32, height: 32, border: '2px solid #3d4947', borderTopColor: '#6bd8cb', borderRadius: '50%' }} className="animate-stitch-spin" />
+              <div style={{ width: 32, height: 32, border: '2px solid var(--sb-border, #D8E0D5)', borderTopColor: 'var(--sb-primary, #6F8F69)', borderRadius: '50%' }} className="animate-stitch-spin" />
             </div>
           ) : activeTab === 'users' ? (
             <div style={{ overflowX: 'auto' }}>
@@ -186,32 +186,32 @@ export const AdminDashboardPage: React.FC = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: i * 0.02 }}
-                      style={{ borderBottom: '1px solid #3d4947', cursor: 'pointer' }}
+                      style={{ borderBottom: '1px solid var(--sb-border, #D8E0D5)', cursor: 'pointer' }}
                       onClick={() => setSelectedMerchant(u)}
-                      onMouseEnter={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'rgba(107,216,203,0.04)'; }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'rgba(111,143,105,0.06)'; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'; }}
                     >
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 34, height: 34, borderRadius: 17, background: '#2a2a2a', border: '1px solid #3d4947', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700, color: '#6bd8cb', flexShrink: 0 }}>
+                          <div style={{ width: 34, height: 34, borderRadius: 17, background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700, color: 'var(--sb-primary, #6F8F69)', flexShrink: 0 }}>
                             {(u.businessName || u.name || 'U').charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: '#e5e2e1', margin: 0 }}>{u.businessName || u.name}</p>
-                            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', margin: '2px 0 0' }}>{u.name}{u.isAdmin && ' · Admin'}</p>
+                            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>{u.businessName || u.name}</p>
+                            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)', margin: '2px 0 0' }}>{u.name}{u.isAdmin && ' · Admin'}</p>
                           </div>
                         </div>
                       </td>
-                      <td style={{ padding: '14px 16px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#bcc9c6' }}>
+                      <td style={{ padding: '14px 16px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)' }}>
                         <p style={{ margin: 0 }}>{u.email}</p>
-                        <p style={{ margin: '2px 0 0', fontSize: 11, color: '#879391' }}>{u.phone || 'No phone'}</p>
+                        <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)' }}>{u.phone || 'No phone'}</p>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                           <RatingStars rating={u.rating || 5} size={12} />
                         </div>
                       </td>
-                      <td style={{ padding: '14px 16px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#bcc9c6' }}>
+                      <td style={{ padding: '14px 16px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)' }}>
                         {u._count?.listings || 0} lots / {u._count?.reservations || 0} orders
                       </td>
                       <td style={{ padding: '14px 16px' }}>
@@ -229,8 +229,8 @@ export const AdminDashboardPage: React.FC = () => {
                             letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer',
                             border: '1px solid',
                             ...(u.active !== false
-                              ? { color: '#ffb4ab', borderColor: 'rgba(255,180,171,0.3)', background: 'rgba(255,180,171,0.08)' }
-                              : { color: '#6bd8cb', borderColor: 'rgba(107,216,203,0.3)', background: 'rgba(107,216,203,0.08)' }
+                              ? { color: 'var(--sb-danger, #A65C55)', borderColor: 'rgba(166,92,85,0.3)', background: 'rgba(166,92,85,0.08)' }
+                              : { color: 'var(--sb-primary, #6F8F69)', borderColor: 'rgba(111,143,105,0.3)', background: 'rgba(111,143,105,0.08)' }
                             ),
                           }}
                         >
@@ -261,29 +261,29 @@ export const AdminDashboardPage: React.FC = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: i * 0.02 }}
-                      style={{ borderBottom: '1px solid #3d4947' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'rgba(107,216,203,0.03)'; }}
+                      style={{ borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'rgba(111,143,105,0.06)'; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'; }}
                     >
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 40, height: 40, borderRadius: 6, background: '#2a2a2a', border: '1px solid #3d4947', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            {l.imageUrl ? <img src={l.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6 }} /> : <Store size={16} color="#3d4947" />}
+                          <div style={{ width: 40, height: 40, borderRadius: 6, background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            {l.imageUrl ? <img src={l.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6 }} /> : <Store size={16} color="var(--sb-text-muted, #7A847A)" />}
                           </div>
                           <div>
-                            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: '#e5e2e1', margin: '0 0 2px' }}>{l.title}</p>
-                            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391', margin: 0 }}>#SB-{l.id.substring(0, 8).toUpperCase()}</p>
+                            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', margin: '0 0 2px' }}>{l.title}</p>
+                            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', margin: 0 }}>#SB-{l.id.substring(0, 8).toUpperCase()}</p>
                           </div>
                         </div>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
-                        <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#bcc9c6', background: 'rgba(188,201,198,0.1)', border: '1px solid rgba(188,201,198,0.15)', borderRadius: 4, padding: '3px 8px' }}>
+                        <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--sb-text-secondary, #4F5A51)', background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '3px 8px' }}>
                           {l.category}
                         </span>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
-                        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, fontWeight: 600, color: '#e5e2e1', margin: 0 }}>{l.quantity} {l.unit}</p>
-                        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#6bd8cb', margin: '2px 0 0' }}>₹{l.pricePerUnit}/{l.unit}</p>
+                        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>{l.quantity} {l.unit}</p>
+                        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-primary, #6F8F69)', margin: '2px 0 0' }}>₹{l.pricePerUnit}/{l.unit}</p>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
                         <StatusBadge status={l.status} />
@@ -297,8 +297,8 @@ export const AdminDashboardPage: React.FC = () => {
                             letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer',
                             border: '1px solid',
                             ...(l.active
-                              ? { color: '#f6b351', borderColor: 'rgba(246,179,81,0.3)', background: 'rgba(246,179,81,0.08)' }
-                              : { color: '#6bd8cb', borderColor: 'rgba(107,216,203,0.3)', background: 'rgba(107,216,203,0.08)' }
+                              ? { color: 'var(--sb-warning, #B88A45)', borderColor: 'rgba(184,138,69,0.3)', background: 'rgba(184,138,69,0.08)' }
+                              : { color: 'var(--sb-primary, #6F8F69)', borderColor: 'rgba(111,143,105,0.3)', background: 'rgba(111,143,105,0.08)' }
                             ),
                           }}
                         >
@@ -319,7 +319,7 @@ export const AdminDashboardPage: React.FC = () => {
             <div style={{
               position: 'fixed', inset: 0, zIndex: 999,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              backgroundColor: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
+              backgroundColor: 'rgba(24, 32, 24, 0.45)', backdropFilter: 'blur(4px)',
               padding: 16,
             }}>
               <motion.div
@@ -327,38 +327,38 @@ export const AdminDashboardPage: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 style={{
-                  background: '#1c1b1b', border: '1px solid #3d4947',
+                  background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)',
                   borderRadius: 8, width: '100%', maxWidth: 640,
                   maxHeight: '90vh', overflowY: 'auto',
-                  boxShadow: '0 24px 48px rgba(0,0,0,0.7)',
+                  boxShadow: '0 24px 48px rgba(0,0,0,0.12)',
                 }}
               >
                 {/* Header */}
                 <div style={{
-                  padding: '20px 24px', borderBottom: '1px solid #3d4947',
+                  padding: '20px 24px', borderBottom: '1px solid var(--sb-border, #D8E0D5)',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{
                       width: 44, height: 44, borderRadius: '50%',
-                      background: '#29a195', color: '#003732',
+                      background: 'var(--sb-primary-soft, #DCE8D8)', color: 'var(--sb-primary, #6F8F69)',
                       fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                       {(selectedMerchant.businessName || selectedMerchant.name).charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: '#e5e2e1', margin: 0 }}>
+                      <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>
                         {selectedMerchant.businessName || selectedMerchant.name}
                       </h3>
-                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', margin: '2px 0 0' }}>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)', margin: '2px 0 0' }}>
                         Merchant ID #M-{selectedMerchant.id.substring(0, 8).toUpperCase()}
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => setSelectedMerchant(null)}
-                    style={{ background: 'transparent', border: 'none', color: '#879391', cursor: 'pointer', padding: 6 }}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--sb-text-muted, #7A847A)', cursor: 'pointer', padding: 6 }}
                   >
                     <X size={20} />
                   </button>
@@ -368,7 +368,7 @@ export const AdminDashboardPage: React.FC = () => {
                 <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
                   
                   {/* Status & Trust Overview */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 6, padding: 16 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 6, padding: 16 }}>
                     <div>
                       <span style={labelStyle}>Account Status</span>
                       <StatusBadge status={selectedMerchant.active !== false ? 'active' : 'suspended'} />
@@ -377,14 +377,14 @@ export const AdminDashboardPage: React.FC = () => {
                       <span style={labelStyle}>Trust Rating</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <RatingStars rating={selectedMerchant.rating || 5} size={12} />
-                        <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700, color: '#f6b351' }}>
+                        <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700, color: 'var(--sb-warning, #B88A45)' }}>
                           {(selectedMerchant.rating || 5).toFixed(1)}
                         </span>
                       </div>
                     </div>
                     <div>
                       <span style={labelStyle}>Role</span>
-                      <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600, color: '#6bd8cb' }}>
+                      <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600, color: 'var(--sb-primary, #6F8F69)' }}>
                         {selectedMerchant.isAdmin ? 'Admin' : 'Verified Merchant'}
                       </span>
                     </div>
@@ -393,15 +393,15 @@ export const AdminDashboardPage: React.FC = () => {
                   {/* Contact Info */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <span style={labelStyle}>Contact & Logistics</span>
-                    <div style={{ background: '#131313', border: '1px solid #3d4947', borderRadius: 6, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1' }}>
-                        <Mail size={14} color="#879391" /> {selectedMerchant.email}
+                    <div style={{ background: 'var(--sb-background, #F7F7F2)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 6, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-primary, #182018)' }}>
+                        <Mail size={14} color="var(--sb-text-muted, #7A847A)" /> {selectedMerchant.email}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1' }}>
-                        <Phone size={14} color="#879391" /> {selectedMerchant.phone || 'No phone number on file'}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-primary, #182018)' }}>
+                        <Phone size={14} color="var(--sb-text-muted, #7A847A)" /> {selectedMerchant.phone || 'No phone number on file'}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1' }}>
-                        <MapPin size={14} color="#879391" /> {selectedMerchant.address || 'Address unlisted'}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-primary, #182018)' }}>
+                        <MapPin size={14} color="var(--sb-text-muted, #7A847A)" /> {selectedMerchant.address || 'Address unlisted'}
                       </div>
                     </div>
                   </div>
@@ -410,16 +410,16 @@ export const AdminDashboardPage: React.FC = () => {
                   <div>
                     <span style={labelStyle}>Active Lots Listed by Merchant ({merchantListings.length})</span>
                     {merchantListings.length === 0 ? (
-                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', margin: 0 }}>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)', margin: 0 }}>
                         This merchant has no active surplus listings.
                       </p>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 180, overflowY: 'auto' }}>
                         {merchantListings.map(l => (
-                          <div key={l.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 4, padding: '8px 12px' }}>
+                          <div key={l.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '8px 12px' }}>
                             <div>
-                              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 600, color: '#e5e2e1', margin: 0 }}>{l.title}</p>
-                              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391', margin: '2px 0 0' }}>{l.quantity} {l.unit} · ₹{l.pricePerUnit}/{l.unit}</p>
+                              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>{l.title}</p>
+                              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', margin: '2px 0 0' }}>{l.quantity} {l.unit} · ₹{l.pricePerUnit}/{l.unit}</p>
                             </div>
                             <StatusBadge status={l.status} />
                           </div>
@@ -429,7 +429,7 @@ export const AdminDashboardPage: React.FC = () => {
                   </div>
 
                   {/* Moderation Toggle CTA */}
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 8, borderTop: '1px solid #3d4947' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 8, borderTop: '1px solid var(--sb-border, #D8E0D5)' }}>
                     <button
                       onClick={() => toggleUser(selectedMerchant.id)}
                       style={{
@@ -438,8 +438,8 @@ export const AdminDashboardPage: React.FC = () => {
                         letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer',
                         border: '1px solid',
                         ...(selectedMerchant.active !== false
-                          ? { color: '#ffb4ab', borderColor: 'rgba(255,180,171,0.3)', background: 'rgba(255,180,171,0.1)' }
-                          : { color: '#6bd8cb', borderColor: 'rgba(107,216,203,0.3)', background: 'rgba(107,216,203,0.1)' }
+                          ? { color: 'var(--sb-danger, #A65C55)', borderColor: 'rgba(166,92,85,0.3)', background: 'rgba(166,92,85,0.1)' }
+                          : { color: 'var(--sb-primary, #6F8F69)', borderColor: 'rgba(111,143,105,0.3)', background: 'rgba(111,143,105,0.1)' }
                         ),
                       }}
                     >

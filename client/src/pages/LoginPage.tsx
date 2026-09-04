@@ -19,7 +19,7 @@ const labelStyle: React.CSSProperties = {
   fontSize: 11, fontWeight: 600,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
-  color: '#bcc9c6',
+  color: 'var(--sb-text-secondary, #4F5A51)',
   marginBottom: 6,
 };
 
@@ -37,14 +37,14 @@ const InputRow: React.FC<{
   return (
     <div style={{
       display: 'flex', alignItems: 'center',
-      background: '#2a2a2a',
-      border: `1px solid ${focused ? '#6bd8cb' : '#3d4947'}`,
+      background: 'var(--sb-surface, #FFFFFF)',
+      border: `1px solid ${focused ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-border, #D8E0D5)'}`,
       borderRadius: 4,
       padding: '0 12px',
       transition: 'border-color 0.15s',
-      boxShadow: focused ? '0 0 0 2px rgba(107,216,203,0.1)' : 'none',
+      boxShadow: focused ? '0 0 0 2px rgba(111,143,105,0.15)' : 'none',
     }}>
-      <span style={{ color: focused ? '#6bd8cb' : '#879391', display: 'flex', transition: 'color 0.15s' }}>
+      <span style={{ color: focused ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-muted, #7A847A)', display: 'flex', transition: 'color 0.15s' }}>
         {icon}
       </span>
       <input
@@ -61,7 +61,7 @@ const InputRow: React.FC<{
           border: 'none', outline: 'none',
           padding: '11px 10px',
           fontFamily: 'Work Sans, sans-serif',
-          fontSize: 14, color: '#e5e2e1',
+          fontSize: 14, color: 'var(--sb-text-primary, #182018)',
         }}
       />
       {rightElement}
@@ -95,7 +95,7 @@ export const LoginPage: React.FC = () => {
   return (
     <div style={{
       minHeight: 'calc(100vh - 56px)',
-      background: '#131313',
+      background: 'var(--sb-background, #F7F7F2)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '40px 16px',
     }}>
@@ -105,10 +105,11 @@ export const LoginPage: React.FC = () => {
         transition={{ duration: 0.3 }}
         style={{
           width: '100%', maxWidth: 440,
-          background: '#1c1b1b',
-          border: '1px solid #3d4947',
+          background: 'var(--sb-surface, #FFFFFF)',
+          border: '1px solid var(--sb-border, #D8E0D5)',
           borderRadius: 8,
           padding: '40px 40px 36px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
         }}
       >
         {/* Header */}
@@ -116,18 +117,18 @@ export const LoginPage: React.FC = () => {
           <h1 style={{
             fontFamily: 'Sora, sans-serif',
             fontWeight: 700, fontSize: 28,
-            color: '#e5e2e1',
+            color: 'var(--sb-text-primary, #182018)',
             lineHeight: 1.3,
             marginBottom: 8,
           }}>
             Welcome back to<br />StockBridge
           </h1>
-          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6' }}>
+          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-secondary, #4F5A51)' }}>
             Sign in to manage your stock and orders
           </p>
         </div>
 
-        <hr style={{ border: 'none', borderTop: '1px solid #3d4947', marginBottom: 28 }} />
+        <hr style={{ border: 'none', borderTop: '1px solid var(--sb-border, #D8E0D5)', marginBottom: 28 }} />
 
         {/* Form */}
         <form onSubmit={e => { e.preventDefault(); executeLogin(email.trim(), password); }}
@@ -145,7 +146,7 @@ export const LoginPage: React.FC = () => {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <label style={{ ...labelStyle, marginBottom: 0 }}>Password</label>
-              <a href="#" style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#6bd8cb', textDecoration: 'none' }}>
+              <a href="#" style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-primary, #6F8F69)', textDecoration: 'none' }}>
                 Forgot?
               </a>
             </div>
@@ -159,10 +160,10 @@ export const LoginPage: React.FC = () => {
           {error && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              background: 'rgba(255,180,171,0.08)',
-              border: '1px solid rgba(255,180,171,0.2)',
+              background: 'rgba(166,92,85,0.08)',
+              border: '1px solid rgba(166,92,85,0.2)',
               borderRadius: 4, padding: '10px 12px',
-              color: '#ffb4ab', fontSize: 13, fontFamily: 'Work Sans, sans-serif',
+              color: 'var(--sb-danger, #A65C55)', fontSize: 13, fontFamily: 'Work Sans, sans-serif',
             }}>
               <AlertCircle size={14} /> {error}
             </div>
@@ -176,20 +177,20 @@ export const LoginPage: React.FC = () => {
             {loading ? 'Authenticating...' : 'Sign In'}
           </button>
 
-          <p style={{ textAlign: 'center', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#bcc9c6' }}>
+          <p style={{ textAlign: 'center', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)' }}>
             Don't have an account?{' '}
-            <Link to="/register" style={{ color: '#6bd8cb', fontWeight: 600, textDecoration: 'none' }}>
+            <Link to="/register" style={{ color: 'var(--sb-primary, #6F8F69)', fontWeight: 600, textDecoration: 'none' }}>
               Register account
             </Link>
           </p>
         </form>
 
         {/* Demo accounts */}
-        <hr style={{ border: 'none', borderTop: '1px solid #3d4947', margin: '28px 0 20px' }} />
+        <hr style={{ border: 'none', borderTop: '1px solid var(--sb-border, #D8E0D5)', margin: '28px 0 20px' }} />
         <p style={{
           fontFamily: 'Work Sans, sans-serif',
           fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
-          textTransform: 'uppercase', color: '#879391',
+          textTransform: 'uppercase', color: 'var(--sb-text-muted, #7A847A)',
           textAlign: 'center', marginBottom: 14,
         }}>
           Quick Demo Access
@@ -203,23 +204,23 @@ export const LoginPage: React.FC = () => {
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 background: 'transparent',
-                border: '1px solid #3d4947',
+                border: '1px solid var(--sb-border, #D8E0D5)',
                 borderRadius: 4, padding: '9px 12px',
-                color: '#bcc9c6',
+                color: 'var(--sb-text-secondary, #4F5A51)',
                 fontFamily: 'Work Sans, sans-serif',
                 fontSize: 12, fontWeight: 500,
                 cursor: 'pointer', textAlign: 'left',
                 transition: 'background 0.12s, border-color 0.12s, color 0.12s',
               }}
               onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = '#2a2a2a';
-                (e.currentTarget as HTMLButtonElement).style.borderColor = '#6bd8cb';
-                (e.currentTarget as HTMLButtonElement).style.color = '#e5e2e1';
+                (e.currentTarget as HTMLButtonElement).style.background = 'var(--sb-surface-soft, #F2F6EF)';
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--sb-primary, #6F8F69)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-text-primary, #182018)';
               }}
               onMouseLeave={e => {
                 (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-                (e.currentTarget as HTMLButtonElement).style.borderColor = '#3d4947';
-                (e.currentTarget as HTMLButtonElement).style.color = '#bcc9c6';
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--sb-border, #D8E0D5)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-text-secondary, #4F5A51)';
               }}
             >
               <User size={14} style={{ flexShrink: 0 }} />

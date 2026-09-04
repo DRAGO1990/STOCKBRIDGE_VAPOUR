@@ -11,15 +11,15 @@ const labelStyle: React.CSSProperties = {
   fontFamily: 'Work Sans, sans-serif',
   fontSize: 11, fontWeight: 600,
   letterSpacing: '0.06em', textTransform: 'uppercase',
-  color: '#879391', marginBottom: 8, display: 'block',
+  color: 'var(--sb-text-muted, #7A847A)', marginBottom: 8, display: 'block',
 };
 
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
-  background: '#2a2a2a', border: '1px solid #3d4947',
+  background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)',
   borderRadius: 4, padding: '11px 14px',
   fontFamily: 'Work Sans, sans-serif',
-  fontSize: 14, color: '#e5e2e1', outline: 'none',
+  fontSize: 14, color: 'var(--sb-text-primary, #182018)', outline: 'none',
 };
 
 export const ProfilePage: React.FC = () => {
@@ -94,20 +94,21 @@ export const ProfilePage: React.FC = () => {
   if (!user) return null;
 
   return (
-    <div style={{ background: '#131313', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--sb-background, #F7F7F2)', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '40px 24px 80px' }}>
         
         {/* ── Merchant Header Card ── */}
         <div style={{
-          background: '#1c1b1b', border: '1px solid #3d4947',
+          background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)',
           borderRadius: 8, padding: '24px 28px', marginBottom: 28,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexWrap: 'wrap', gap: 16,
+          boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{
               width: 56, height: 56, borderRadius: 28,
-              background: '#29a195', color: '#003732',
+              background: 'var(--sb-primary-soft, #DCE8D8)', color: 'var(--sb-primary, #6F8F69)',
               fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 24,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
@@ -116,20 +117,20 @@ export const ProfilePage: React.FC = () => {
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 22, color: '#e5e2e1', margin: 0 }}>
+                <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 22, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>
                   {user.businessName || user.name}
                 </h1>
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4,
-                  background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.25)',
+                  background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
                   borderRadius: 4, padding: '2px 8px',
                   fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
-                  color: '#6bd8cb', textTransform: 'uppercase', letterSpacing: '0.04em',
+                  color: 'var(--sb-primary, #6F8F69)', textTransform: 'uppercase', letterSpacing: '0.04em',
                 }}>
                   <ShieldCheck size={11} /> Verified
                 </span>
               </div>
-              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', margin: 0 }}>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)', margin: 0 }}>
                 {user.email} · Registered Merchant
               </p>
             </div>
@@ -139,7 +140,7 @@ export const ProfilePage: React.FC = () => {
             <span style={labelStyle}>Trust Score</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <RatingStars rating={user.rating || 5} size={16} />
-              <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 16, fontWeight: 700, color: '#f6b351' }}>
+              <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 16, fontWeight: 700, color: 'var(--sb-warning, #B88A45)' }}>
                 {(user.rating || 5).toFixed(1)}
               </span>
             </div>
@@ -150,16 +151,16 @@ export const ProfilePage: React.FC = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
           
           {/* Form */}
-          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: '28px' }}>
-            <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 18, color: '#e5e2e1', margin: '0 0 20px' }}>
+          <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, padding: '28px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+            <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 18, color: 'var(--sb-text-primary, #182018)', margin: '0 0 20px' }}>
               Merchant Profile & Location
             </h2>
 
             {successMsg && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px',
-                background: 'rgba(107,216,203,0.08)', border: '1px solid rgba(107,216,203,0.25)',
-                borderRadius: 4, color: '#6bd8cb', fontFamily: 'Work Sans, sans-serif',
+                background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
+                borderRadius: 4, color: 'var(--sb-success, #557A55)', fontFamily: 'Work Sans, sans-serif',
                 fontSize: 13, marginBottom: 20,
               }}>
                 <CheckCircle size={15} /> {successMsg}
@@ -169,8 +170,8 @@ export const ProfilePage: React.FC = () => {
             {errorMsg && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px',
-                background: 'rgba(255,180,171,0.08)', border: '1px solid rgba(255,180,171,0.25)',
-                borderRadius: 4, color: '#ffb4ab', fontFamily: 'Work Sans, sans-serif',
+                background: 'rgba(166,92,85,0.08)', border: '1px solid rgba(166,92,85,0.25)',
+                borderRadius: 4, color: 'var(--sb-danger, #A65C55)', fontFamily: 'Work Sans, sans-serif',
                 fontSize: 13, marginBottom: 20,
               }}>
                 {errorMsg}
@@ -255,35 +256,35 @@ export const ProfilePage: React.FC = () => {
           </div>
 
           {/* Feedback & Ratings Column */}
-          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: 24 }}>
-            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', margin: '0 0 16px' }}>
+          <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, padding: 24, boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: 'var(--sb-text-primary, #182018)', margin: '0 0 16px' }}>
               Counterparty Reviews ({ratings.length})
             </h3>
 
             {loading ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
-                <div style={{ width: 24, height: 24, border: '2px solid #3d4947', borderTopColor: '#6bd8cb', borderRadius: '50%' }} className="animate-stitch-spin" />
+                <div style={{ width: 24, height: 24, border: '2px solid var(--sb-border, #D8E0D5)', borderTopColor: 'var(--sb-primary, #6F8F69)', borderRadius: '50%' }} className="animate-stitch-spin" />
               </div>
             ) : ratings.length === 0 ? (
-              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', margin: 0 }}>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)', margin: 0 }}>
                 No transaction reviews yet. Reviews will appear here once counterparties complete trades.
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {ratings.map((r) => (
-                  <div key={r.id} style={{ background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 4, padding: 12 }}>
+                  <div key={r.id} style={{ background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                      <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 12, fontWeight: 600, color: '#e5e2e1' }}>
+                      <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 12, fontWeight: 600, color: 'var(--sb-text-primary, #182018)' }}>
                         {r.fromUser?.businessName || r.fromUser?.name || 'Verified Merchant'}
                       </span>
                       <RatingStars rating={r.score} size={12} />
                     </div>
                     {r.comment && (
-                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#bcc9c6', margin: '0 0 4px', fontStyle: 'italic' }}>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-secondary, #4F5A51)', margin: '0 0 4px', fontStyle: 'italic' }}>
                         "{r.comment}"
                       </p>
                     )}
-                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, color: '#879391' }}>
+                    <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, color: 'var(--sb-text-muted, #7A847A)' }}>
                       {new Date(r.createdAt).toLocaleDateString()}
                     </span>
                   </div>
