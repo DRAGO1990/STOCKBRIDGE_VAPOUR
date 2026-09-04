@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config';
+import { calculateUrgencyFromExpiry } from '../utils/urgency';
 
 // Valid categories must match client-side CATEGORIES
 export const VALID_CATEGORIES = [
@@ -28,6 +29,7 @@ export interface VoiceExtraction {
   category: string;
   quantity: number;
   unit: string;
+  mrp: number | null;
   pricePerUnit: number;
   expiryDate: string | null;
   urgency: 'low' | 'medium' | 'high';
@@ -90,36 +92,30 @@ EXTRACTION RULES & DOMAIN KNOWLEDGE:
    - Extract the total number as an integer or float > 0.
    - Understand Indian spoken number words (e.g., "ek"=1, "do"=2, "paanch"=5, "das"=10, "bees"=20, "pachees"=25, "pachaas"=50, "sau"=100, "dedh sau"=150, "do sau"=200, "paanch sau"=500, "hazaar"=1000).
 
-5. "pricePerUnit":
+5. "mrp":
+   - Maximum Retail Price in INR (look for phrases like "MRP", "printed price", "chapa hua daam", "printed rate", "pack MRP").
+   - If MRP is not mentioned or cannot be determined, set to null and include "mrp" in "missingFields".
+   - Do NOT guess or fabricate an MRP if not explicitly spoken.
+
+6. "pricePerUnit":
    - Price in Indian Rupees (₹) per single unit.
    - If a total lot price is quoted (e.g. "sab milake 5000 rupaye" for 50 units), calculate: 5000 / 50 = 100.
    - If rate per unit is quoted (e.g. "120 rupaye per packet"), pricePerUnit = 120.
 
-6. "expiryDate":
+7. "expiryDate":
    - Must be ISO format YYYY-MM-DD.
-   - IMPORTANT: StockBridge requires expiry dates to be AT LEAST 10 DAYS in the future from today (${todayStr}).
    - Interpret relative phrases: "agle mahine" / "next month" (+30 days), "15 din baad" (+15 days), "2 mahine baad" (+60 days), "6 mahine" (+180 days), "saal ke aakhir tak" (end of year).
    - If no expiry date is stated or if it is a non-perishable product, set it to "${defaultExpiryStr}" and include "expiryDate" in "missingFields".
 
-7. "urgency": Must be EXACTLY ONE of: "low", "medium", "high".
-   - Carefully detect the seller's spoken urgency level:
-     * "high":
-       - High urgency criteria: Expiry MUST be between 10 to 15 days from today (${todayStr}). Used for fast/emergency clearance, distress sales, or immediate liquidation.
-       - Explicit mentions: "urgency level high", "urgency high", "high urgency", "urgency is high", "urgency: high"
-       - Urgency phrases: "urgent", "urgently", "emergency", "immediate", "immediately", "fast clearance", "clearance", "distress sale", "aaj hi bechna hai", "turant bechna hai", "jaldi nikalna hai", "jaldi se", "shop band ho rahi hai", "godown khali karna hai", "short expiry", "10 din", "12 din", "15 din me", "तुरंत", "जल्दी", "शीघ्र", "इमरजेंसी", "अर्जेंट", "तातडीने", "உடனடியாக", "తక్షణమే", "জরুরি", "તરત જ", "ತುರ್ತು", "ഉടൻ", "ਤੁਰੰਤ".
-     * "medium":
-       - Explicit mentions: "urgency level medium", "urgency medium", "medium urgency", "moderate"
-       - Medium phrases: "1-2 weeks", "agle hafte", "next week", "15 din", "20 din", "do hafte", "month end", "mahine ke aakhir", "medium priority", "मध्यम", "साधारण".
-     * "low":
-       - Explicit mentions: "urgency level low", "urgency low", "low urgency"
-       - Low phrases: "no hurry", "aram se", "koi jaldi nahi", "time hai", "fresh stock", "regular stock", "standard liquidation", "3 mahine bache hain", "कम", "आराम से".
+8. "urgency":
+   - IMPORTANT: Do NOT determine urgency. Urgency is calculated dynamically by the application based strictly on product expiry date. Return "low" as placeholder.
 
-8. "notes":
-   - Clean summary of condition, packaging state, reasons for surplus, discounts, or special handling mentioned by the seller (e.g., "Outer carton slightly damp, sealed inner packs intact. Ready for bulk dispatch.").
+9. "notes":
+   - Clean summary of condition, packaging state, reasons for surplus, discounts, or special handling mentioned by the seller.
 
-9. "confidence": Number between 0.0 and 1.0 based on how complete and clear the speech was.
+10. "confidence": Number between 0.0 and 1.0 based on how complete and clear the speech was.
 
-10. "missingFields": Array of field names that were not explicitly mentioned in the speech (e.g. ["expiryDate"]).
+11. "missingFields": Array of field names that were not explicitly mentioned in the speech (e.g. ["expiryDate", "mrp"]).
 
 OUTPUT JSON SCHEMA:
 {
@@ -127,6 +123,7 @@ OUTPUT JSON SCHEMA:
   "category": string,
   "quantity": number,
   "unit": string,
+  "mrp": number | null,
   "pricePerUnit": number,
   "expiryDate": string,
   "urgency": "low" | "medium" | "high",
@@ -153,46 +150,14 @@ function sanitizeExtraction(raw: any): VoiceExtraction {
     unit = match || 'pieces';
   }
 
-  // Normalize urgency
-  let urgency: 'low' | 'medium' | 'high' = 'low';
-  const rawUrgencyStr = String(raw.urgency || '').toLowerCase().trim();
-  if (
-    rawUrgencyStr === 'high' ||
-    rawUrgencyStr.includes('high') ||
-    rawUrgencyStr.includes('urgent') ||
-    rawUrgencyStr.includes('immediate') ||
-    rawUrgencyStr.includes('emergency') ||
-    rawUrgencyStr.includes('तुरंत') ||
-    rawUrgencyStr.includes('जल्दी') ||
-    rawUrgencyStr.includes('तातडी') ||
-    rawUrgencyStr.includes('உடனடி') ||
-    rawUrgencyStr.includes('అత్యవసర') ||
-    rawUrgencyStr.includes('জরুরি') ||
-    rawUrgencyStr.includes('તરત') ||
-    rawUrgencyStr.includes('ತುರ್ತು')
-  ) {
-    urgency = 'high';
-  } else if (
-    rawUrgencyStr === 'medium' ||
-    rawUrgencyStr.includes('medium') ||
-    rawUrgencyStr.includes('moderate') ||
-    rawUrgencyStr.includes('normal') ||
-    rawUrgencyStr.includes('मध्यम') ||
-    rawUrgencyStr.includes('মাঝারি')
-  ) {
-    urgency = 'medium';
-  } else {
-    urgency = 'low';
+  // Parse MRP
+  let mrp: number | null = null;
+  if (raw.mrp !== undefined && raw.mrp !== null) {
+    const parsedMrp = Number(raw.mrp);
+    if (!isNaN(parsedMrp) && parsedMrp > 0) {
+      mrp = parsedMrp;
+    }
   }
-
-  // Normalize expiry date (must be >= 10 days in future, and 10 to 15 days for high urgency)
-  const minFutureDate = new Date();
-  minFutureDate.setDate(minFutureDate.getDate() + 10);
-  minFutureDate.setHours(0, 0, 0, 0);
-
-  const maxHighDate = new Date();
-  maxHighDate.setDate(maxHighDate.getDate() + 15);
-  maxHighDate.setHours(23, 59, 59, 999);
 
   let expiryDate: string | null = null;
   let hasExplicitExpiry = false;
@@ -200,38 +165,25 @@ function sanitizeExtraction(raw: any): VoiceExtraction {
   if (raw.expiryDate) {
     const parsed = new Date(raw.expiryDate);
     if (!isNaN(parsed.getTime())) {
-      if (parsed.getTime() >= minFutureDate.getTime()) {
-        expiryDate = parsed.toISOString().split('T')[0];
-        hasExplicitExpiry = true;
-      } else {
-        // If date provided is too soon (<10 days), set to minimum valid window (10 days)
-        const adjustedDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
-        expiryDate = adjustedDate.toISOString().split('T')[0];
-        hasExplicitExpiry = true;
-      }
+      expiryDate = parsed.toISOString().split('T')[0];
+      hasExplicitExpiry = true;
     }
   }
 
-  if (urgency === 'high') {
-    if (!hasExplicitExpiry) {
-      const defaultHighDate = new Date(Date.now() + 12 * 24 * 60 * 60 * 1000);
-      expiryDate = defaultHighDate.toISOString().split('T')[0];
-    } else if (expiryDate) {
-      const parsed = new Date(expiryDate);
-      if (parsed.getTime() < minFutureDate.getTime()) {
-        expiryDate = minFutureDate.toISOString().split('T')[0];
-      } else if (parsed.getTime() > maxHighDate.getTime()) {
-        expiryDate = maxHighDate.toISOString().split('T')[0];
-      }
-    }
-  } else if (!expiryDate) {
+  if (!expiryDate) {
     const defaultDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     expiryDate = defaultDate.toISOString().split('T')[0];
   }
 
+  // Dynamic urgency is strictly determined by expiry date:
+  const calculatedUrgency = calculateUrgencyFromExpiry(expiryDate).urgency;
+
   const missingFields: string[] = Array.isArray(raw.missingFields) ? raw.missingFields.map(String) : [];
   if (!hasExplicitExpiry && !missingFields.includes('expiryDate')) {
     missingFields.push('expiryDate');
+  }
+  if (mrp === null && !missingFields.includes('mrp')) {
+    missingFields.push('mrp');
   }
 
   // Calculate dynamic confidence score based on actual field matches
@@ -241,10 +193,9 @@ function sanitizeExtraction(raw: any): VoiceExtraction {
   if (Number(raw.quantity) > 0) calculatedConfidence += 0.12;
   if (VALID_UNITS.includes(unit)) calculatedConfidence += 0.08;
   if (Number(raw.pricePerUnit) > 0) calculatedConfidence += 0.12;
+  if (mrp !== null) calculatedConfidence += 0.08;
   if (hasExplicitExpiry) calculatedConfidence += 0.08;
-  if (urgency !== 'low' || String(raw.urgency).toLowerCase() === 'low') calculatedConfidence += 0.06;
 
-  // Use provided confidence if valid and varying, otherwise use calculatedConfidence
   let finalConfidence = Number(raw.confidence);
   if (isNaN(finalConfidence) || finalConfidence <= 0 || finalConfidence === 0.65) {
     finalConfidence = calculatedConfidence;
@@ -256,9 +207,10 @@ function sanitizeExtraction(raw: any): VoiceExtraction {
     category,
     quantity: Math.max(0, Number(raw.quantity) || 0),
     unit,
+    mrp,
     pricePerUnit: Math.max(0, Number(raw.pricePerUnit) || 0),
     expiryDate,
-    urgency,
+    urgency: calculatedUrgency,
     notes: String(raw.notes || '').trim(),
     confidence: finalConfidence,
     missingFields,
@@ -301,14 +253,43 @@ function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
   else if (lower.includes('can') || lower.includes('tin') || lower.includes('कैन') || lower.includes('टिन')) unit = 'cans';
   else if (lower.includes('ream') || lower.includes('gatta') || lower.includes('rim') || lower.includes('रीम')) unit = 'reams';
 
+  // Extract MRP from transcript (Hindi phrases & English)
+  let mrp: number | null = null;
+  const mrpMatch =
+    lower.match(/(?:mrp|printed price|chapa hua daam|chapa daam|chape huye daam|printed rate)\s*(?:rs\.?|rupees|₹|:)?\s*(\d+(?:\.\d+)?)/i) ||
+    lower.match(/(?:mrp)\s*[:=]?\s*(\d+(?:\.\d+)?)/i);
+  if (mrpMatch) {
+    mrp = parseFloat(mrpMatch[1]) || null;
+  } else {
+    missingFields.push('mrp');
+  }
+
   // Extract price
   let pricePerUnit = 0;
-  const priceMatch = lower.match(/(?:₹|rs\.?|rupaye|rupees|price|rate|bhav|रुपये|रुपए|प्रति|दर)\s*(\d+(?:\.\d+)?)/i) ||
-    lower.match(/(\d+(?:\.\d+)?)\s*(?:₹|rs\.?|rupaye|rupees|रुपये|रुपए|per|\/|में|me)/i);
-  if (priceMatch) {
-    pricePerUnit = parseFloat(priceMatch[1]) || 0;
+  // If MRP was matched, make sure we find selling price by avoiding matching the same MRP number
+  const priceMatches = [
+    ...lower.matchAll(/(?:rate|bhav|humara rate|price|selling price|bechna hai|bechna)\s*(?:rs\.?|rupees|₹|:|\s)?\s*(\d+(?:\.\d+)?)/gi),
+  ];
+  if (priceMatches.length > 0) {
+    pricePerUnit = parseFloat(priceMatches[0][1]) || 0;
   } else {
-    missingFields.push('pricePerUnit');
+    const generalPriceMatch =
+      lower.match(/(?:₹|rs\.?|rupaye|rupees|रुपये|रुपए|per|\/|में|me)\s*(\d+(?:\.\d+)?)/i) ||
+      lower.match(/(\d+(?:\.\d+)?)\s*(?:₹|rs\.?|rupaye|rupees|रुपये|रुपए|per|\/|में|me)/i);
+    if (generalPriceMatch) {
+      const val = parseFloat(generalPriceMatch[1]) || 0;
+      if (val !== mrp) {
+        pricePerUnit = val;
+      }
+    }
+  }
+
+  if (!pricePerUnit) {
+    if (mrp) {
+      pricePerUnit = Math.round(mrp * 0.8);
+    } else {
+      missingFields.push('pricePerUnit');
+    }
   }
 
   // Detect category
@@ -331,36 +312,6 @@ function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
     category = 'Hardware';
   }
 
-  // Detect Urgency
-  let urgency: 'low' | 'medium' | 'high' = 'low';
-
-  const hasExplicitLow =
-    /\burgency\s*(?:level|is)?\s*[:=]?\s*low\b/i.test(transcript) ||
-    /\blow\s*(?:urgency|priority)\b/i.test(transcript) ||
-    /(?:लो\s*अर्जेंसी|अर्जेंसी\s*(?:लेवल)?\s*लो|कम\s*प्राथमिकता|कोई\s*जल्दी\s*नहीं|जल्दी\s*नहीं\s*है|आराम\s*से|काफी\s*समय|समय\s*है|धैर्य|हळूहळू|काही\s*घाई\s*नाही|அவசரமில்லை|అత్యవసరం\s*లేదు)/i.test(transcript) ||
-    /\b(koi jaldi nahi|jaldi nahi|jaldi nahi hai|aram se|no hurry|no rush|low urgency|low priority|plenty of time|fresh stock|regular lot)\b/i.test(lower);
-
-  const hasExplicitHigh =
-    /\burgency\s*(?:level|is)?\s*[:=]?\s*high\b/i.test(transcript) ||
-    /\bhigh\s*(?:urgency|priority)\b/i.test(transcript) ||
-    /(?:हाई\s*अर्जेंसी|अर्जेंसी\s*(?:लेवल)?\s*हाई|अत्यंत\s*आवश्यक|तुरंत|जल्दी\s*से\s*जल्दी|जल्दी\s*बेचना|शीघ्र|इमरजेंसी|अर्जेंट|आपातकालीन|तातडीने|तातकाळ|त्वरित|உடனடியாக|அவசரம்|తక్షణమే|అత్యవసరం|জরুরি|তাড়াতাড়ি|તરત|ઝડપથી|ತುರ್ತು|ഉടൻ|ਤੁਰੰਤ)/i.test(transcript) ||
-    /\b(urgent|urgently|emergency|immediate|immediately|turant|aaj hi|kal tak|fast clearance|distress sale|short expiry|khali karna|band ho rahi|fast sale)\b/i.test(lower) ||
-    (/\bjaldi\b/i.test(lower) && !/\b(koi jaldi nahi|jaldi nahi|jaldi nahi hai)\b/i.test(lower));
-
-  const hasExplicitMed =
-    /\burgency\s*(?:level|is)?\s*[:=]?\s*medium\b/i.test(transcript) ||
-    /\bmedium\s*(?:urgency|priority)\b/i.test(transcript) ||
-    /(?:मीडियम\s*अर्जेंसी|अर्जेंसी\s*(?:लेवल)?\s*मीडियम|मध्यम|साधारण|நடுத்தர|మధ్యస్థ|মাঝারি|મધ્યમ)/i.test(transcript) ||
-    /\b(medium|moderate|normal clearance|agle hafte|next week|15 din|20 din|2 hafte|2 weeks|month end|mahine ke aakhir)\b/i.test(lower);
-
-  if (hasExplicitLow) {
-    urgency = 'low';
-  } else if (hasExplicitHigh) {
-    urgency = 'high';
-  } else if (hasExplicitMed) {
-    urgency = 'medium';
-  }
-
   // Parse Expiry Date from transcript
   let expiryDate = '';
   let hasExplicitExpiry = false;
@@ -380,12 +331,12 @@ function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
 
     if (daysMatch) {
       const days = parseInt(daysMatch[1], 10);
-      const target = new Date(Date.now() + Math.max(10, days) * 24 * 60 * 60 * 1000);
+      const target = new Date(Date.now() + Math.max(1, days) * 24 * 60 * 60 * 1000);
       expiryDate = target.toISOString().split('T')[0];
       hasExplicitExpiry = true;
     } else if (weeksMatch) {
       const weeks = parseInt(weeksMatch[1], 10);
-      const target = new Date(Date.now() + Math.max(10, weeks * 7) * 24 * 60 * 60 * 1000);
+      const target = new Date(Date.now() + Math.max(1, weeks * 7) * 24 * 60 * 60 * 1000);
       expiryDate = target.toISOString().split('T')[0];
       hasExplicitExpiry = true;
     } else if (monthsMatch) {
@@ -400,28 +351,14 @@ function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
     }
   }
 
-  if (urgency === 'high') {
-    if (!hasExplicitExpiry) {
-      const defaultHighDate = new Date(Date.now() + 12 * 24 * 60 * 60 * 1000);
-      expiryDate = defaultHighDate.toISOString().split('T')[0];
-      missingFields.push('expiryDate');
-    } else {
-      const parsed = new Date(expiryDate);
-      const minHigh = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
-      const maxHigh = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-      minHigh.setHours(0, 0, 0, 0);
-      maxHigh.setHours(23, 59, 59, 999);
-      if (parsed.getTime() < minHigh.getTime()) {
-        expiryDate = minHigh.toISOString().split('T')[0];
-      } else if (parsed.getTime() > maxHigh.getTime()) {
-        expiryDate = maxHigh.toISOString().split('T')[0];
-      }
-    }
-  } else if (!expiryDate) {
+  if (!expiryDate) {
     const defaultDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     expiryDate = defaultDate.toISOString().split('T')[0];
     missingFields.push('expiryDate');
   }
+
+  // Urgency is computed deterministically from expiryDate
+  const urgency = calculateUrgencyFromExpiry(expiryDate).urgency;
 
   // Title formatting: Clean capitalized words
   let title = transcript
@@ -445,8 +382,8 @@ function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
   if (quantity > 0) confidence += 0.12;
   if (unit) confidence += 0.08;
   if (pricePerUnit > 0) confidence += 0.12;
+  if (mrp !== null) confidence += 0.08;
   if (hasExplicitExpiry) confidence += 0.08;
-  if (urgency !== 'low') confidence += 0.06;
   confidence = Math.min(0.96, Math.max(0.45, Math.round(confidence * 100) / 100));
 
   return {
@@ -454,6 +391,7 @@ function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
     category,
     quantity: quantity || 10,
     unit,
+    mrp,
     pricePerUnit: pricePerUnit || 100,
     expiryDate,
     urgency,

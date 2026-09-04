@@ -1,8 +1,27 @@
+import fs from 'fs';
+import path from 'path';
 import { Router, Request, Response } from 'express';
 import prisma from '../lib/prisma';
+import { config } from '../config';
 import { authMiddleware } from '../middleware/auth';
+import { uploadListingImage } from '../middleware/upload';
 import { listingSchema, listingUpdateSchema, matchQuerySchema } from '../validators';
 import { matchListings } from '../services/matchingEngine';
+import { getDaysUntilExpiry, calculateUrgency } from '../utils/urgency';
+
+const deleteLocalProductImage = (imageUrl?: string | null) => {
+  if (!imageUrl || typeof imageUrl !== 'string') return;
+  if (!imageUrl.startsWith('/uploads/products/')) return;
+  try {
+    const filename = path.basename(imageUrl);
+    const fullPath = path.resolve(config.upload.dir, 'products', filename);
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
+    }
+  } catch (err) {
+    console.error('Failed to clean up product image:', err);
+  }
+};
 
 const router = Router();
 
@@ -78,18 +97,32 @@ router.get('/my/all', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // Create listing
-router.post('/', authMiddleware, async (req: Request, res: Response) => {
+router.post('/', authMiddleware, uploadListingImage, async (req: Request, res: Response) => {
   try {
-    const data = listingSchema.parse(req.body);
+    const imageUrl = req.file
+      ? `/uploads/products/${req.file.filename}`
+      : req.body.imageUrl || null;
+
+    const payload = { ...req.body, ...(imageUrl !== null && { imageUrl }) };
+    const data = listingSchema.parse(payload);
+
+    // Backend is single source of truth for urgency:
+    const calculatedUrgency = calculateUrgency(data.expiryDate);
+
     const listing = await prisma.listing.create({
       data: {
         ...data,
+        urgency: calculatedUrgency,
+        imageUrl: data.imageUrl ?? imageUrl,
         expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
         sellerId: req.user!.userId,
       },
     });
     res.status(201).json(listing);
   } catch (err: any) {
+    if (req.file) {
+      deleteLocalProductImage(`/uploads/products/${req.file.filename}`);
+    }
     if (err.name === 'ZodError') {
       res.status(400).json({ error: 'Validation error', details: err.errors });
       return;
@@ -100,24 +133,74 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // Update listing
-router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
+router.put('/:id', authMiddleware, uploadListingImage, async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
     const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing || listing.sellerId !== req.user!.userId) {
+      if (req.file) {
+        deleteLocalProductImage(`/uploads/products/${req.file.filename}`);
+      }
       res.status(403).json({ error: 'Not authorized' });
       return;
     }
-    const data = listingUpdateSchema.parse(req.body);
+
+    const imageUrl = req.file
+      ? `/uploads/products/${req.file.filename}`
+      : req.body.imageUrl;
+
+    const payload = { ...req.body, ...(imageUrl !== undefined && { imageUrl }) };
+    const data = listingUpdateSchema.parse(payload);
+
+    const updatedExpiry = data.expiryDate !== undefined ? (data.expiryDate ? new Date(data.expiryDate) : null) : listing.expiryDate;
+    const updatedUrgency = calculateUrgency(updatedExpiry);
+    const updatedImage = imageUrl !== undefined ? imageUrl : listing.imageUrl;
+
+    const wantsActivation = req.body.active === true || req.body.status === 'active';
+    const daysRemaining = getDaysUntilExpiry(updatedExpiry);
+
+    if (wantsActivation) {
+      if (daysRemaining === null || daysRemaining < 11) {
+        if (req.file) {
+          deleteLocalProductImage(`/uploads/products/${req.file.filename}`);
+        }
+        res.status(400).json({ error: 'This product cannot be relisted because less than 11 days remain until expiry.' });
+        return;
+      }
+    }
+
+    let targetStatus = listing.status;
+    let targetActive = listing.active;
+
+    if (wantsActivation) {
+      targetStatus = 'active';
+      targetActive = true;
+    } else if (listing.status === 'expiry_unlisted' || !listing.active) {
+      if (data.expiryDate && daysRemaining !== null && daysRemaining >= 11) {
+        targetStatus = 'active';
+        targetActive = true;
+      } else {
+        targetStatus = listing.status;
+        targetActive = false;
+      }
+    }
+
     const updated = await prisma.listing.update({
       where: { id },
       data: {
         ...data,
-        ...(data.expiryDate !== undefined && { expiryDate: data.expiryDate ? new Date(data.expiryDate) : null }),
+        urgency: updatedUrgency,
+        status: targetStatus,
+        active: targetActive,
+        imageUrl: updatedImage,
+        ...(data.expiryDate !== undefined && { expiryDate: updatedExpiry }),
       },
     });
     res.json(updated);
   } catch (err: any) {
+    if (req.file) {
+      deleteLocalProductImage(`/uploads/products/${req.file.filename}`);
+    }
     if (err.name === 'ZodError') {
       res.status(400).json({ error: 'Validation error', details: err.errors });
       return;
@@ -125,6 +208,16 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
     console.error('Update listing error:', err);
     res.status(500).json({ error: 'Failed to update listing' });
   }
+});
+
+// Dedicated product image upload endpoint
+router.post('/upload-image', authMiddleware, uploadListingImage, (req: Request, res: Response) => {
+  if (!req.file) {
+    res.status(400).json({ error: 'No image file provided' });
+    return;
+  }
+  const imageUrl = `/uploads/products/${req.file.filename}`;
+  res.json({ imageUrl });
 });
 
 // Delete/deactivate listing

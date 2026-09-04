@@ -28,6 +28,9 @@ model User {
   sentMessages Message[]
   ratingsGiven Rating[]      @relation("RatingFrom")
   ratingsReceived Rating[]   @relation("RatingTo")
+  notifications   Notification[]
+  inventoryBatches    InventoryBatch[]
+  dailyInventoryLogs  DailyInventoryLog[]
 
   @@index([email])
 }
@@ -41,14 +44,17 @@ model Listing {
   unit         String
   pricePerUnit Float
   expiryDate   DateTime?
+  mrp          Float?
+  imageUrl     String?
   urgency      String   @default("low") // low, medium, high
-  status       String   @default("active") // active, reserved, sold, expired
+  status       String   @default("active") // active, reserved, sold, expired, expiry_unlisted
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   seller       User     @relation(fields: [sellerId], references: [id])
   reservations Reservation[]
+  notifications Notification[]
 
   @@index([sellerId])
   @@index([category])
@@ -107,4 +113,66 @@ model Rating {
 
   @@unique([fromUserId, reservationId])
   @@index([toUserId])
+}
+
+model Notification {
+  id               String          @id @default(uuid())
+  userId           String
+  type             String          @default("LISTING_AUTO_UNLISTED") // "LISTING_AUTO_UNLISTED" | "INVENTORY_RISK_RECOMMENDATION"
+  title            String
+  message          String
+  read             Boolean         @default(false)
+  listingId        String?
+  inventoryBatchId String?
+  createdAt        DateTime        @default(now())
+
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing          Listing?        @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  inventoryBatch   InventoryBatch? @relation(fields: [inventoryBatchId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([inventoryBatchId])
+}
+
+model InventoryBatch {
+  id              String              @id @default(uuid())
+  sellerId        String
+  productName     String
+  category        String
+  batchNumber     String?
+  expiryDate      DateTime
+  currentQuantity Float
+  unit            String
+  mrp             Float?
+  costPrice       Float?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  seller          User                @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  dailyLogs       DailyInventoryLog[]
+  notifications   Notification[]
+
+  @@index([sellerId])
+  @@index([expiryDate])
+}
+
+model DailyInventoryLog {
+  id                String         @id @default(uuid())
+  inventoryBatchId  String
+  sellerId          String
+  date              String         // Format: YYYY-MM-DD
+  soldQuantity      Float          @default(0)
+  remainingQuantity Float          @default(0)
+  restockedQuantity Float          @default(0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  inventoryBatch    InventoryBatch @relation(fields: [inventoryBatchId], references: [id], onDelete: Cascade)
+  seller            User           @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@unique([inventoryBatchId, date])
+  @@index([inventoryBatchId])
+  @@index([sellerId])
+  @@index([date])
 }

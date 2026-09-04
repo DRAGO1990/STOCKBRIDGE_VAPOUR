@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   AlertCircle,
@@ -10,12 +10,16 @@ import {
   CheckCircle,
   Loader2,
   Package,
+  Flame,
+  Sparkles,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../lib/api';
 import { useAuthStore } from '../stores/authStore';
 import { VoiceListingPanel } from '../components/VoiceListingPanel';
 import type { ExtractedFields } from '../components/VoiceListingPanel';
+import { ProductImageUpload } from '../components/ProductImageUpload';
+import { calculateUrgencyFromExpiry, validateExpiryDate, MIN_EXPIRY_DAYS } from '../utils/urgency';
 
 const CATEGORIES = [
   'Groceries',
@@ -67,16 +71,45 @@ export const CreateListingPage: React.FC = () => {
   const [category, setCategory] = useState('Groceries');
   const [quantity, setQuantity] = useState<number>(0);
   const [unit, setUnit] = useState('packets');
+  const [mrp, setMrp] = useState<number>(0);
   const [pricePerUnit, setPrice] = useState<number>(0);
   const [expiryDate, setExpiry] = useState('');
-  const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('low');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetchingListing, setFetchingListing] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [voiceAutoFilled, setVoiceAutoFilled] = useState(false);
 
-  const minExpiryDate = new Date(Date.now() + 10 * 86400000).toISOString().split('T')[0];
+  // Dynamic urgency auto-calculated strictly from expiry date (Read-only for seller)
+  const calculatedUrgency = useMemo(() => {
+    return calculateUrgencyFromExpiry(expiryDate);
+  }, [expiryDate]);
+
+  const urgency = calculatedUrgency.urgency;
+
+  // Minimum date boundary (at least 11 days from today)
+  const minExpiryDate = new Date(Date.now() + MIN_EXPIRY_DAYS * 86400000).toISOString().split('T')[0];
+
+  const handleExpiryChange = useCallback((newExpiry: string) => {
+    setExpiry(newExpiry);
+  }, []);
+
+  const handleImageSelected = (file: File) => {
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setImageError('');
+  };
+
+  const handleImageRemoved = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setImageUrl(null);
+    setImageError('');
+  };
 
   // If in edit mode, fetch existing listing details immediately and prefill the form
   useEffect(() => {
@@ -93,11 +126,15 @@ export const CreateListingPage: React.FC = () => {
         if (CATEGORIES.includes(item.category)) setCategory(item.category);
         setQuantity(item.quantity || 0);
         if (UNITS.includes(item.unit)) setUnit(item.unit);
+        setMrp(item.mrp || 0);
         setPrice(item.pricePerUnit || 0);
         if (item.expiryDate) {
           setExpiry(item.expiryDate.split('T')[0]);
         }
-        setUrgency(item.urgency || 'low');
+        if (item.imageUrl) {
+          setImageUrl(item.imageUrl);
+          setImagePreview(item.imageUrl);
+        }
         setFetchingListing(false);
       })
       .catch((err) => {
@@ -106,26 +143,54 @@ export const CreateListingPage: React.FC = () => {
       });
   }, [editId]);
 
-  const handleUrgencyChange = (u: 'low' | 'medium' | 'high') => {
-    setUrgency(u);
-    if (u === 'high' && expiryDate) {
-      const exp = new Date(expiryDate);
-      const max = new Date(Date.now() + 15 * 86400000);
-      const min = new Date(Date.now() + 10 * 86400000);
-      if (exp < min || exp > max) {
-        setExpiry(new Date(Date.now() + 12 * 86400000).toISOString().split('T')[0]);
+  // Smart Inventory recommendation pre-fill
+  useEffect(() => {
+    if (editId) return;
+
+    const prefillTitle = searchParams.get('title');
+    const prefillCategory = searchParams.get('category');
+    const prefillQty = searchParams.get('quantity');
+    const prefillUnit = searchParams.get('unit');
+    const prefillExpiry = searchParams.get('expiryDate');
+    const prefillMrp = searchParams.get('mrp');
+
+    if (prefillTitle) setTitle(prefillTitle);
+    if (prefillCategory && CATEGORIES.includes(prefillCategory)) setCategory(prefillCategory);
+    if (prefillQty) {
+      const q = parseFloat(prefillQty);
+      if (!isNaN(q) && q > 0) setQuantity(q);
+    }
+    if (prefillUnit && UNITS.includes(prefillUnit)) setUnit(prefillUnit);
+    if (prefillExpiry) setExpiry(prefillExpiry);
+    if (prefillMrp) {
+      const m = parseFloat(prefillMrp);
+      if (!isNaN(m) && m > 0) {
+        setMrp(m);
+        setPrice(Math.round(m * 0.8));
       }
     }
-  };
+  }, [editId, searchParams]);
 
   const handleVoiceFieldsExtracted = (fields: ExtractedFields) => {
+    // Validate expiry before auto-filling
+    if (fields.expiryDate) {
+      const expiryValidation = validateExpiryDate(fields.expiryDate);
+      if (!expiryValidation.valid) {
+        setError(expiryValidation.error || 'This product cannot be listed because less than 11 days are remaining until expiry.');
+        setMode('manual');
+        return;
+      }
+    }
+
     setTitle(fields.title || '');
     if (CATEGORIES.includes(fields.category)) setCategory(fields.category);
     setQuantity(fields.quantity || 0);
     if (UNITS.includes(fields.unit)) setUnit(fields.unit);
+    if (fields.mrp) setMrp(fields.mrp);
     setPrice(fields.pricePerUnit || 0);
-    setExpiry(fields.expiryDate || '');
-    setUrgency(fields.urgency || 'low');
+    if (fields.expiryDate) {
+      setExpiry(fields.expiryDate);
+    }
     setVoiceAutoFilled(true);
     setMode('manual');
     setError('');
@@ -143,18 +208,29 @@ export const CreateListingPage: React.FC = () => {
       return;
     }
 
-    const selectedExpiry = new Date(expiryDate);
-    const minReq = new Date(Date.now() + 10 * 86400000);
-    minReq.setHours(0, 0, 0, 0);
+    // Validate MRP
+    if (!mrp || mrp <= 0) {
+      setError('Product MRP must be a positive number.');
+      return;
+    }
 
-    if (urgency === 'high') {
-      const maxReq = new Date(Date.now() + 15 * 86400000);
-      if (selectedExpiry < minReq || selectedExpiry > maxReq) {
-        setError('High urgency listings must expire between 10–15 days from today.');
-        return;
-      }
-    } else if (selectedExpiry < minReq) {
-      setError('Expiry date must be at least 10 days from today.');
+    if (pricePerUnit > mrp) {
+      setError(`Selling price (₹${pricePerUnit}) cannot exceed the Product MRP (₹${mrp}).`);
+      return;
+    }
+
+    // Validate image: required on create
+    if (!isEditMode && !imageFile && !imageUrl) {
+      const imgMsg = 'Product image is required. Please upload a product photo.';
+      setImageError(imgMsg);
+      setError(imgMsg);
+      return;
+    }
+
+    // Validate expiry date: minimum 11 days remaining
+    const expiryValidation = validateExpiryDate(expiryDate);
+    if (!expiryValidation.valid) {
+      setError(expiryValidation.error || 'This product cannot be listed because less than 11 days are remaining until expiry.');
       return;
     }
 
@@ -162,14 +238,27 @@ export const CreateListingPage: React.FC = () => {
     setError('');
 
     try {
+      let finalImageUrl = imageUrl;
+
+      // If user uploaded a new image file, upload it
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        const uploadRes = await api.post('/listings/upload-image', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        finalImageUrl = uploadRes.data.imageUrl;
+      }
+
       const payload = {
         title: title.trim(),
         category,
         quantity: Number(quantity),
         unit,
+        mrp: Number(mrp),
         pricePerUnit: Number(pricePerUnit),
         expiryDate: new Date(expiryDate).toISOString(),
-        urgency,
+        imageUrl: finalImageUrl,
       };
 
       if (isEditMode && editId) {
@@ -191,6 +280,9 @@ export const CreateListingPage: React.FC = () => {
   };
 
   const totalValue = quantity * pricePerUnit;
+  const discountPercent = mrp > 0 && pricePerUnit > 0 && pricePerUnit <= mrp
+    ? Math.round(((mrp - pricePerUnit) / mrp) * 100)
+    : 0;
 
   if (fetchingListing) {
     return (
@@ -222,6 +314,20 @@ export const CreateListingPage: React.FC = () => {
             >
               <ArrowLeft size={16} /> Cancel & Return to Listing
             </Link>
+          </div>
+        )}
+
+        {/* Banner if prefilled from Smart Inventory */}
+        {searchParams.get('fromInventory') && (
+          <div style={{
+            background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.3)',
+            borderRadius: 6, padding: '12px 16px', marginBottom: 20,
+            display: 'flex', alignItems: 'center', gap: 10,
+          }}>
+            <Sparkles size={16} color="#6bd8cb" />
+            <span style={{ fontSize: 13, color: '#6bd8cb', fontFamily: 'Work Sans, sans-serif' }}>
+              Prefilled from Smart Inventory Recommendation. Review lot details and adjust liquidation price before publishing.
+            </span>
           </div>
         )}
 
@@ -301,7 +407,7 @@ export const CreateListingPage: React.FC = () => {
               }}>
                 <CheckCircle size={16} color="#6bd8cb" />
                 <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1' }}>
-                  Existing stock details loaded. Modify the price, quantity, or urgency below and save.
+                  Existing stock details loaded. Modify the price, quantity, or details below and save.
                 </span>
               </div>
             )}
@@ -361,8 +467,8 @@ export const CreateListingPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Qty + Price */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    {/* Qty, MRP & Selling Price */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
                       <div>
                         <label style={labelStyle}>Quantity Available *</label>
                         <input
@@ -376,7 +482,20 @@ export const CreateListingPage: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label style={labelStyle}>Price per {unit} (₹) *</label>
+                        <label style={labelStyle}>Product MRP (₹) *</label>
+                        <input
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          value={mrp || ''}
+                          onChange={(e) => setMrp(Number(e.target.value))}
+                          required
+                          placeholder="e.g. 100"
+                          style={inputStyle}
+                        />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Selling Price per {unit} (₹) *</label>
                         <input
                           type="number"
                           min="0.01"
@@ -385,75 +504,152 @@ export const CreateListingPage: React.FC = () => {
                           onChange={(e) => setPrice(Number(e.target.value))}
                           required
                           placeholder="0.00"
-                          style={inputStyle}
+                          style={{
+                            ...inputStyle,
+                            borderColor: mrp > 0 && pricePerUnit > mrp ? '#ffb4ab' : '#3d4947',
+                          }}
                         />
                       </div>
                     </div>
+
+                    {/* MRP & Discount Helper */}
+                    {mrp > 0 && pricePerUnit > 0 && (
+                      <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '8px 12px', borderRadius: 4,
+                        background: pricePerUnit > mrp ? 'rgba(255,180,171,0.1)' : 'rgba(107,216,203,0.06)',
+                        border: `1px solid ${pricePerUnit > mrp ? 'rgba(255,180,171,0.3)' : 'rgba(107,216,203,0.2)'}`,
+                      }}>
+                        <span style={{
+                          fontFamily: 'Work Sans, sans-serif', fontSize: 12,
+                          color: pricePerUnit > mrp ? '#ffb4ab' : '#6bd8cb', fontWeight: 500,
+                        }}>
+                          {pricePerUnit > mrp
+                            ? `⚠️ Selling price exceeds MRP! Maximum allowed price is ₹${mrp}.`
+                            : `Offering ${discountPercent}% discount off MRP (₹${mrp} printed).`}
+                        </span>
+                        <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391' }}>
+                          MRP Rule Active
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* ── Section: Urgency ── */}
+                {/* ── Section: Product Image Upload ── */}
                 <div style={{ padding: '24px 28px', borderBottom: '1px solid #3d4947' }}>
-                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', marginBottom: 8 }}>
-                    Urgency
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', marginBottom: 6 }}>
+                    Product Image *
                   </p>
                   <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', marginBottom: 16 }}>
-                    Marks how urgently you need to liquidate this lot.
+                    Upload a clear photo of your surplus stock or packaging lot (JPG, PNG, WEBP, max 5 MB).
                   </p>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {(['low', 'medium', 'high'] as const).map((u) => {
-                      const active = urgency === u;
-                      const colors: Record<string, { color: string; bg: string; border: string }> = {
-                        low: { color: '#bcc9c6', bg: 'rgba(188,201,198,0.1)', border: 'rgba(188,201,198,0.2)' },
-                        medium: { color: '#f6b351', bg: 'rgba(246,179,81,0.1)', border: 'rgba(246,179,81,0.2)' },
-                        high: { color: '#ffb4ab', bg: 'rgba(255,180,171,0.1)', border: 'rgba(255,180,171,0.2)' },
-                      };
-                      return (
-                        <button
-                          key={u}
-                          type="button"
-                          onClick={() => handleUrgencyChange(u)}
+                  <ProductImageUpload
+                    imageFile={imageFile}
+                    imagePreview={imagePreview}
+                    imageError={imageError}
+                    onImageSelected={handleImageSelected}
+                    onImageRemoved={handleImageRemoved}
+                    onErrorChange={(err) => setImageError(err)}
+                    disabled={loading}
+                    label="Upload Product Image (Required)"
+                  />
+                </div>
+
+                {/* ── Section: Expiry Date & Urgency ── */}
+                <div style={{ padding: '24px 28px', borderBottom: '1px solid #3d4947' }}>
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', marginBottom: 6 }}>
+                    Expiry Date & Urgency
+                  </p>
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', marginBottom: 20 }}>
+                    Urgency is automatically calculated strictly based on product expiry date.
+                  </p>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
+                    <div>
+                      <label style={labelStyle}>Product Expiry Date *</label>
+                      <div style={{
+                        display: 'flex', alignItems: 'center', background: '#2a2a2a',
+                        border: '1px solid #3d4947', borderRadius: 4, padding: '0 14px',
+                      }}>
+                        <Calendar size={16} color="#879391" style={{ flexShrink: 0 }} />
+                        <input
+                          type="date"
+                          value={expiryDate}
+                          min={minExpiryDate}
+                          onChange={(e) => handleExpiryChange(e.target.value)}
+                          required
                           style={{
-                            padding: '8px 20px', borderRadius: 4,
-                            border: `1px solid ${active ? colors[u].border : '#3d4947'}`,
-                            background: active ? colors[u].bg : 'transparent',
-                            color: active ? colors[u].color : '#879391',
-                            fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600,
-                            cursor: 'pointer', textTransform: 'capitalize',
+                            ...inputStyle, padding: '11px 10px', border: 'none', background: 'transparent',
+                            width: '100%', colorScheme: 'dark',
+                          }}
+                        />
+                      </div>
+                      <span style={{ fontSize: 11, color: '#879391', display: 'block', marginTop: 4 }}>
+                        Must be at least {MIN_EXPIRY_DAYS} days in the future.
+                      </span>
+                    </div>
+
+                    <div>
+                      <label style={labelStyle}>Urgency Level</label>
+                      <div
+                        id="urgency-display-badge"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          background: '#222222',
+                          border: `1px solid ${urgency === 'high' ? 'rgba(255,180,171,0.4)' : urgency === 'medium' ? 'rgba(246,179,81,0.4)' : '#3d4947'}`,
+                          borderRadius: 4,
+                          padding: '10px 14px',
+                          minHeight: 44,
+                          boxSizing: 'border-box',
+                        }}
+                      >
+                        {urgency === 'high' && (
+                          <Flame size={16} color="#ffb4ab" style={{ flexShrink: 0 }} className="animate-pulse" />
+                        )}
+                        <span
+                          id="current-urgency-value"
+                          style={{
+                            fontFamily: 'Sora, sans-serif',
+                            fontWeight: 700,
+                            fontSize: 14,
+                            letterSpacing: '0.04em',
+                            color: urgency === 'high' ? '#ffb4ab' : urgency === 'medium' ? '#f6b351' : '#6bd8cb',
+                            textTransform: 'uppercase',
                           }}
                         >
-                          {u}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* ── Section: Expiry ── */}
-                <div style={{ padding: '24px 28px', borderBottom: '1px solid #3d4947' }}>
-                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', marginBottom: 8 }}>
-                    Expiry Date
-                  </p>
-                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', marginBottom: 16 }}>
-                    Must be at least 10 days from today{urgency === 'high' ? ' and no more than 15 days (high urgency)' : ''}.
-                  </p>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', background: '#2a2a2a',
-                    border: '1px solid #3d4947', borderRadius: 4, padding: '0 14px', maxWidth: 280,
-                  }}>
-                    <Calendar size={16} color="#879391" style={{ flexShrink: 0 }} />
-                    <input
-                      type="date"
-                      value={expiryDate}
-                      min={minExpiryDate}
-                      max={urgency === 'high' ? new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0] : undefined}
-                      onChange={(e) => setExpiry(e.target.value)}
-                      required
-                      style={{
-                        ...inputStyle, padding: '11px 10px', border: 'none', background: 'transparent',
-                        width: '100%', colorScheme: 'dark',
-                      }}
-                    />
+                          {urgency.toUpperCase()}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontFamily: 'Work Sans, sans-serif',
+                            color: '#879391',
+                            background: 'rgba(135,147,145,0.12)',
+                            border: '1px solid rgba(135,147,145,0.2)',
+                            padding: '2px 8px',
+                            borderRadius: 3,
+                            marginLeft: 'auto',
+                            fontWeight: 500,
+                          }}
+                        >
+                          Read-only
+                        </span>
+                      </div>
+                      <span style={{ fontSize: 11, color: '#879391', display: 'block', marginTop: 4 }}>
+                        Automatically calculated from expiry date
+                      </span>
+                      {expiryDate && calculatedUrgency.daysRemaining !== null && (
+                        <span style={{ fontSize: 11, color: '#bcc9c6', display: 'block', marginTop: 2 }}>
+                          {calculatedUrgency.statusText}
+                        </span>
+                      )}
+                      <span style={{ fontSize: 11, color: '#879391', display: 'block', marginTop: 2 }}>
+                        11–25d: High · 26–50d: Medium · &gt;50d: Low
+                      </span>
+                    </div>
                   </div>
                 </div>
 

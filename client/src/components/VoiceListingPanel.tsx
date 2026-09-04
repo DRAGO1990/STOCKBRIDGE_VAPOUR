@@ -22,6 +22,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import api from '../lib/api';
+import { calculateUrgencyFromExpiry, validateExpiryDate } from '../utils/urgency';
 
 // ─── Language Configuration ─────────────────────────────────────────────────
 
@@ -168,6 +169,7 @@ export interface ExtractedFields {
   quantity: number;
   unit: string;
   pricePerUnit: number;
+  mrp?: number | null;
   expiryDate: string;
   urgency: 'low' | 'medium' | 'high';
   notes: string;
@@ -338,9 +340,9 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
   const extractClientSideFallback = (text: string): ExtractedFields => {
     let quantity = 50;
     let pricePerUnit = 100;
+    let mrp: number | undefined = undefined;
     let unit = 'packets';
     let category = 'Groceries';
-    let urgency: 'low' | 'medium' | 'high' = 'low';
 
     const numMatch = text.match(/(\d+)\s*(kg|packets|packet|boxes|box|pieces|piece|litres|bags|can|cans|quintal)/i);
     if (numMatch) {
@@ -353,9 +355,20 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       else if (u.includes('can')) unit = 'cans';
     }
 
-    const priceMatch = text.match(/(?:rs\.?|rupees|₹|rate|price|at)\s*(\d+(?:\.\d+)?)/i);
+    const mrpMatch = text.match(/(?:mrp|m\.r\.p\.?)\s*(?:rs\.?|rupees|₹|:)?\s*(\d+(?:\.\d+)?)/i);
+    if (mrpMatch) {
+      mrp = parseFloat(mrpMatch[1]);
+    }
+
+    const priceMatch = text.match(/(?:rs\.?|rupees|₹|rate|price|selling price|at)\s*(\d+(?:\.\d+)?)/i);
     if (priceMatch) {
       pricePerUnit = parseFloat(priceMatch[1]);
+    }
+
+    if (mrp && pricePerUnit > mrp) {
+      pricePerUnit = Math.round(mrp * 0.8);
+    } else if (!mrp && pricePerUnit) {
+      mrp = Math.round(pricePerUnit * 1.25);
     }
 
     if (/oil|tel|ghee|rice|chawal|dal|wheat|atta|flour|sugar/i.test(text)) {
@@ -366,11 +379,8 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       category = 'Prepared Food & Bakery';
     }
 
-    if (/emergency|urgent|immediate|jaldi|expiry\s*(?:in)?\s*\d+\s*days?/i.test(text)) {
-      urgency = 'high';
-    }
-
-    const defaultExpiry = new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0];
+    const defaultExpiry = new Date(Date.now() + 20 * 86400000).toISOString().split('T')[0];
+    const urgency = calculateUrgencyFromExpiry(defaultExpiry).urgency;
 
     return {
       title: text.slice(0, 45).trim() || 'Surplus Inventory Lot',
@@ -378,6 +388,7 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       quantity,
       unit,
       pricePerUnit,
+      mrp: mrp || 120,
       expiryDate: defaultExpiry,
       urgency,
       notes: text,
@@ -404,12 +415,45 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       });
 
       if (res.data.success && res.data.extraction) {
-        setExtraction(res.data.extraction);
+        const data = res.data.extraction;
+        const parsedExpiry = data.expiryDate || new Date(Date.now() + 20 * 86400000).toISOString().split('T')[0];
+
+        // Validate expiry: reject if < 11 days remaining
+        const expiryValidation = validateExpiryDate(parsedExpiry);
+        if (!expiryValidation.valid) {
+          setError(expiryValidation.error || 'This product cannot be listed because less than 11 days are remaining until expiry.');
+          setIsParsing(false);
+          return;
+        }
+
+        // Always compute urgency deterministically — ignore any AI-returned urgency
+        const urgencyComputed = calculateUrgencyFromExpiry(parsedExpiry).urgency;
+
+        const structuredFields: ExtractedFields = {
+          ...data,
+          expiryDate: parsedExpiry,
+          urgency: urgencyComputed,
+        };
+        setExtraction(structuredFields);
       } else {
-        setExtraction(extractClientSideFallback(textToParse));
+        const fallback = extractClientSideFallback(textToParse);
+        const fallbackExpiryValidation = validateExpiryDate(fallback.expiryDate);
+        if (!fallbackExpiryValidation.valid) {
+          setError(fallbackExpiryValidation.error || 'This product cannot be listed because less than 11 days are remaining until expiry.');
+          setIsParsing(false);
+          return;
+        }
+        setExtraction(fallback);
       }
     } catch {
-      setExtraction(extractClientSideFallback(textToParse));
+      const fallback = extractClientSideFallback(textToParse);
+      const fallbackExpiryValidation = validateExpiryDate(fallback.expiryDate);
+      if (!fallbackExpiryValidation.valid) {
+        setError(fallbackExpiryValidation.error || 'This product cannot be listed because less than 11 days are remaining until expiry.');
+        setIsParsing(false);
+        return;
+      }
+      setExtraction(fallback);
     } finally {
       setIsParsing(false);
     }
@@ -753,6 +797,29 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
               </span>
               <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: '#6bd8cb', margin: '4px 0 0' }}>
                 ₹{extraction.pricePerUnit} / {extraction.unit}
+              </p>
+            </div>
+
+            {extraction.mrp && (
+              <div style={{ background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 4, padding: 12 }}>
+                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Product MRP
+                </span>
+                <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: '#bcc9c6', margin: '4px 0 0' }}>
+                  ₹{extraction.mrp} / {extraction.unit}
+                </p>
+              </div>
+            )}
+
+            <div style={{ background: '#2a2a2a', border: '1px solid #3d4947', borderRadius: 4, padding: 12 }}>
+              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Urgency (Calculated)
+              </span>
+              <p style={{
+                fontFamily: 'Work Sans, sans-serif', fontWeight: 700, fontSize: 13, margin: '4px 0 0', textTransform: 'uppercase',
+                color: extraction.urgency === 'high' ? '#ffb4ab' : extraction.urgency === 'medium' ? '#f6b351' : '#6bd8cb',
+              }}>
+                {extraction.urgency}
               </p>
             </div>
           </div>

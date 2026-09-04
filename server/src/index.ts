@@ -17,6 +17,9 @@ import ratingRoutes from './routes/ratings';
 import messageRoutes from './routes/messages';
 import adminRoutes from './routes/admin';
 import voiceRoutes from './routes/voice';
+import notificationRoutes from './routes/notifications';
+import inventoryRoutes from './routes/inventory';
+import { runAutoExpiryUnlistingCheck } from './services/expiryMonitor';
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +45,8 @@ app.use('/api/ratings', ratingRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/voice', voiceRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -72,6 +77,18 @@ setInterval(async () => {
     console.error('Auto-expire error:', err);
   }
 }, 60000); // Every minute
+
+// AdityaRana: Automatic expiry unlisting background monitor
+runAutoExpiryUnlistingCheck().catch((err) =>
+  console.error('[ExpiryMonitor] Startup check error:', err)
+);
+
+const EXPIRY_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+setInterval(() => {
+  runAutoExpiryUnlistingCheck().catch((err) =>
+    console.error('[ExpiryMonitor] Periodic check error:', err)
+  );
+}, EXPIRY_CHECK_INTERVAL_MS);
 
 server.listen(config.port, () => {
   console.log(`🚀 StockBridge server running on port ${config.port}`);

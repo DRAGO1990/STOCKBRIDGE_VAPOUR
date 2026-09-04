@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MIN_EXPIRY_DAYS } from './utils/urgency';
 
 export const registerSchema = z.object({
   name: z.string().min(2).max(100),
@@ -16,70 +17,78 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-export const baseListingSchema = z.object({
-  title: z.string().min(2).max(200),
-  category: z.string().min(1).max(100),
-  quantity: z.number().positive(),
-  unit: z.string().min(1).max(50),
-  pricePerUnit: z.number().positive(),
-  expiryDate: z
-    .string()
-    .min(1, 'Expiry date is required')
-    .refine(
-      (val) => {
-        const expiry = new Date(val);
-        if (isNaN(expiry.getTime())) return false;
-        const minDate = new Date();
-        minDate.setDate(minDate.getDate() + 10);
-        minDate.setHours(0, 0, 0, 0);
-        return expiry.getTime() >= minDate.getTime();
-      },
-      { message: 'Expiry date must be at least 10 days in the future' }
-    ),
-  urgency: z.enum(['low', 'medium', 'high']).default('low'),
-});
+export const baseListingSchema = z
+  .object({
+    title: z.string().min(2).max(200),
+    category: z.string().min(1).max(100),
+    quantity: z.coerce.number().positive(),
+    unit: z.string().min(1).max(50),
+    mrp: z.coerce.number().positive({ message: 'MRP must be a positive number' }),
+    pricePerUnit: z.coerce.number().positive({ message: 'Selling price must be a positive number' }),
+    expiryDate: z
+      .string()
+      .min(1, 'Expiry date is required')
+      .refine(
+        (val) => {
+          const expiry = new Date(val);
+          if (isNaN(expiry.getTime())) return false;
+          const minDate = new Date();
+          minDate.setDate(minDate.getDate() + MIN_EXPIRY_DAYS);
+          minDate.setHours(0, 0, 0, 0);
+          return expiry.getTime() >= minDate.getTime();
+        },
+        { message: 'This product cannot be listed because less than 11 days are remaining until expiry.' }
+      ),
+    urgency: z.enum(['low', 'medium', 'high']).optional().default('low'),
+    imageUrl: z.string().nullable().optional(),
+  })
+  .refine((data) => data.pricePerUnit <= data.mrp, {
+    message: 'Selling price should not be greater than the product MRP.',
+    path: ['pricePerUnit'],
+  });
 
-export const listingSchema = baseListingSchema.superRefine((data, ctx) => {
-  if (data.expiryDate && data.urgency === 'high') {
-    const expiry = new Date(data.expiryDate);
-    const minHigh = new Date();
-    minHigh.setDate(minHigh.getDate() + 10);
-    minHigh.setHours(0, 0, 0, 0);
+export const listingSchema = baseListingSchema;
 
-    const maxHigh = new Date();
-    maxHigh.setDate(maxHigh.getDate() + 15);
-    maxHigh.setHours(23, 59, 59, 999);
-
-    if (expiry.getTime() < minHigh.getTime() || expiry.getTime() > maxHigh.getTime()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'High urgency listings must have an expiry date between 10 to 15 days from today',
-        path: ['expiryDate'],
-      });
+export const baseListingUpdateSchema = z
+  .object({
+    title: z.string().min(2).max(200),
+    category: z.string().min(1).max(100),
+    quantity: z.coerce.number().positive(),
+    unit: z.string().min(1).max(50),
+    mrp: z.coerce.number().positive({ message: 'MRP must be a positive number' }),
+    pricePerUnit: z.coerce.number().positive({ message: 'Selling price must be a positive number' }),
+    expiryDate: z
+      .string()
+      .min(1, 'Expiry date is required')
+      .refine(
+        (val) => {
+          const expiry = new Date(val);
+          if (isNaN(expiry.getTime())) return false;
+          const minDate = new Date();
+          minDate.setDate(minDate.getDate() + MIN_EXPIRY_DAYS);
+          minDate.setHours(0, 0, 0, 0);
+          return expiry.getTime() >= minDate.getTime();
+        },
+        { message: 'This product cannot be listed because less than 11 days are remaining until expiry.' }
+      ),
+    urgency: z.enum(['low', 'medium', 'high']).optional(),
+    imageUrl: z.string().nullable().optional(),
+  })
+  .partial()
+  .refine(
+    (data) => {
+      if (data.mrp !== undefined && data.pricePerUnit !== undefined) {
+        return data.pricePerUnit <= data.mrp;
+      }
+      return true;
+    },
+    {
+      message: 'Selling price should not be greater than the product MRP.',
+      path: ['pricePerUnit'],
     }
-  }
-});
+  );
 
-export const listingUpdateSchema = baseListingSchema.partial().superRefine((data, ctx) => {
-  if (data.expiryDate && data.urgency === 'high') {
-    const expiry = new Date(data.expiryDate);
-    const minHigh = new Date();
-    minHigh.setDate(minHigh.getDate() + 10);
-    minHigh.setHours(0, 0, 0, 0);
-
-    const maxHigh = new Date();
-    maxHigh.setDate(maxHigh.getDate() + 15);
-    maxHigh.setHours(23, 59, 59, 999);
-
-    if (expiry.getTime() < minHigh.getTime() || expiry.getTime() > maxHigh.getTime()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'High urgency listings must have an expiry date between 10 to 15 days from today',
-        path: ['expiryDate'],
-      });
-    }
-  }
-});
+export const listingUpdateSchema = baseListingUpdateSchema;
 
 export const reservationSchema = z.object({
   listingId: z.string().uuid(),
@@ -117,4 +126,25 @@ const validLanguageCodes = SUPPORTED_VOICE_LANGUAGES.map((l) => l.code) as unkno
 export const voiceParseSchema = z.object({
   transcript: z.string().min(2, 'Transcript is too short'),
   language: z.string().default('hi-IN'),
+});
+
+// AdityaRana: Smart Inventory Batch & Log Schemas
+export const inventoryBatchSchema = z.object({
+  productName: z.string().min(2, 'Product name is required').max(200),
+  category: z.string().min(1, 'Category is required').max(100),
+  batchNumber: z.string().max(100).optional().nullable(),
+  expiryDate: z.string().min(1, 'Expiry date is required'),
+  currentQuantity: z.coerce.number().min(0, 'Quantity cannot be negative'),
+  unit: z.string().min(1).max(50),
+  mrp: z.coerce.number().positive().optional().nullable(),
+  costPrice: z.coerce.number().positive().optional().nullable(),
+});
+
+export const inventoryBatchUpdateSchema = inventoryBatchSchema.partial();
+
+export const dailyLogSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  soldQuantity: z.coerce.number().min(0, 'Sold quantity cannot be negative'),
+  remainingQuantity: z.coerce.number().min(0, 'Remaining quantity cannot be negative'),
+  restockedQuantity: z.coerce.number().min(0, 'Restocked quantity cannot be negative').optional().default(0),
 });

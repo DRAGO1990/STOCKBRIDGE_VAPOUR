@@ -14,6 +14,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 import api from '../lib/api';
+import { connectSocket } from '../lib/socket';
+import type { Notification } from '../types';
 
 const DEMO_ACCOUNTS = [
   { name: 'Rajesh (Distributor)', email: 'rajesh@demo.com', initials: 'RD' },
@@ -36,8 +38,20 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [switching, setSwitching] = useState(false);
+
+  const fetchNotifications = async () => {
+    if (!user) return;
+    try {
+      const res = await api.get('/notifications');
+      setNotifications(res.data.notifications || []);
+      setUnreadNotificationsCount(res.data.unreadCount || 0);
+    } catch { /* silent */ }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -48,15 +62,49 @@ export const Navbar: React.FC = () => {
       } catch { /* silent */ }
     };
     fetchUnread();
-    const iv = setInterval(fetchUnread, 10000);
+    fetchNotifications();
+    const iv = setInterval(() => {
+      fetchUnread();
+      fetchNotifications();
+    }, 15000);
     return () => clearInterval(iv);
+  }, [user]);
+
+  // Real-time socket notification listener
+  useEffect(() => {
+    if (!user) return;
+    const socket = connectSocket();
+    const handleSocketNotification = () => {
+      fetchNotifications();
+    };
+    socket.on('notification', handleSocketNotification);
+    return () => {
+      socket.off('notification', handleSocketNotification);
+    };
   }, [user]);
 
   // Close menus on route change
   useEffect(() => {
     setMobileOpen(false);
     setUserMenuOpen(false);
+    setNotificationMenuOpen(false);
   }, [location.pathname]);
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await api.patch(`/notifications/${id}/read`);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+      setUnreadNotificationsCount(prev => Math.max(0, prev - 1));
+    } catch { /* silent */ }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await api.patch('/notifications/read-all');
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadNotificationsCount(0);
+    } catch { /* silent */ }
+  };
 
   const handleQuickSwitch = async (email: string) => {
     setSwitching(true);
@@ -73,12 +121,13 @@ export const Navbar: React.FC = () => {
   };
 
   const navLinks: NavLink[] = [
-    { name: 'How It Works', path: '/how-it-works' },
-    { name: 'Buy Stock',    path: '/marketplace' },
-    { name: 'Sell Stock',   path: '/create-listing' },
-    { name: 'My Stock',     path: '/my-listings',    authOnly: true },
-    { name: 'Orders',       path: '/reservations',   authOnly: true, badge: unreadCount },
-    { name: 'Admin Portal', path: '/admin',           adminOnly: true },
+    { name: 'How It Works',     path: '/how-it-works' },
+    { name: 'Buy Stock',        path: '/marketplace' },
+    { name: 'Sell Stock',       path: '/create-listing' },
+    { name: 'My Stock',         path: '/my-listings',    authOnly: true },
+    { name: 'Smart Inventory',  path: '/inventory',      authOnly: true },
+    { name: 'Orders',           path: '/reservations',   authOnly: true, badge: unreadCount },
+    { name: 'Admin Portal',     path: '/admin',          adminOnly: true },
   ];
 
   const visibleLinks = navLinks.filter(l => {
@@ -207,32 +256,152 @@ export const Navbar: React.FC = () => {
             </button>
           )}
 
-          {/* Bell */}
-          <button
-            style={{
-              width: 36, height: 36,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'transparent',
-              border: '1px solid #3d4947',
-              borderRadius: 18,
-              color: '#bcc9c6',
-              cursor: 'pointer',
-              position: 'relative',
-              transition: 'border-color 0.15s, color 0.15s',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#e5e2e1'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#bcc9c6'; }}
-          >
-            <Bell size={16} />
-            {unreadCount > 0 && (
-              <span style={{
-                position: 'absolute', top: 6, right: 6,
-                width: 7, height: 7,
-                borderRadius: '50%',
-                background: '#6bd8cb',
-              }} />
-            )}
-          </button>
+          {/* Bell & Notifications Dropdown */}
+          {user && (
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => {
+                  setNotificationMenuOpen(v => !v);
+                  setUserMenuOpen(false);
+                }}
+                title="Notifications"
+                style={{
+                  width: 36, height: 36,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: notificationMenuOpen ? '#2a2a2a' : 'transparent',
+                  border: '1px solid #3d4947',
+                  borderRadius: 18,
+                  color: notificationMenuOpen ? '#6bd8cb' : '#bcc9c6',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'border-color 0.15s, color 0.15s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#e5e2e1'; }}
+                onMouseLeave={e => {
+                  if (!notificationMenuOpen) (e.currentTarget as HTMLButtonElement).style.color = '#bcc9c6';
+                }}
+              >
+                <Bell size={16} />
+                {unreadNotificationsCount > 0 && (
+                  <span style={{
+                    position: 'absolute', top: -2, right: -2,
+                    background: '#ffb4ab',
+                    color: '#690005',
+                    fontSize: 9, fontWeight: 700,
+                    borderRadius: 10,
+                    minWidth: 16, height: 16,
+                    padding: '0 4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: '1px solid #131313',
+                  }}>
+                    {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                  </span>
+                )}
+              </button>
+
+              <AnimatePresence>
+                {notificationMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    style={{
+                      position: 'absolute', right: 0, top: 'calc(100% + 8px)',
+                      width: 340,
+                      background: '#1c1b1b',
+                      border: '1px solid #3d4947',
+                      borderRadius: 8,
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                      zIndex: 100,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {/* Dropdown Header */}
+                    <div style={{
+                      padding: '12px 16px',
+                      borderBottom: '1px solid #3d4947',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700, color: '#e5e2e1' }}>
+                          Notifications
+                        </span>
+                        {unreadNotificationsCount > 0 && (
+                          <span style={{
+                            background: 'rgba(255,180,171,0.15)', color: '#ffb4ab',
+                            border: '1px solid rgba(255,180,171,0.3)',
+                            fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10,
+                          }}>
+                            {unreadNotificationsCount} new
+                          </span>
+                        )}
+                      </div>
+                      {unreadNotificationsCount > 0 && (
+                        <button
+                          onClick={handleMarkAllRead}
+                          style={{
+                            background: 'none', border: 'none',
+                            fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                            color: '#6bd8cb', cursor: 'pointer', padding: 0,
+                          }}
+                        >
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Notification List */}
+                    <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                      {notifications.length === 0 ? (
+                        <div style={{ padding: '32px 16px', textAlign: 'center', color: '#879391', fontFamily: 'Work Sans, sans-serif', fontSize: 13 }}>
+                          No notifications yet
+                        </div>
+                      ) : (
+                        notifications.map(n => (
+                          <div
+                            key={n.id}
+                            onClick={() => {
+                              if (!n.read) handleMarkAsRead(n.id);
+                              if (n.listingId) {
+                                setNotificationMenuOpen(false);
+                                navigate('/my-listings');
+                              }
+                            }}
+                            style={{
+                              padding: '12px 16px',
+                              borderBottom: '1px solid #2a2a2a',
+                              background: n.read ? 'transparent' : 'rgba(255,180,171,0.04)',
+                              cursor: 'pointer',
+                              display: 'flex', gap: 10,
+                              transition: 'background 0.15s',
+                            }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.03)'; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = n.read ? 'transparent' : 'rgba(255,180,171,0.04)'; }}
+                          >
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: n.read ? 'transparent' : '#ffb4ab', marginTop: 6, flexShrink: 0 }} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 12, fontWeight: 600, color: '#e5e2e1', marginBottom: 2 }}>
+                                {n.title}
+                              </p>
+                              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#bcc9c6', lineHeight: 1.4, marginBottom: 4 }}>
+                                {n.message}
+                              </p>
+                              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, color: '#879391' }}>
+                                {new Date(n.createdAt).toLocaleDateString('en-IN', {
+                                  day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
 
           {/* User / Auth */}
           {user ? (

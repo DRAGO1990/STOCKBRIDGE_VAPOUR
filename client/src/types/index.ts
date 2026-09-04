@@ -27,9 +27,10 @@ export interface Listing {
   quantity: number;
   unit: string;
   pricePerUnit: number;
+  mrp?: number | null;
   expiryDate?: string | null;
   urgency: 'low' | 'medium' | 'high';
-  status: 'active' | 'reserved' | 'sold' | 'expired';
+  status: 'active' | 'reserved' | 'sold' | 'expired' | 'expiry_unlisted';
   active: boolean;
   imageUrl?: string | null;
   createdAt: string;
@@ -104,4 +105,78 @@ export interface AdminStats {
   listings: number;
   reservations: number;
   completed: number;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  listingId?: string | null;
+  inventoryBatchId?: string | null;
+  createdAt: string;
+  listing?: {
+    id: string;
+    title: string;
+    imageUrl?: string | null;
+    status: string;
+    active: boolean;
+  };
+}
+
+export type PredictionConfidence = 'insufficient' | 'low' | 'medium' | 'high';
+export type InventoryRiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
+
+export interface InventoryPredictionResult {
+  currentQuantity: number;
+  unit: string;
+  historyDaysCount: number;
+  averageDailySales: number;
+  daysUntilExpiry: number | null;
+  daysUntilHighUrgency: number;
+  predictedDaysToSellRemaining: number | null;
+  predictedRemainingAtHighUrgency: number;
+  recommendedListingQuantity: number;
+  riskLevel: InventoryRiskLevel;
+  confidence: PredictionConfidence;
+  shouldRecommendListing: boolean;
+  canListOnStockBridge: boolean;
+  reason: string;
+}
+
+export interface DailyInventoryLog {
+  id: string;
+  inventoryBatchId: string;
+  sellerId: string;
+  date: string;
+  soldQuantity: number;
+  remainingQuantity: number;
+  restockedQuantity: number;
+  createdAt: string;
+}
+
+export interface InventoryBatch {
+  id: string;
+  sellerId: string;
+  productName: string;
+  category: string;
+  batchNumber?: string | null;
+  expiryDate: string;
+  currentQuantity: number;
+  unit: string;
+  mrp?: number | null;
+  costPrice?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  dailyLogs?: DailyInventoryLog[];
+  prediction?: InventoryPredictionResult;
+}
+
+export interface InventorySummary {
+  totalBatches: number;
+  atRiskCount: number;
+  highUrgencyCount: number;
+  totalStockValueAtRisk: number;
 }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Plus, Search, ChevronDown, Edit, Eye, AlertTriangle, Store,
+  Plus, Search, ChevronDown, Edit, Eye, AlertTriangle, Store, TrendingUp,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../lib/api';
@@ -19,10 +19,11 @@ const TAB_LABELS: { key: FilterTab; label: string }[] = [
 
 const statusStyle = (status: string): React.CSSProperties => {
   switch (status) {
-    case 'active':   return { color: '#6bd8cb', background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.2)' };
-    case 'reserved': return { color: '#ddb7ff', background: 'rgba(221,183,255,0.1)', border: '1px solid rgba(221,183,255,0.2)' };
-    case 'sold':     return { color: '#bcc9c6', background: 'rgba(188,201,198,0.1)', border: '1px solid rgba(188,201,198,0.2)' };
-    default:         return { color: '#f6b351', background: 'rgba(246,179,81,0.1)',   border: '1px solid rgba(246,179,81,0.2)' };
+    case 'active':          return { color: '#6bd8cb', background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.2)' };
+    case 'reserved':        return { color: '#ddb7ff', background: 'rgba(221,183,255,0.1)', border: '1px solid rgba(221,183,255,0.2)' };
+    case 'sold':            return { color: '#bcc9c6', background: 'rgba(188,201,198,0.1)', border: '1px solid rgba(188,201,198,0.2)' };
+    case 'expiry_unlisted': return { color: '#ffb4ab', background: 'rgba(255,180,171,0.15)', border: '1px solid rgba(255,180,171,0.35)' };
+    default:                return { color: '#f6b351', background: 'rgba(246,179,81,0.1)',   border: '1px solid rgba(246,179,81,0.2)' };
   }
 };
 
@@ -50,6 +51,7 @@ export const MyListingsPage: React.FC = () => {
   const activeCount   = listings.filter(l => l.status === 'active' && l.active).length;
   const reservedCount = listings.filter(l => l.status === 'reserved').length;
   const soldCount     = listings.filter(l => l.status === 'sold').length;
+  const unlistedCount = listings.filter(l => l.status === 'expiry_unlisted').length;
   const totalValue    = listings.reduce((s, l) => s + l.quantity * l.pricePerUnit, 0);
 
   const expiringCount = listings.filter(l => {
@@ -65,7 +67,7 @@ export const MyListingsPage: React.FC = () => {
     if (tab === 'sold')      return l.status === 'sold';
     if (tab === 'attention') {
       const days = l.expiryDate ? Math.ceil((new Date(l.expiryDate).getTime() - Date.now()) / 86400000) : 999;
-      return days <= 7 || l.status === 'reserved';
+      return days <= 7 || l.status === 'reserved' || l.status === 'expiry_unlisted';
     }
     return true;
   });
@@ -88,13 +90,22 @@ export const MyListingsPage: React.FC = () => {
               Manage your listed inventory, track reservations and see what needs attention.
             </p>
           </div>
-          <Link
-            to="/create-listing"
-            className="stitch-btn-primary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 20px', textDecoration: 'none', borderRadius: 4 }}
-          >
-            <Plus size={16} /> List New Stock
-          </Link>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Link
+              to="/inventory"
+              className="stitch-btn-ghost"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', textDecoration: 'none', borderRadius: 4 }}
+            >
+              <TrendingUp size={16} color="#6bd8cb" /> Smart Inventory
+            </Link>
+            <Link
+              to="/create-listing"
+              className="stitch-btn-primary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 20px', textDecoration: 'none', borderRadius: 4 }}
+            >
+              <Plus size={16} /> List New Stock
+            </Link>
+          </div>
         </div>
 
         <hr style={{ border: 'none', borderTop: '1px solid #3d4947', marginBottom: 28 }} />
@@ -105,6 +116,7 @@ export const MyListingsPage: React.FC = () => {
             { label: 'Active Listings',    value: activeCount,                               color: '#6bd8cb' },
             { label: 'Reserved',           value: reservedCount,                             color: '#ddb7ff' },
             { label: 'Sold / Completed',   value: soldCount,                                 color: '#bcc9c6' },
+            ...(unlistedCount > 0 ? [{ label: 'Auto Unlisted', value: unlistedCount, color: '#ffb4ab' }] : []),
             { label: 'Total Listed Value', value: `₹${totalValue.toLocaleString('en-IN')}`, color: '#6bd8cb' },
           ].map(stat => (
             <div key={stat.label} style={{ background: '#1c1b1b', padding: '20px 20px 24px' }}>
@@ -116,15 +128,17 @@ export const MyListingsPage: React.FC = () => {
           ))}
 
           {/* Needs Attention cell */}
-          {expiringCount > 0 && (
+          {(expiringCount > 0 || unlistedCount > 0) && (
             <div style={{ background: '#1c1b1b', padding: '20px 20px 24px', gridColumn: 'span 1' }}>
               <p style={{ ...S.label, color: '#f6b351', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <AlertTriangle size={10} /> Needs Attention
               </p>
               <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#bcc9c6' }}>{expiringCount} listings expiring soon</span>
-                  <button style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#6bd8cb', letterSpacing: '0.05em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>Review</button>
+                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#bcc9c6' }}>
+                    {unlistedCount > 0 ? `${unlistedCount} auto-unlisted` : `${expiringCount} expiring soon`}
+                  </span>
+                  <button onClick={() => setTab('attention')} style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#6bd8cb', letterSpacing: '0.05em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>Review</button>
                 </div>
               </div>
             </div>
@@ -239,7 +253,7 @@ export const MyListingsPage: React.FC = () => {
                       letterSpacing: '0.06em', textTransform: 'uppercase',
                       ...statusStyle(listing.status),
                     }}>
-                      {listing.status}
+                      {listing.status === 'expiry_unlisted' ? 'Auto Unlisted' : listing.status}
                     </div>
                   </div>
 
@@ -254,6 +268,11 @@ export const MyListingsPage: React.FC = () => {
                     <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391' }}>
                       {listing.quantity} {listing.unit} remaining
                     </p>
+                    {listing.status === 'expiry_unlisted' && (
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#ffb4ab', marginTop: 4 }}>
+                        This product was automatically unlisted because it remained unsold for 15+ days and now has less than 11 days until expiry.
+                      </p>
+                    )}
                   </div>
 
                   {/* Value */}
@@ -270,11 +289,29 @@ export const MyListingsPage: React.FC = () => {
                   {/* Status + days */}
                   <div style={{ minWidth: 140 }}>
                     <p style={S.label}>Status</p>
-                    {days !== null && (
-                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: days <= 7 ? '#f6b351' : '#bcc9c6', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                        {days <= 7 && <AlertTriangle size={12} />}
-                        {days <= 0 ? 'Expired' : `${days} days left`}
-                      </p>
+                    {listing.status === 'expiry_unlisted' ? (
+                      <div style={{ marginTop: 4 }}>
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          padding: '3px 8px', borderRadius: 4,
+                          fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                          color: '#ffb4ab', background: 'rgba(255,180,171,0.12)', border: '1px solid rgba(255,180,171,0.25)',
+                        }}>
+                          <AlertTriangle size={11} /> Auto Unlisted
+                        </span>
+                        {days !== null && (
+                          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#bcc9c6', marginTop: 3 }}>
+                            {days <= 0 ? 'Expired' : `${days} days left`}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      days !== null && (
+                        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: days <= 7 ? '#f6b351' : '#bcc9c6', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                          {days <= 7 && <AlertTriangle size={12} />}
+                          {days <= 0 ? 'Expired' : `${days} days left`}
+                        </p>
+                      )
                     )}
                   </div>
 
@@ -287,7 +324,16 @@ export const MyListingsPage: React.FC = () => {
                     >
                       <Eye size={13} /> View Listing
                     </Link>
-                    {listing.status !== 'sold' && (
+                    {listing.status === 'expiry_unlisted' ? (
+                      <Link
+                        to={`/create-listing?edit=${listing.id}`}
+                        className="stitch-btn-primary"
+                        style={{ padding: '7px 14px', fontSize: 12, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}
+                        title="Update expiry date to 11+ days to relist"
+                      >
+                        <Edit size={13} /> Edit Expiry to Relist
+                      </Link>
+                    ) : listing.status !== 'sold' && (
                       <Link
                         to={`/create-listing?edit=${listing.id}`}
                         className="stitch-btn-primary"

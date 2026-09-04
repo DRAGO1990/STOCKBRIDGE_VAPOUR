@@ -9,6 +9,7 @@ import { MarketplacePage } from './pages/MarketplacePage';
 import { ListingDetailPage } from './pages/ListingDetailPage';
 import { CreateListingPage } from './pages/CreateListingPage';
 import { MyListingsPage } from './pages/MyListingsPage';
+import { InventoryPage } from './pages/InventoryPage';
 import { ReservationsPage } from './pages/ReservationsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
@@ -69,6 +70,9 @@ const AppRoutes: React.FC = () => {
             <Route path="/sell" element={<Navigate to="/create-listing" replace />} />
             <Route path="/my-listings" element={
               <ProtectedRoute><PageWrapper><MyListingsPage /></PageWrapper></ProtectedRoute>
+            } />
+            <Route path="/inventory" element={
+              <ProtectedRoute><PageWrapper><InventoryPage /></PageWrapper></ProtectedRoute>
             } />
             <Route path="/reservations" element={
               <ProtectedRoute><PageWrapper><ReservationsPage /></PageWrapper></ProtectedRoute>
