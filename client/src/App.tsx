@@ -15,6 +15,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { MarketPreviewPage } from './pages/MarketPreviewPage';
 import { useAuthStore } from './stores/authStore';
 
 // Page transition wrapper
@@ -49,7 +50,7 @@ const AppRoutes: React.FC = () => {
   const isAdminPage = location.pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#131313', color: '#e5e2e1' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--sb-background, #F7F7F2)', color: 'var(--sb-text-primary, #182018)' }}>
       {!isAdminPage && <Navbar />}
       <main className="flex-1">
         <AnimatePresence mode="wait">
@@ -57,11 +58,18 @@ const AppRoutes: React.FC = () => {
             {/* Public */}
             <Route path="/" element={<PageWrapper><LandingPage /></PageWrapper>} />
             <Route path="/how-it-works" element={<PageWrapper><HowItWorksPage /></PageWrapper>} />
-            <Route path="/marketplace" element={<PageWrapper><MarketplacePage /></PageWrapper>} />
-            <Route path="/buy" element={<Navigate to="/marketplace" replace />} />
-            <Route path="/listings/:id" element={<PageWrapper><ListingDetailPage /></PageWrapper>} />
+            <Route path="/market-preview" element={<PageWrapper><MarketPreviewPage /></PageWrapper>} />
             <Route path="/login" element={<PageWrapper><LoginPage /></PageWrapper>} />
             <Route path="/register" element={<PageWrapper><RegisterPage /></PageWrapper>} />
+
+            {/* Protected Marketplace & Trade */}
+            <Route path="/marketplace" element={
+              <ProtectedRoute><PageWrapper><MarketplacePage /></PageWrapper></ProtectedRoute>
+            } />
+            <Route path="/buy" element={<Navigate to="/marketplace" replace />} />
+            <Route path="/listings/:id" element={
+              <ProtectedRoute><PageWrapper><ListingDetailPage /></PageWrapper></ProtectedRoute>
+            } />
 
             {/* Protected */}
             <Route path="/create-listing" element={

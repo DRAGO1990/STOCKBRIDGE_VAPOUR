@@ -10,7 +10,7 @@ const labelStyle: React.CSSProperties = {
   fontFamily: 'Work Sans, sans-serif',
   fontSize: 11, fontWeight: 600,
   letterSpacing: '0.06em', textTransform: 'uppercase',
-  color: '#bcc9c6', marginBottom: 6,
+  color: 'var(--sb-text-secondary, #4F5A51)', marginBottom: 6,
 };
 
 type InputFieldProps = {
@@ -28,14 +28,14 @@ const InputField: React.FC<InputFieldProps> = ({ icon, type = 'text', placeholde
   return (
     <div style={{
       display: 'flex', alignItems: 'center',
-      background: '#2a2a2a',
-      border: `1px solid ${focused ? '#6bd8cb' : '#3d4947'}`,
+      background: 'var(--sb-surface, #FFFFFF)',
+      border: `1px solid ${focused ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-border, #D8E0D5)'}`,
       borderRadius: 4,
       padding: '0 12px',
       transition: 'border-color 0.15s',
-      boxShadow: focused ? '0 0 0 2px rgba(107,216,203,0.1)' : 'none',
+      boxShadow: focused ? '0 0 0 2px rgba(111,143,105,0.15)' : 'none',
     }}>
-      <span style={{ color: focused ? '#6bd8cb' : '#879391', display: 'flex', transition: 'color 0.15s', flexShrink: 0 }}>
+      <span style={{ color: focused ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-muted, #7A847A)', display: 'flex', transition: 'color 0.15s', flexShrink: 0 }}>
         {icon}
       </span>
       <input
@@ -50,7 +50,7 @@ const InputField: React.FC<InputFieldProps> = ({ icon, type = 'text', placeholde
           border: 'none', outline: 'none',
           padding: '11px 10px',
           fontFamily: 'Work Sans, sans-serif',
-          fontSize: 14, color: '#e5e2e1',
+          fontSize: 14, color: 'var(--sb-text-primary, #182018)',
         }}
       />
     </div>
@@ -90,7 +90,7 @@ export const RegisterPage: React.FC = () => {
   return (
     <div style={{
       minHeight: 'calc(100vh - 56px)',
-      background: '#131313',
+      background: 'var(--sb-background, #F7F7F2)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '40px 16px',
     }}>
@@ -100,10 +100,11 @@ export const RegisterPage: React.FC = () => {
         transition={{ duration: 0.3 }}
         style={{
           width: '100%', maxWidth: 500,
-          background: '#1c1b1b',
-          border: '1px solid #3d4947',
+          background: 'var(--sb-surface, #FFFFFF)',
+          border: '1px solid var(--sb-border, #D8E0D5)',
           borderRadius: 8,
           padding: '40px 40px 36px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
         }}
       >
         {/* Header */}
@@ -111,16 +112,16 @@ export const RegisterPage: React.FC = () => {
           <h1 style={{
             fontFamily: 'Sora, sans-serif',
             fontWeight: 700, fontSize: 28,
-            color: '#e5e2e1', lineHeight: 1.3, marginBottom: 8,
+            color: 'var(--sb-text-primary, #182018)', lineHeight: 1.3, marginBottom: 8,
           }}>
             Register your business
           </h1>
-          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6' }}>
+          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-secondary, #4F5A51)' }}>
             Create your StockBridge merchant account
           </p>
         </div>
 
-        <hr style={{ border: 'none', borderTop: '1px solid #3d4947', marginBottom: 28 }} />
+        <hr style={{ border: 'none', borderTop: '1px solid var(--sb-border, #D8E0D5)', marginBottom: 28 }} />
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {/* Name + Business */}
@@ -157,12 +158,12 @@ export const RegisterPage: React.FC = () => {
           <div>
             <label style={labelStyle}>Warehouse / Shop Location Address</label>
             <div style={{
-              background: '#2a2a2a',
-              border: '1px solid #3d4947',
+              background: 'var(--sb-surface, #FFFFFF)',
+              border: '1px solid var(--sb-border, #D8E0D5)',
               borderRadius: 4, padding: '0 12px',
             }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, paddingTop: 11 }}>
-                <MapPin size={16} color="#879391" style={{ marginTop: 2, flexShrink: 0 }} />
+                <MapPin size={16} color="var(--sb-text-muted, #7A847A)" style={{ marginTop: 2, flexShrink: 0 }} />
                 <textarea
                   value={formData.address}
                   onChange={e => setFormData(f => ({ ...f, address: e.target.value }))}
@@ -172,7 +173,7 @@ export const RegisterPage: React.FC = () => {
                     flex: 1, background: 'transparent',
                     border: 'none', outline: 'none', resize: 'none',
                     fontFamily: 'Work Sans, sans-serif',
-                    fontSize: 14, color: '#e5e2e1',
+                    fontSize: 14, color: 'var(--sb-text-primary, #182018)',
                     padding: '0 0 10px',
                   }}
                 />
@@ -183,10 +184,10 @@ export const RegisterPage: React.FC = () => {
           {error && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              background: 'rgba(255,180,171,0.08)',
-              border: '1px solid rgba(255,180,171,0.2)',
+              background: 'rgba(166,92,85,0.08)',
+              border: '1px solid rgba(166,92,85,0.2)',
               borderRadius: 4, padding: '10px 12px',
-              color: '#ffb4ab', fontSize: 13, fontFamily: 'Work Sans, sans-serif',
+              color: 'var(--sb-danger, #A65C55)', fontSize: 13, fontFamily: 'Work Sans, sans-serif',
             }}>
               <AlertCircle size={14} /> {error}
             </div>
@@ -205,9 +206,9 @@ export const RegisterPage: React.FC = () => {
             {loading ? 'Creating Account...' : <>Create Business Account <ArrowRight size={16} /></>}
           </button>
 
-          <p style={{ textAlign: 'center', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#bcc9c6' }}>
+          <p style={{ textAlign: 'center', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)' }}>
             Already have an account?{' '}
-            <Link to="/login" style={{ color: '#6bd8cb', fontWeight: 600, textDecoration: 'none' }}>
+            <Link to="/login" style={{ color: 'var(--sb-primary, #6F8F69)', fontWeight: 600, textDecoration: 'none' }}>
               Sign In
             </Link>
           </p>

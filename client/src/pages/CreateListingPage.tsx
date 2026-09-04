@@ -41,20 +41,20 @@ const labelStyle: React.CSSProperties = {
   fontWeight: 600,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
-  color: '#bcc9c6',
+  color: 'var(--sb-text-secondary, #4F5A51)',
   marginBottom: 8,
 };
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
   boxSizing: 'border-box',
-  background: '#2a2a2a',
-  border: '1px solid #3d4947',
+  background: 'var(--sb-surface, #FFFFFF)',
+  border: '1px solid var(--sb-border, #D8E0D5)',
   borderRadius: 4,
   padding: '11px 14px',
   fontFamily: 'Work Sans, sans-serif',
   fontSize: 14,
-  color: '#e5e2e1',
+  color: 'var(--sb-text-primary, #182018)',
   outline: 'none',
 };
 
@@ -287,8 +287,8 @@ export const CreateListingPage: React.FC = () => {
   if (fetchingListing) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', gap: 16 }}>
-        <Loader2 size={32} color="#6bd8cb" className="animate-spin" />
-        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6' }}>
+        <Loader2 size={32} color="var(--sb-primary, #6F8F69)" className="animate-spin" />
+        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-secondary, #4F5A51)' }}>
           Loading existing stock details...
         </p>
       </div>
@@ -296,7 +296,7 @@ export const CreateListingPage: React.FC = () => {
   }
 
   return (
-    <div style={{ background: '#131313', minHeight: '100vh', color: '#e5e2e1' }}>
+    <div style={{ background: 'var(--sb-background, #F7F7F2)', minHeight: '100vh', color: 'var(--sb-text-primary, #182018)' }}>
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '40px 24px 80px' }}>
         
         {/* ── Back button in Edit Mode ── */}
@@ -306,11 +306,11 @@ export const CreateListingPage: React.FC = () => {
               to={`/listings/${editId}`}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
-                fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391',
+                fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)',
                 textDecoration: 'none', transition: 'color 0.15s',
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#6bd8cb')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#879391')}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--sb-primary, #6F8F69)')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--sb-text-muted, #7A847A)')}
             >
               <ArrowLeft size={16} /> Cancel & Return to Listing
             </Link>
@@ -320,12 +320,12 @@ export const CreateListingPage: React.FC = () => {
         {/* Banner if prefilled from Smart Inventory */}
         {searchParams.get('fromInventory') && (
           <div style={{
-            background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.3)',
+            background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
             borderRadius: 6, padding: '12px 16px', marginBottom: 20,
             display: 'flex', alignItems: 'center', gap: 10,
           }}>
-            <Sparkles size={16} color="#6bd8cb" />
-            <span style={{ fontSize: 13, color: '#6bd8cb', fontFamily: 'Work Sans, sans-serif' }}>
+            <Sparkles size={16} color="var(--sb-primary, #6F8F69)" />
+            <span style={{ fontSize: 13, color: 'var(--sb-primary, #6F8F69)', fontFamily: 'Work Sans, sans-serif', fontWeight: 500 }}>
               Prefilled from Smart Inventory Recommendation. Review lot details and adjust liquidation price before publishing.
             </span>
           </div>
@@ -334,27 +334,27 @@ export const CreateListingPage: React.FC = () => {
         {/* ── Page Header ── */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32, color: '#e5e2e1', margin: 0, letterSpacing: '-0.01em' }}>
+            <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32, color: 'var(--sb-text-primary, #182018)', margin: 0, letterSpacing: '-0.01em' }}>
               {isEditMode ? 'Edit Stock Listing' : 'List New Stock'}
             </h1>
             {isEditMode && (
               <span style={{
                 fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700,
-                color: '#6bd8cb', background: 'rgba(107,216,203,0.1)',
-                border: '1px solid rgba(107,216,203,0.25)', borderRadius: 4, padding: '3px 8px',
+                color: 'var(--sb-primary, #6F8F69)', background: 'var(--sb-primary-pale, #EAF1E7)',
+                border: '1px solid var(--sb-primary-soft, #DCE8D8)', borderRadius: 4, padding: '3px 8px',
               }}>
                 Editing #{editId?.substring(0, 8).toUpperCase()}
               </span>
             )}
           </div>
-          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6', margin: 0 }}>
+          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-muted, #7A847A)', margin: 0 }}>
             {isEditMode
               ? 'Update price, quantity, or terms. Existing lot details have been loaded into the form below.'
               : 'Fill in the details or use voice to quickly create a listing.'}
           </p>
         </motion.div>
 
-        <hr style={{ border: 'none', borderTop: '1px solid #3d4947', marginBottom: 28 }} />
+        <hr className="stitch-divider" style={{ marginBottom: 28 }} />
 
         {/* ── Mode Toggle (Only show on new listing) ── */}
         {!isEditMode && (
@@ -373,8 +373,8 @@ export const CreateListingPage: React.FC = () => {
                   border: '1px solid',
                   cursor: 'pointer', transition: 'all 0.15s',
                   ...(mode === m.key
-                    ? { background: 'rgba(107,216,203,0.1)', borderColor: '#6bd8cb', color: '#6bd8cb' }
-                    : { background: 'transparent', borderColor: '#3d4947', color: '#bcc9c6' }),
+                    ? { background: 'var(--sb-primary-pale, #EAF1E7)', borderColor: 'var(--sb-primary, #6F8F69)', color: 'var(--sb-primary, #6F8F69)' }
+                    : { background: 'transparent', borderColor: 'var(--sb-border, #D8E0D5)', color: 'var(--sb-text-secondary, #4F5A51)' }),
                 }}
               >
                 {m.icon} {m.label}
@@ -389,11 +389,11 @@ export const CreateListingPage: React.FC = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             {voiceAutoFilled && (
               <div style={{
-                background: 'rgba(107,216,203,0.08)', border: '1px solid rgba(107,216,203,0.2)',
+                background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
                 borderRadius: 4, padding: '12px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8,
               }}>
-                <AlertCircle size={14} color="#6bd8cb" />
-                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#6bd8cb' }}>
+                <AlertCircle size={14} color="var(--sb-primary, #6F8F69)" />
+                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-primary, #6F8F69)' }}>
                   Voice data auto-filled — please review before publishing.
                 </span>
               </div>
@@ -401,23 +401,23 @@ export const CreateListingPage: React.FC = () => {
 
             {isEditMode && (
               <div style={{
-                background: 'rgba(107,216,203,0.08)', border: '1px solid rgba(107,216,203,0.25)',
+                background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
                 borderRadius: 6, padding: '12px 16px', marginBottom: 20,
                 display: 'flex', alignItems: 'center', gap: 10,
               }}>
-                <CheckCircle size={16} color="#6bd8cb" />
-                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1' }}>
+                <CheckCircle size={16} color="var(--sb-primary, #6F8F69)" />
+                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-primary, #182018)' }}>
                   Existing stock details loaded. Modify the price, quantity, or details below and save.
                 </span>
               </div>
             )}
 
             <form onSubmit={handleSubmit}>
-              <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, overflow: 'hidden' }}>
+              <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
                 
                 {/* ── Section: Basics ── */}
-                <div style={{ padding: '24px 28px', borderBottom: '1px solid #3d4947' }}>
-                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', marginBottom: 20 }}>
+                <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: 'var(--sb-text-primary, #182018)', marginBottom: 20 }}>
                     Basics
                   </p>
 
@@ -445,7 +445,7 @@ export const CreateListingPage: React.FC = () => {
                           style={{ ...inputStyle, cursor: 'pointer' }}
                         >
                           {CATEGORIES.map((c) => (
-                            <option key={c} value={c} style={{ background: '#1c1b1b' }}>
+                            <option key={c} value={c}>
                               {c}
                             </option>
                           ))}
@@ -459,7 +459,7 @@ export const CreateListingPage: React.FC = () => {
                           style={{ ...inputStyle, cursor: 'pointer' }}
                         >
                           {UNITS.map((u) => (
-                            <option key={u} value={u} style={{ background: '#1c1b1b' }}>
+                            <option key={u} value={u}>
                               {u}
                             </option>
                           ))}
@@ -506,7 +506,7 @@ export const CreateListingPage: React.FC = () => {
                           placeholder="0.00"
                           style={{
                             ...inputStyle,
-                            borderColor: mrp > 0 && pricePerUnit > mrp ? '#ffb4ab' : '#3d4947',
+                            borderColor: mrp > 0 && pricePerUnit > mrp ? 'var(--sb-danger, #A65C55)' : 'var(--sb-border, #D8E0D5)',
                           }}
                         />
                       </div>
@@ -516,20 +516,20 @@ export const CreateListingPage: React.FC = () => {
                     {mrp > 0 && pricePerUnit > 0 && (
                       <div style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '8px 12px', borderRadius: 4,
-                        background: pricePerUnit > mrp ? 'rgba(255,180,171,0.1)' : 'rgba(107,216,203,0.06)',
-                        border: `1px solid ${pricePerUnit > mrp ? 'rgba(255,180,171,0.3)' : 'rgba(107,216,203,0.2)'}`,
+                        padding: '10px 14px', borderRadius: 6,
+                        background: pricePerUnit > mrp ? 'rgba(166,92,85,0.08)' : 'var(--sb-primary-pale, #EAF1E7)',
+                        border: `1px solid ${pricePerUnit > mrp ? 'rgba(166,92,85,0.25)' : 'var(--sb-primary-soft, #DCE8D8)'}`,
                       }}>
                         <span style={{
                           fontFamily: 'Work Sans, sans-serif', fontSize: 12,
-                          color: pricePerUnit > mrp ? '#ffb4ab' : '#6bd8cb', fontWeight: 500,
+                          color: pricePerUnit > mrp ? 'var(--sb-danger, #A65C55)' : 'var(--sb-primary, #6F8F69)', fontWeight: 600,
                         }}>
                           {pricePerUnit > mrp
-                            ? `⚠️ Selling price exceeds MRP! Maximum allowed price is ₹${mrp}.`
+                            ? `⚠️ Selling price exceeds MRP! Maximum allowed selling price is ₹${mrp}.`
                             : `Offering ${discountPercent}% discount off MRP (₹${mrp} printed).`}
                         </span>
-                        <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391' }}>
-                          MRP Rule Active
+                        <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)' }}>
+                          MRP Rule Enforced
                         </span>
                       </div>
                     )}
@@ -537,11 +537,11 @@ export const CreateListingPage: React.FC = () => {
                 </div>
 
                 {/* ── Section: Product Image Upload ── */}
-                <div style={{ padding: '24px 28px', borderBottom: '1px solid #3d4947' }}>
-                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', marginBottom: 6 }}>
+                <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: 'var(--sb-text-primary, #182018)', marginBottom: 6 }}>
                     Product Image *
                   </p>
-                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', marginBottom: 16 }}>
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)', marginBottom: 16 }}>
                     Upload a clear photo of your surplus stock or packaging lot (JPG, PNG, WEBP, max 5 MB).
                   </p>
                   <ProductImageUpload
@@ -552,16 +552,16 @@ export const CreateListingPage: React.FC = () => {
                     onImageRemoved={handleImageRemoved}
                     onErrorChange={(err) => setImageError(err)}
                     disabled={loading}
-                    label="Upload Product Image (Required)"
+                    label="Product Image (Required)"
                   />
                 </div>
 
                 {/* ── Section: Expiry Date & Urgency ── */}
-                <div style={{ padding: '24px 28px', borderBottom: '1px solid #3d4947' }}>
-                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', marginBottom: 6 }}>
+                <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: 'var(--sb-text-primary, #182018)', marginBottom: 6 }}>
                     Expiry Date & Urgency
                   </p>
-                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', marginBottom: 20 }}>
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)', marginBottom: 20 }}>
                     Urgency is automatically calculated strictly based on product expiry date.
                   </p>
 
@@ -569,10 +569,10 @@ export const CreateListingPage: React.FC = () => {
                     <div>
                       <label style={labelStyle}>Product Expiry Date *</label>
                       <div style={{
-                        display: 'flex', alignItems: 'center', background: '#2a2a2a',
-                        border: '1px solid #3d4947', borderRadius: 4, padding: '0 14px',
+                        display: 'flex', alignItems: 'center', background: 'var(--sb-surface, #FFFFFF)',
+                        border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '0 14px',
                       }}>
-                        <Calendar size={16} color="#879391" style={{ flexShrink: 0 }} />
+                        <Calendar size={16} color="var(--sb-text-muted, #7A847A)" style={{ flexShrink: 0 }} />
                         <input
                           type="date"
                           value={expiryDate}
@@ -581,11 +581,11 @@ export const CreateListingPage: React.FC = () => {
                           required
                           style={{
                             ...inputStyle, padding: '11px 10px', border: 'none', background: 'transparent',
-                            width: '100%', colorScheme: 'dark',
+                            width: '100%', colorScheme: 'light',
                           }}
                         />
                       </div>
-                      <span style={{ fontSize: 11, color: '#879391', display: 'block', marginTop: 4 }}>
+                      <span style={{ fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', display: 'block', marginTop: 4 }}>
                         Must be at least {MIN_EXPIRY_DAYS} days in the future.
                       </span>
                     </div>
@@ -598,8 +598,8 @@ export const CreateListingPage: React.FC = () => {
                           display: 'flex',
                           alignItems: 'center',
                           gap: 10,
-                          background: '#222222',
-                          border: `1px solid ${urgency === 'high' ? 'rgba(255,180,171,0.4)' : urgency === 'medium' ? 'rgba(246,179,81,0.4)' : '#3d4947'}`,
+                          background: 'var(--sb-surface-soft, #F2F6EF)',
+                          border: `1px solid ${urgency === 'high' ? 'rgba(166,92,85,0.4)' : urgency === 'medium' ? 'rgba(184,138,69,0.4)' : 'var(--sb-border, #D8E0D5)'}`,
                           borderRadius: 4,
                           padding: '10px 14px',
                           minHeight: 44,
@@ -607,7 +607,7 @@ export const CreateListingPage: React.FC = () => {
                         }}
                       >
                         {urgency === 'high' && (
-                          <Flame size={16} color="#ffb4ab" style={{ flexShrink: 0 }} className="animate-pulse" />
+                          <Flame size={16} color="var(--sb-danger, #A65C55)" style={{ flexShrink: 0 }} className="animate-pulse" />
                         )}
                         <span
                           id="current-urgency-value"
@@ -616,7 +616,7 @@ export const CreateListingPage: React.FC = () => {
                             fontWeight: 700,
                             fontSize: 14,
                             letterSpacing: '0.04em',
-                            color: urgency === 'high' ? '#ffb4ab' : urgency === 'medium' ? '#f6b351' : '#6bd8cb',
+                            color: urgency === 'high' ? 'var(--sb-danger, #A65C55)' : urgency === 'medium' ? 'var(--sb-warning, #B88A45)' : 'var(--sb-primary, #6F8F69)',
                             textTransform: 'uppercase',
                           }}
                         >
@@ -626,9 +626,9 @@ export const CreateListingPage: React.FC = () => {
                           style={{
                             fontSize: 11,
                             fontFamily: 'Work Sans, sans-serif',
-                            color: '#879391',
-                            background: 'rgba(135,147,145,0.12)',
-                            border: '1px solid rgba(135,147,145,0.2)',
+                            color: 'var(--sb-text-muted, #7A847A)',
+                            background: 'var(--sb-surface, #FFFFFF)',
+                            border: '1px solid var(--sb-border, #D8E0D5)',
                             padding: '2px 8px',
                             borderRadius: 3,
                             marginLeft: 'auto',
@@ -638,15 +638,15 @@ export const CreateListingPage: React.FC = () => {
                           Read-only
                         </span>
                       </div>
-                      <span style={{ fontSize: 11, color: '#879391', display: 'block', marginTop: 4 }}>
+                      <span style={{ fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', display: 'block', marginTop: 4 }}>
                         Automatically calculated from expiry date
                       </span>
                       {expiryDate && calculatedUrgency.daysRemaining !== null && (
-                        <span style={{ fontSize: 11, color: '#bcc9c6', display: 'block', marginTop: 2 }}>
+                        <span style={{ fontSize: 11, color: 'var(--sb-text-secondary, #4F5A51)', display: 'block', marginTop: 2 }}>
                           {calculatedUrgency.statusText}
                         </span>
                       )}
-                      <span style={{ fontSize: 11, color: '#879391', display: 'block', marginTop: 2 }}>
+                      <span style={{ fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', display: 'block', marginTop: 2 }}>
                         11–25d: High · 26–50d: Medium · &gt;50d: Low
                       </span>
                     </div>
@@ -656,18 +656,18 @@ export const CreateListingPage: React.FC = () => {
                 {/* ── Live Value Preview ── */}
                 {quantity > 0 && pricePerUnit > 0 && (
                   <div style={{
-                    padding: '20px 28px', background: '#131313', borderBottom: '1px solid #3d4947',
+                    padding: '20px 28px', background: 'var(--sb-surface-soft, #F2F6EF)', borderBottom: '1px solid var(--sb-border, #D8E0D5)',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}>
                     <div>
-                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', marginBottom: 4 }}>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)', marginBottom: 4 }}>
                         Estimated Lot Value
                       </p>
-                      <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 26, color: '#6bd8cb', margin: 0 }}>
+                      <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 26, color: 'var(--sb-primary, #6F8F69)', margin: 0 }}>
                         ₹{totalValue.toLocaleString('en-IN')}
                       </p>
                     </div>
-                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', margin: 0 }}>
+                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)', margin: 0 }}>
                       {quantity} {unit} × ₹{pricePerUnit}
                     </p>
                   </div>
@@ -678,9 +678,9 @@ export const CreateListingPage: React.FC = () => {
                   {error && (
                     <div style={{
                       display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
-                      background: 'rgba(255,180,171,0.08)', border: '1px solid rgba(255,180,171,0.2)',
+                      background: 'rgba(166,92,85,0.08)', border: '1px solid rgba(166,92,85,0.2)',
                       borderRadius: 4, padding: '12px 16px',
-                      color: '#ffb4ab', fontFamily: 'Work Sans, sans-serif', fontSize: 13,
+                      color: 'var(--sb-danger, #A65C55)', fontFamily: 'Work Sans, sans-serif', fontSize: 13,
                     }}>
                       <AlertCircle size={14} /> {error}
                     </div>
@@ -689,9 +689,9 @@ export const CreateListingPage: React.FC = () => {
                   {successMsg && (
                     <div style={{
                       display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
-                      background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.25)',
+                      background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
                       borderRadius: 4, padding: '12px 16px',
-                      color: '#6bd8cb', fontFamily: 'Work Sans, sans-serif', fontSize: 13,
+                      color: 'var(--sb-primary, #6F8F69)', fontFamily: 'Work Sans, sans-serif', fontSize: 13,
                     }}>
                       <CheckCircle size={14} /> {successMsg}
                     </div>
@@ -700,7 +700,7 @@ export const CreateListingPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="stitch-btn-primary glow-teal"
+                    className="stitch-btn-primary"
                     style={{
                       padding: '14px', width: '100%', fontSize: 14,
                       letterSpacing: '0.04em', opacity: loading ? 0.6 : 1,

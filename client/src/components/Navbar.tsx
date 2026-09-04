@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Bell,
-  User as UserIcon,
   Menu,
   X,
   MapPin,
-  ChevronDown,
   LogOut,
-  Settings,
   Store,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -120,15 +117,20 @@ export const Navbar: React.FC = () => {
     }
   };
 
-  const navLinks: NavLink[] = [
-    { name: 'How It Works',     path: '/how-it-works' },
-    { name: 'Buy Stock',        path: '/marketplace' },
-    { name: 'Sell Stock',       path: '/create-listing' },
-    { name: 'My Stock',         path: '/my-listings',    authOnly: true },
-    { name: 'Smart Inventory',  path: '/inventory',      authOnly: true },
-    { name: 'Orders',           path: '/reservations',   authOnly: true, badge: unreadCount },
-    { name: 'Admin Portal',     path: '/admin',          adminOnly: true },
-  ];
+  const navLinks: NavLink[] = user
+    ? [
+        { name: 'How It Works',     path: '/how-it-works' },
+        { name: 'Market',           path: '/marketplace' },
+        { name: 'Sell Stock',       path: '/create-listing' },
+        { name: 'My Stock',         path: '/my-listings',    authOnly: true },
+        { name: 'Smart Inventory',  path: '/inventory',      authOnly: true },
+        { name: 'Orders',           path: '/reservations',   authOnly: true, badge: unreadCount },
+        { name: 'Admin Portal',     path: '/admin',          adminOnly: true },
+      ]
+    : [
+        { name: 'How It Works', path: '/how-it-works' },
+        { name: 'Market',       path: '/market-preview' },
+      ];
 
   const visibleLinks = navLinks.filter(l => {
     if (l.authOnly && !user) return false;
@@ -142,116 +144,118 @@ export const Navbar: React.FC = () => {
     <header
       className="sticky top-0 z-50"
       style={{
-        background: '#131313',
-        borderBottom: '1px solid #3d4947',
+        background: 'var(--sb-surface, #FFFFFF)',
+        borderBottom: '1px solid var(--sb-border, #D8E0D5)',
       }}
     >
       <div className="max-w-screen-xl mx-auto px-6 flex items-center justify-between h-14">
 
-        {/* ── Brand Logo ── */}
-        <Link to="/" className="flex items-center gap-2.5 shrink-0">
-          {/* Stitch-style square icon */}
-          <div style={{
-            width: 32, height: 32,
-            background: '#1c1b1b',
-            border: '1px solid #3d4947',
-            borderRadius: 6,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Store size={16} color="#6bd8cb" />
-          </div>
-          <span style={{
-            fontFamily: 'Sora, sans-serif',
-            fontWeight: 700,
-            fontSize: 18,
-            color: '#6bd8cb',
-            letterSpacing: '-0.01em',
-          }}>
-            StockBridge
-          </span>
-          <span style={{
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            color: '#bcc9c6',
-            background: '#2a2a2a',
-            border: '1px solid #3d4947',
-            padding: '2px 6px',
-            borderRadius: 4,
-          }}>
-            B2B
-          </span>
-        </Link>
+        {/* ── Left Side: Brand Logo + Desktop Nav ── */}
+        <div className="flex items-center gap-8">
+          {/* ── Brand Logo ── */}
+          <Link to="/" className="flex items-center gap-2.5 shrink-0">
+            <div style={{
+              width: 32, height: 32,
+              background: 'var(--sb-surface-soft, #F2F6EF)',
+              border: '1px solid var(--sb-border, #D8E0D5)',
+              borderRadius: 6,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Store size={16} color="var(--sb-primary, #6F8F69)" />
+            </div>
+            <span style={{
+              fontFamily: 'Sora, sans-serif',
+              fontWeight: 700,
+              fontSize: 18,
+              color: 'var(--sb-text-primary, #182018)',
+              letterSpacing: '-0.01em',
+            }}>
+              StockBridge
+            </span>
+            <span style={{
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: 'var(--sb-text-secondary, #4F5A51)',
+              background: 'var(--sb-surface-soft, #F2F6EF)',
+              border: '1px solid var(--sb-border, #D8E0D5)',
+              padding: '2px 6px',
+              borderRadius: 4,
+            }}>
+              B2B
+            </span>
+          </Link>
 
-        {/* ── Desktop Nav Links ── */}
-        <nav className="hidden md:flex items-center gap-0">
-          {visibleLinks.map((link) => {
-            const active = isActive(link.path);
-            return (
-              <Link
-                key={link.path}
-                to={link.path}
-                style={{
-                  position: 'relative',
-                  padding: '0 16px',
-                  height: 56,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  fontFamily: 'Work Sans, sans-serif',
-                  fontSize: 14,
-                  fontWeight: 500,
-                  letterSpacing: '0.02em',
-                  color: active ? '#6bd8cb' : '#bcc9c6',
-                  textDecoration: 'none',
-                  transition: 'color 0.15s ease',
-                  borderBottom: active ? '2px solid #6bd8cb' : '2px solid transparent',
-                }}
-                onMouseEnter={e => {
-                  if (!active) (e.currentTarget as HTMLAnchorElement).style.color = '#e5e2e1';
-                }}
-                onMouseLeave={e => {
-                  if (!active) (e.currentTarget as HTMLAnchorElement).style.color = '#bcc9c6';
-                }}
-              >
-                {link.name}
-                {link.badge && link.badge > 0 ? (
-                  <span style={{
-                    background: '#6bd8cb',
-                    color: '#003732',
-                    fontSize: 10, fontWeight: 700,
-                    borderRadius: '50%',
-                    width: 17, height: 17,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {link.badge}
-                  </span>
-                ) : null}
-              </Link>
-            );
-          })}
-        </nav>
+          {/* ── Desktop Nav Links ── */}
+          <nav className="hidden md:flex items-center gap-0">
+            {visibleLinks.map((link) => {
+              const active = isActive(link.path);
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  style={{
+                    position: 'relative',
+                    padding: '0 14px',
+                    height: 56,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontFamily: 'Work Sans, sans-serif',
+                    fontSize: 14,
+                    fontWeight: 500,
+                    letterSpacing: '0.02em',
+                    color: active ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-secondary, #4F5A51)',
+                    textDecoration: 'none',
+                    transition: 'color 0.15s ease',
+                    borderBottom: active ? '2px solid var(--sb-primary, #6F8F69)' : '2px solid transparent',
+                  }}
+                  onMouseEnter={e => {
+                    if (!active) (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sb-text-primary, #182018)';
+                  }}
+                  onMouseLeave={e => {
+                    if (!active) (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sb-text-secondary, #4F5A51)';
+                  }}
+                >
+                  {link.name}
+                  {link.badge && link.badge > 0 ? (
+                    <span style={{
+                      background: 'var(--sb-primary, #6F8F69)',
+                      color: '#FFFFFF',
+                      fontSize: 10, fontWeight: 700,
+                      borderRadius: '50%',
+                      width: 17, height: 17,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {link.badge}
+                    </span>
+                  ) : null}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
 
         {/* ── Right Controls ── */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-3">
           {/* Location pill (shown when logged in) */}
           {user && (
             <button style={{
               display: 'flex', alignItems: 'center', gap: 6,
               background: 'transparent',
-              border: '1px solid #3d4947',
+              border: '1px solid var(--sb-border, #D8E0D5)',
               borderRadius: 20,
               padding: '5px 12px',
-              color: '#bcc9c6',
+              color: 'var(--sb-text-secondary, #4F5A51)',
               fontFamily: 'Work Sans, sans-serif',
               fontSize: 12, fontWeight: 500,
               letterSpacing: '0.03em',
               cursor: 'pointer',
               textTransform: 'uppercase',
-              transition: 'border-color 0.15s',
+              transition: 'border-color 0.15s, color 0.15s',
             }}>
-              <MapPin size={12} color="#6bd8cb" />
+              <MapPin size={12} color="var(--sb-primary, #6F8F69)" />
               Mumbai · Within 25 km
             </button>
           )}
@@ -268,31 +272,31 @@ export const Navbar: React.FC = () => {
                 style={{
                   width: 36, height: 36,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: notificationMenuOpen ? '#2a2a2a' : 'transparent',
-                  border: '1px solid #3d4947',
+                  background: notificationMenuOpen ? 'var(--sb-surface-soft, #F2F6EF)' : 'transparent',
+                  border: '1px solid var(--sb-border, #D8E0D5)',
                   borderRadius: 18,
-                  color: notificationMenuOpen ? '#6bd8cb' : '#bcc9c6',
+                  color: notificationMenuOpen ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-secondary, #4F5A51)',
                   cursor: 'pointer',
                   position: 'relative',
                   transition: 'border-color 0.15s, color 0.15s',
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#e5e2e1'; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-text-primary, #182018)'; }}
                 onMouseLeave={e => {
-                  if (!notificationMenuOpen) (e.currentTarget as HTMLButtonElement).style.color = '#bcc9c6';
+                  if (!notificationMenuOpen) (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-text-secondary, #4F5A51)';
                 }}
               >
                 <Bell size={16} />
                 {unreadNotificationsCount > 0 && (
                   <span style={{
                     position: 'absolute', top: -2, right: -2,
-                    background: '#ffb4ab',
-                    color: '#690005',
+                    background: 'var(--sb-danger, #A65C55)',
+                    color: '#FFFFFF',
                     fontSize: 9, fontWeight: 700,
                     borderRadius: 10,
                     minWidth: 16, height: 16,
                     padding: '0 4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    border: '1px solid #131313',
+                    border: '1px solid var(--sb-surface, #FFFFFF)',
                   }}>
                     {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
                   </span>
@@ -309,10 +313,10 @@ export const Navbar: React.FC = () => {
                     style={{
                       position: 'absolute', right: 0, top: 'calc(100% + 8px)',
                       width: 340,
-                      background: '#1c1b1b',
-                      border: '1px solid #3d4947',
+                      background: 'var(--sb-surface, #FFFFFF)',
+                      border: '1px solid var(--sb-border, #D8E0D5)',
                       borderRadius: 8,
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                      boxShadow: '0 12px 28px rgba(0,0,0,0.12)',
                       zIndex: 100,
                       overflow: 'hidden',
                     }}
@@ -320,17 +324,18 @@ export const Navbar: React.FC = () => {
                     {/* Dropdown Header */}
                     <div style={{
                       padding: '12px 16px',
-                      borderBottom: '1px solid #3d4947',
+                      borderBottom: '1px solid var(--sb-border, #D8E0D5)',
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      background: 'var(--sb-surface-soft, #F2F6EF)',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700, color: '#e5e2e1' }}>
+                        <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700, color: 'var(--sb-text-primary, #182018)' }}>
                           Notifications
                         </span>
                         {unreadNotificationsCount > 0 && (
                           <span style={{
-                            background: 'rgba(255,180,171,0.15)', color: '#ffb4ab',
-                            border: '1px solid rgba(255,180,171,0.3)',
+                            background: 'rgba(166,92,85,0.12)', color: 'var(--sb-danger, #A65C55)',
+                            border: '1px solid rgba(166,92,85,0.25)',
                             fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10,
                           }}>
                             {unreadNotificationsCount} new
@@ -343,7 +348,7 @@ export const Navbar: React.FC = () => {
                           style={{
                             background: 'none', border: 'none',
                             fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
-                            color: '#6bd8cb', cursor: 'pointer', padding: 0,
+                            color: 'var(--sb-primary, #6F8F69)', cursor: 'pointer', padding: 0,
                           }}
                         >
                           Mark all as read
@@ -354,7 +359,7 @@ export const Navbar: React.FC = () => {
                     {/* Notification List */}
                     <div style={{ maxHeight: 320, overflowY: 'auto' }}>
                       {notifications.length === 0 ? (
-                        <div style={{ padding: '32px 16px', textAlign: 'center', color: '#879391', fontFamily: 'Work Sans, sans-serif', fontSize: 13 }}>
+                        <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--sb-text-muted, #7A847A)', fontFamily: 'Work Sans, sans-serif', fontSize: 13 }}>
                           No notifications yet
                         </div>
                       ) : (
@@ -370,24 +375,24 @@ export const Navbar: React.FC = () => {
                             }}
                             style={{
                               padding: '12px 16px',
-                              borderBottom: '1px solid #2a2a2a',
-                              background: n.read ? 'transparent' : 'rgba(255,180,171,0.04)',
+                              borderBottom: '1px solid var(--sb-border, #D8E0D5)',
+                              background: n.read ? 'transparent' : 'rgba(111,143,105,0.05)',
                               cursor: 'pointer',
                               display: 'flex', gap: 10,
                               transition: 'background 0.15s',
                             }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.03)'; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = n.read ? 'transparent' : 'rgba(255,180,171,0.04)'; }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'var(--sb-surface-soft, #F2F6EF)'; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = n.read ? 'transparent' : 'rgba(111,143,105,0.05)'; }}
                           >
-                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: n.read ? 'transparent' : '#ffb4ab', marginTop: 6, flexShrink: 0 }} />
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: n.read ? 'transparent' : 'var(--sb-primary, #6F8F69)', marginTop: 6, flexShrink: 0 }} />
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 12, fontWeight: 600, color: '#e5e2e1', marginBottom: 2 }}>
+                              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 12, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', marginBottom: 2 }}>
                                 {n.title}
                               </p>
-                              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#bcc9c6', lineHeight: 1.4, marginBottom: 4 }}>
+                              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-secondary, #4F5A51)', lineHeight: 1.4, marginBottom: 4 }}>
                                 {n.message}
                               </p>
-                              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, color: '#879391' }}>
+                              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, color: 'var(--sb-text-muted, #7A847A)' }}>
                                 {new Date(n.createdAt).toLocaleDateString('en-IN', {
                                   day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
                                 })}
@@ -411,9 +416,9 @@ export const Navbar: React.FC = () => {
                 style={{
                   width: 36, height: 36,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: '#29a195',
+                  background: 'var(--sb-primary, #6F8F69)',
                   borderRadius: 18,
-                  color: '#003732',
+                  color: '#FFFFFF',
                   fontFamily: 'Sora, sans-serif',
                   fontSize: 13, fontWeight: 700,
                   border: 'none', cursor: 'pointer',
@@ -432,23 +437,24 @@ export const Navbar: React.FC = () => {
                     style={{
                       position: 'absolute', right: 0, top: 'calc(100% + 8px)',
                       width: 240,
-                      background: '#1c1b1b',
-                      border: '1px solid #3d4947',
+                      background: 'var(--sb-surface, #FFFFFF)',
+                      border: '1px solid var(--sb-border, #D8E0D5)',
                       borderRadius: 8,
                       padding: '8px',
+                      boxShadow: '0 12px 28px rgba(0,0,0,0.08)',
                       zIndex: 100,
                     }}
                   >
                     {/* User info */}
-                    <div style={{ padding: '8px 10px 12px', borderBottom: '1px solid #3d4947', marginBottom: 8 }}>
-                      <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: '#e5e2e1' }}>
+                    <div style={{ padding: '8px 10px 12px', borderBottom: '1px solid var(--sb-border, #D8E0D5)', marginBottom: 8 }}>
+                      <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--sb-text-primary, #182018)' }}>
                         {user.businessName || user.name}
                       </p>
-                      <p style={{ fontSize: 12, color: '#bcc9c6', marginTop: 2 }}>{user.email}</p>
+                      <p style={{ fontSize: 12, color: 'var(--sb-text-muted, #7A847A)', marginTop: 2 }}>{user.email}</p>
                     </div>
 
                     {/* Quick switch */}
-                    <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#6bd8cb', padding: '0 10px', marginBottom: 6 }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--sb-primary, #6F8F69)', padding: '0 10px', marginBottom: 6 }}>
                       Quick Demo Switch
                     </p>
                     {DEMO_ACCOUNTS.map(acc => (
@@ -461,9 +467,9 @@ export const Navbar: React.FC = () => {
                           display: 'flex', alignItems: 'center', gap: 10,
                           padding: '8px 10px',
                           borderRadius: 6,
-                          background: user.email === acc.email ? 'rgba(107,216,203,0.08)' : 'transparent',
+                          background: user.email === acc.email ? 'var(--sb-primary-pale, #EAF1E7)' : 'transparent',
                           border: 'none',
-                          color: user.email === acc.email ? '#6bd8cb' : '#bcc9c6',
+                          color: user.email === acc.email ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-secondary, #4F5A51)',
                           fontFamily: 'Work Sans, sans-serif',
                           fontSize: 13, fontWeight: 500,
                           cursor: user.email === acc.email ? 'default' : 'pointer',
@@ -471,7 +477,7 @@ export const Navbar: React.FC = () => {
                           transition: 'background 0.12s',
                         }}
                         onMouseEnter={e => {
-                          if (user.email !== acc.email) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)';
+                          if (user.email !== acc.email) (e.currentTarget as HTMLButtonElement).style.background = 'var(--sb-surface-soft, #F2F6EF)';
                         }}
                         onMouseLeave={e => {
                           if (user.email !== acc.email) (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
@@ -479,27 +485,27 @@ export const Navbar: React.FC = () => {
                       >
                         <span style={{
                           width: 28, height: 28, borderRadius: 14,
-                          background: '#2a2a2a',
+                          background: 'var(--sb-surface-soft, #F2F6EF)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 11, fontWeight: 700,
-                          color: '#6bd8cb', flexShrink: 0,
+                          color: 'var(--sb-primary, #6F8F69)', flexShrink: 0,
                         }}>{acc.initials}</span>
                         <span>{acc.name}</span>
                       </button>
                     ))}
 
-                    <div style={{ borderTop: '1px solid #3d4947', marginTop: 8, paddingTop: 8 }}>
+                    <div style={{ borderTop: '1px solid var(--sb-border, #D8E0D5)', marginTop: 8, paddingTop: 8 }}>
                       <button
                         onClick={() => { logout(); navigate('/login'); }}
                         style={{
                           width: '100%', display: 'flex', alignItems: 'center', gap: 8,
                           padding: '8px 10px', borderRadius: 6,
                           background: 'transparent', border: 'none',
-                          color: '#ffb4ab', fontFamily: 'Work Sans, sans-serif',
+                          color: 'var(--sb-danger, #A65C55)', fontFamily: 'Work Sans, sans-serif',
                           fontSize: 13, fontWeight: 500, cursor: 'pointer',
                           transition: 'background 0.12s',
                         }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,180,171,0.08)'; }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(166,92,85,0.08)'; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                       >
                         <LogOut size={14} />
@@ -517,12 +523,12 @@ export const Navbar: React.FC = () => {
                 style={{
                   fontFamily: 'Work Sans, sans-serif',
                   fontSize: 14, fontWeight: 500,
-                  color: '#bcc9c6', textDecoration: 'none',
+                  color: 'var(--sb-text-primary, #182018)', textDecoration: 'none',
                   padding: '6px 12px',
                   transition: 'color 0.15s',
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#e5e2e1'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#bcc9c6'; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sb-primary, #6F8F69)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sb-text-primary, #182018)'; }}
               >
                 Sign In
               </Link>
@@ -544,8 +550,8 @@ export const Navbar: React.FC = () => {
           style={{
             width: 36, height: 36,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 6,
-            color: '#bcc9c6', cursor: 'pointer',
+            background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 6,
+            color: 'var(--sb-text-primary, #182018)', cursor: 'pointer',
           }}
         >
           {mobileOpen ? <X size={18} /> : <Menu size={18} />}
@@ -560,7 +566,7 @@ export const Navbar: React.FC = () => {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            style={{ overflow: 'hidden', borderTop: '1px solid #3d4947', background: '#1c1b1b' }}
+            style={{ overflow: 'hidden', borderTop: '1px solid var(--sb-border, #D8E0D5)', background: 'var(--sb-surface, #FFFFFF)' }}
           >
             <div style={{ padding: '12px 24px 20px' }}>
               <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -576,8 +582,8 @@ export const Navbar: React.FC = () => {
                         borderRadius: 6,
                         fontFamily: 'Work Sans, sans-serif',
                         fontSize: 14, fontWeight: 500,
-                        color: active ? '#6bd8cb' : '#bcc9c6',
-                        background: active ? 'rgba(107,216,203,0.08)' : 'transparent',
+                        color: active ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-secondary, #4F5A51)',
+                        background: active ? 'var(--sb-primary-pale, #EAF1E7)' : 'transparent',
                         textDecoration: 'none',
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       }}
@@ -585,7 +591,7 @@ export const Navbar: React.FC = () => {
                       {link.name}
                       {link.badge && link.badge > 0 ? (
                         <span style={{
-                          background: '#6bd8cb', color: '#003732',
+                          background: 'var(--sb-primary, #6F8F69)', color: '#FFFFFF',
                           fontSize: 10, fontWeight: 700,
                           borderRadius: 10, padding: '1px 6px',
                         }}>{link.badge}</span>
@@ -595,17 +601,17 @@ export const Navbar: React.FC = () => {
                 })}
               </nav>
 
-              <div style={{ borderTop: '1px solid #3d4947', marginTop: 12, paddingTop: 12 }}>
+              <div style={{ borderTop: '1px solid var(--sb-border, #D8E0D5)', marginTop: 12, paddingTop: 12 }}>
                 {user ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <p style={{ fontSize: 13, color: '#bcc9c6' }}>
-                      Logged in as <strong style={{ color: '#e5e2e1' }}>{user.name}</strong>
+                    <p style={{ fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)' }}>
+                      Logged in as <strong style={{ color: 'var(--sb-text-primary, #182018)' }}>{user.name}</strong>
                     </p>
                     <button
                       onClick={() => { logout(); navigate('/login'); setMobileOpen(false); }}
                       style={{
                         display: 'flex', alignItems: 'center', gap: 6,
-                        color: '#ffb4ab', background: 'none', border: 'none',
+                        color: 'var(--sb-danger, #A65C55)', background: 'none', border: 'none',
                         fontFamily: 'Work Sans, sans-serif', fontSize: 13,
                         cursor: 'pointer', padding: '6px 0',
                       }}
@@ -618,8 +624,8 @@ export const Navbar: React.FC = () => {
                     <Link to="/login" onClick={() => setMobileOpen(false)}
                       style={{
                         display: 'block', textAlign: 'center', padding: '10px',
-                        borderRadius: 6, border: '1px solid #3d4947',
-                        color: '#bcc9c6', fontFamily: 'Work Sans, sans-serif',
+                        borderRadius: 6, border: '1px solid var(--sb-border, #D8E0D5)',
+                        color: 'var(--sb-text-primary, #182018)', fontFamily: 'Work Sans, sans-serif',
                         fontSize: 14, textDecoration: 'none',
                       }}>
                       Sign In

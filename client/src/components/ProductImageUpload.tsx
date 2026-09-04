@@ -90,11 +90,19 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
   return (
     <div className={`space-y-2 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <label className="block text-xs font-semibold text-[#e5e2e1] uppercase tracking-wider font-mono">
+      <div className="flex items-center justify-between" style={{ marginBottom: 6 }}>
+        <label style={{
+          display: 'block',
+          fontFamily: 'Work Sans, sans-serif',
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          color: 'var(--sb-text-primary, #182018)',
+        }}>
           {label}
         </label>
-        <span className="text-[11px] text-[#879391]">
+        <span style={{ fontSize: 11, color: 'var(--sb-text-muted, #7A847A)' }}>
           JPG, PNG, WEBP • Max 5MB
         </span>
       </div>
@@ -110,32 +118,51 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
 
       {imagePreview ? (
         /* Image Selected Preview State */
-        <div className="space-y-3 bg-[#1c1b1b] border border-[#3d4947] rounded-lg p-3.5 shadow-md">
-          <div className="relative rounded-md overflow-hidden border border-[#3d4947] bg-[#131313] group">
+        <div style={{
+          background: 'var(--sb-surface, #FFFFFF)',
+          border: '1px solid var(--sb-border, #D8E0D5)',
+          borderRadius: 8,
+          padding: 14,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+        }}>
+          <div style={{
+            position: 'relative',
+            borderRadius: 6,
+            overflow: 'hidden',
+            border: '1px solid var(--sb-border, #D8E0D5)',
+            background: 'var(--sb-surface-soft, #F2F6EF)',
+          }}>
             <img
               src={imagePreview}
               alt="Product Preview"
-              className="w-full h-44 sm:h-52 object-cover"
+              style={{ width: '100%', height: 200, objectFit: 'cover' }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-              <span className="text-xs text-[#e5e2e1] truncate">
-                {imageFile?.name} ({(imageFile ? (imageFile.size / (1024 * 1024)).toFixed(2) : 0)} MB)
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
+              padding: '12px 10px 6px',
+            }}>
+              <span style={{ fontSize: 11, color: '#FFFFFF' }}>
+                {imageFile ? `${imageFile.name} (${(imageFile.size / (1024 * 1024)).toFixed(2)} MB)` : 'Uploaded Image'}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-3 pt-1">
-            <div className="flex items-center gap-2 text-xs text-[#bcc9c6] min-w-0">
-              <FileImage size={15} className="text-[#6bd8cb] flex-shrink-0" />
-              <span className="truncate">{imageFile?.name || 'Selected Image'}</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingTop: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+              <FileImage size={15} color="var(--sb-primary, #6F8F69)" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: 'var(--sb-text-secondary, #4F5A51)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {imageFile?.name || 'Product Photo Selected'}
+              </span>
             </div>
 
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={disabled}
-                className="px-3 py-1.5 bg-[#2a2a2a] hover:bg-[#353534] border border-[#3d4947] disabled:opacity-50 text-[#6bd8cb] rounded text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5"
+                className="stitch-btn-ghost"
+                style={{ padding: '6px 12px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}
               >
                 <RefreshCw size={12} />
                 Change
@@ -144,7 +171,17 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
                 type="button"
                 onClick={handleRemove}
                 disabled={disabled}
-                className="px-3 py-1.5 bg-rose-950/30 hover:bg-rose-950/60 disabled:opacity-50 border border-rose-800/50 text-[#ffb4ab] rounded text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5"
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 4,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: 'rgba(166,92,85,0.08)',
+                  border: '1px solid rgba(166,92,85,0.25)',
+                  color: 'var(--sb-danger, #A65C55)',
+                  cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 5,
+                }}
               >
                 <X size={12} />
                 Remove
@@ -159,24 +196,54 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`border border-dashed rounded-lg p-5 sm:p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 group ${
-            disabled ? 'opacity-50 cursor-not-allowed border-[#3d4947]' : ''
-          } ${
-            isDragging
-              ? 'border-[#6bd8cb] bg-[#6bd8cb]/10 scale-[1.01]'
-              : 'border-[#3d4947] hover:border-[#6bd8cb] bg-[#1c1b1b] hover:bg-[#201f1f]'
-          }`}
+          style={{
+            border: `1.5px dashed ${isDragging ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-border-strong, #BEC9BA)'}`,
+            borderRadius: 8,
+            padding: '24px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            background: isDragging ? 'var(--sb-primary-pale, #EAF1E7)' : 'var(--sb-surface-soft, #F2F6EF)',
+            transition: 'all 0.15s ease',
+          }}
         >
-          <div className="w-10 h-10 rounded-lg bg-[#2a2a2a] border border-[#3d4947] flex items-center justify-center text-[#6bd8cb] mb-2.5 group-hover:scale-110 transition-transform">
-            <Upload size={18} />
+          <div style={{
+            width: 40, height: 40,
+            borderRadius: 8,
+            background: 'var(--sb-surface, #FFFFFF)',
+            border: '1px solid var(--sb-border, #D8E0D5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginBottom: 10,
+          }}>
+            <Upload size={18} color="var(--sb-primary, #6F8F69)" />
           </div>
-          <p className="text-sm font-semibold text-[#e5e2e1] mb-0.5">
+          <p style={{
+            fontFamily: 'Sora, sans-serif',
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--sb-text-primary, #182018)',
+            margin: '0 0 2px',
+          }}>
             Upload Product Stock Photo
           </p>
-          <p className="text-xs text-[#6bd8cb] font-medium mb-1">
+          <p style={{
+            fontFamily: 'Work Sans, sans-serif',
+            fontSize: 12,
+            fontWeight: 500,
+            color: 'var(--sb-primary, #6F8F69)',
+            margin: '0 0 4px',
+          }}>
             Drag & Drop or Click to Browse
           </p>
-          <p className="text-[11px] text-[#879391]">
+          <p style={{
+            fontFamily: 'Work Sans, sans-serif',
+            fontSize: 11,
+            color: 'var(--sb-text-muted, #7A847A)',
+            margin: 0,
+          }}>
             JPG, PNG, WEBP • Max 5MB
           </p>
         </div>
@@ -184,8 +251,17 @@ export const ProductImageUpload: React.FC<ProductImageUploadProps> = ({
 
       {/* Error Message */}
       {imageError && (
-        <p className="text-xs text-[#ffb4ab] bg-rose-950/30 p-2.5 rounded border border-rose-800/50 flex items-center gap-2">
-          <AlertCircle size={14} className="flex-shrink-0" />
+        <p style={{
+          fontSize: 12,
+          color: 'var(--sb-danger, #A65C55)',
+          background: 'rgba(166,92,85,0.08)',
+          border: '1px solid rgba(166,92,85,0.25)',
+          padding: '8px 12px',
+          borderRadius: 4,
+          display: 'flex', alignItems: 'center', gap: 6,
+          margin: '6px 0 0',
+        }}>
+          <AlertCircle size={14} style={{ flexShrink: 0 }} />
           {imageError}
         </p>
       )}

@@ -19,11 +19,11 @@ const TAB_LABELS: { key: FilterTab; label: string }[] = [
 
 const statusStyle = (status: string): React.CSSProperties => {
   switch (status) {
-    case 'active':          return { color: '#6bd8cb', background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.2)' };
-    case 'reserved':        return { color: '#ddb7ff', background: 'rgba(221,183,255,0.1)', border: '1px solid rgba(221,183,255,0.2)' };
-    case 'sold':            return { color: '#bcc9c6', background: 'rgba(188,201,198,0.1)', border: '1px solid rgba(188,201,198,0.2)' };
-    case 'expiry_unlisted': return { color: '#ffb4ab', background: 'rgba(255,180,171,0.15)', border: '1px solid rgba(255,180,171,0.35)' };
-    default:                return { color: '#f6b351', background: 'rgba(246,179,81,0.1)',   border: '1px solid rgba(246,179,81,0.2)' };
+    case 'active':          return { color: 'var(--sb-primary, #6F8F69)', background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)' };
+    case 'reserved':        return { color: 'var(--sb-warning, #B88A45)', background: 'rgba(184,138,69,0.1)', border: '1px solid rgba(184,138,69,0.25)' };
+    case 'sold':            return { color: 'var(--sb-text-muted, #7A847A)', background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)' };
+    case 'expiry_unlisted': return { color: 'var(--sb-danger, #A65C55)', background: 'rgba(166,92,85,0.12)', border: '1px solid rgba(166,92,85,0.28)' };
+    default:                return { color: 'var(--sb-warning, #B88A45)', background: 'rgba(184,138,69,0.1)',   border: '1px solid rgba(184,138,69,0.25)' };
   }
 };
 
@@ -32,7 +32,7 @@ export const MyListingsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<FilterTab>('all');
   const [search, setSearch] = useState('');
-  const [sortOpen, setSortOpen] = useState(false);
+  const [, setSortOpen] = useState(false);
 
   const fetchListings = () => {
     setLoading(true);
@@ -42,11 +42,6 @@ export const MyListingsPage: React.FC = () => {
   };
 
   useEffect(() => { fetchListings(); }, []);
-
-  const handleDeactivate = async (id: string) => {
-    if (!confirm('Deactivate this listing?')) return;
-    try { await api.delete(`/listings/${id}`); fetchListings(); } catch { /* noop */ }
-  };
 
   const activeCount   = listings.filter(l => l.status === 'active' && l.active).length;
   const reservedCount = listings.filter(l => l.status === 'reserved').length;
@@ -73,20 +68,20 @@ export const MyListingsPage: React.FC = () => {
   });
 
   const S = {
-    label: { fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#879391' } as React.CSSProperties,
+    label: { fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--sb-text-muted, #7A847A)' } as React.CSSProperties,
   };
 
   return (
-    <div style={{ background: '#131313', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--sb-background, #F7F7F2)', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px 80px' }}>
 
         {/* ── Page Header ── */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32, color: '#e5e2e1', marginBottom: 8, letterSpacing: '-0.01em' }}>
+            <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32, color: 'var(--sb-text-primary, #182018)', marginBottom: 8, letterSpacing: '-0.01em' }}>
               My Stock
             </h1>
-            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6' }}>
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-secondary, #4F5A51)' }}>
               Manage your listed inventory, track reservations and see what needs attention.
             </p>
           </div>
@@ -96,7 +91,7 @@ export const MyListingsPage: React.FC = () => {
               className="stitch-btn-ghost"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', textDecoration: 'none', borderRadius: 4 }}
             >
-              <TrendingUp size={16} color="#6bd8cb" /> Smart Inventory
+              <TrendingUp size={16} color="var(--sb-primary, #6F8F69)" /> Smart Inventory
             </Link>
             <Link
               to="/create-listing"
@@ -108,18 +103,18 @@ export const MyListingsPage: React.FC = () => {
           </div>
         </div>
 
-        <hr style={{ border: 'none', borderTop: '1px solid #3d4947', marginBottom: 28 }} />
+        <hr style={{ border: 'none', borderTop: '1px solid var(--sb-border, #D8E0D5)', marginBottom: 28 }} />
 
         {/* ── Stats row ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 1, background: '#3d4947', borderRadius: 8, overflow: 'hidden', marginBottom: 28 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', marginBottom: 28 }}>
           {[
-            { label: 'Active Listings',    value: activeCount,                               color: '#6bd8cb' },
-            { label: 'Reserved',           value: reservedCount,                             color: '#ddb7ff' },
-            { label: 'Sold / Completed',   value: soldCount,                                 color: '#bcc9c6' },
-            ...(unlistedCount > 0 ? [{ label: 'Auto Unlisted', value: unlistedCount, color: '#ffb4ab' }] : []),
-            { label: 'Total Listed Value', value: `₹${totalValue.toLocaleString('en-IN')}`, color: '#6bd8cb' },
+            { label: 'Active Listings',    value: activeCount,                               color: 'var(--sb-primary, #6F8F69)' },
+            { label: 'Reserved',           value: reservedCount,                             color: 'var(--sb-warning, #B88A45)' },
+            { label: 'Sold / Completed',   value: soldCount,                                 color: 'var(--sb-text-muted, #7A847A)' },
+            ...(unlistedCount > 0 ? [{ label: 'Auto Unlisted', value: unlistedCount, color: 'var(--sb-danger, #A65C55)' }] : []),
+            { label: 'Total Listed Value', value: `₹${totalValue.toLocaleString('en-IN')}`, color: 'var(--sb-primary, #6F8F69)' },
           ].map(stat => (
-            <div key={stat.label} style={{ background: '#1c1b1b', padding: '20px 20px 24px' }}>
+            <div key={stat.label} style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '20px 20px 24px' }}>
               <p style={S.label}>{stat.label}</p>
               <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 28, color: stat.color, marginTop: 8 }}>
                 {stat.value}
@@ -129,16 +124,16 @@ export const MyListingsPage: React.FC = () => {
 
           {/* Needs Attention cell */}
           {(expiringCount > 0 || unlistedCount > 0) && (
-            <div style={{ background: '#1c1b1b', padding: '20px 20px 24px', gridColumn: 'span 1' }}>
-              <p style={{ ...S.label, color: '#f6b351', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '20px 20px 24px', gridColumn: 'span 1' }}>
+              <p style={{ ...S.label, color: 'var(--sb-warning, #B88A45)', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <AlertTriangle size={10} /> Needs Attention
               </p>
               <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#bcc9c6' }}>
-                    {unlistedCount > 0 ? `${unlistedCount} auto-unlisted` : `${expiringCount} expiring soon`}
+                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-secondary, #4F5A51)' }}>
+                    {unlistedCount > 0 ? `${unlistedCount} auto-unlisted` : `${expiringCount} listings expiring soon`}
                   </span>
-                  <button onClick={() => setTab('attention')} style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: '#6bd8cb', letterSpacing: '0.05em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>Review</button>
+                  <button onClick={() => setTab('attention')} style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: 'var(--sb-primary, #6F8F69)', letterSpacing: '0.05em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>Review</button>
                 </div>
               </div>
             </div>
@@ -148,7 +143,7 @@ export const MyListingsPage: React.FC = () => {
         {/* ── Filter Tabs + Search ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
           {/* Tabs */}
-          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #3d4947' }}>
+          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
             {TAB_LABELS.map(t => {
               const active = tab === t.key;
               return (
@@ -160,9 +155,9 @@ export const MyListingsPage: React.FC = () => {
                     fontFamily: 'Work Sans, sans-serif',
                     fontWeight: active ? 600 : 400,
                     fontSize: t.key === 'attention' ? 11 : 13,
-                    color: active ? '#6bd8cb' : (t.key === 'attention' ? '#f6b351' : '#bcc9c6'),
+                    color: active ? 'var(--sb-primary, #6F8F69)' : (t.key === 'attention' ? 'var(--sb-warning, #B88A45)' : 'var(--sb-text-secondary, #4F5A51)'),
                     background: 'transparent', border: 'none',
-                    borderBottom: active ? '2px solid #6bd8cb' : '2px solid transparent',
+                    borderBottom: active ? '2px solid var(--sb-primary, #6F8F69)' : '2px solid transparent',
                     cursor: 'pointer', marginBottom: -1,
                     textTransform: t.key === 'attention' ? 'uppercase' as const : 'none' as const,
                     letterSpacing: t.key === 'attention' ? '0.04em' : 0,
@@ -176,12 +171,12 @@ export const MyListingsPage: React.FC = () => {
 
           {/* Search + sort */}
           <div style={{ display: 'flex', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 4, padding: '0 12px' }}>
-              <Search size={14} color="#879391" />
+            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '0 12px' }}>
+              <Search size={14} color="var(--sb-text-muted, #7A847A)" />
               <input
                 type="text" placeholder="Search my listings"
                 value={search} onChange={e => setSearch(e.target.value)}
-                style={{ background: 'transparent', border: 'none', outline: 'none', padding: '9px 10px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#e5e2e1', width: 180 }}
+                style={{ background: 'transparent', border: 'none', outline: 'none', padding: '9px 10px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-primary, #182018)', width: 180 }}
               />
             </div>
             <div style={{ position: 'relative' }}>
@@ -189,9 +184,9 @@ export const MyListingsPage: React.FC = () => {
                 onClick={() => setSortOpen(v => !v)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6,
-                  background: '#1c1b1b', border: '1px solid #3d4947',
+                  background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)',
                   borderRadius: 4, padding: '9px 14px',
-                  fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#bcc9c6', cursor: 'pointer',
+                  fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)', cursor: 'pointer',
                 }}
               >
                 Expiring soon <ChevronDown size={14} />
@@ -204,18 +199,18 @@ export const MyListingsPage: React.FC = () => {
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, height: 100 }} />
+              <div key={i} style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, height: 100 }} />
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: '60px 24px', textAlign: 'center' }}>
-            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, color: '#e5e2e1', marginBottom: 8 }}>No listings here</p>
+          <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, padding: '60px 24px', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, color: 'var(--sb-text-primary, #182018)', marginBottom: 8 }}>No listings here</p>
             <Link to="/create-listing" className="stitch-btn-primary" style={{ display: 'inline-block', padding: '10px 24px', marginTop: 12, textDecoration: 'none', borderRadius: 4 }}>
               + List New Stock
             </Link>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: '#3d4947', borderRadius: 8, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
             {filtered.map((listing, i) => {
               const days = listing.expiryDate
                 ? Math.ceil((new Date(listing.expiryDate).getTime() - Date.now()) / 86400000)
@@ -227,7 +222,7 @@ export const MyListingsPage: React.FC = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: i * 0.03 }}
                   style={{
-                    background: '#1c1b1b',
+                    background: 'var(--sb-surface, #FFFFFF)',
                     padding: '16px 20px',
                     display: 'flex', alignItems: 'center', gap: 16,
                   }}
@@ -235,14 +230,14 @@ export const MyListingsPage: React.FC = () => {
                   {/* Thumbnail */}
                   <div style={{
                     width: 70, height: 70, borderRadius: 6,
-                    background: '#2a2a2a', overflow: 'hidden', flexShrink: 0,
-                    border: '1px solid #3d4947', position: 'relative',
+                    background: 'var(--sb-surface-soft, #F2F6EF)', overflow: 'hidden', flexShrink: 0,
+                    border: '1px solid var(--sb-border, #D8E0D5)', position: 'relative',
                   }}>
                     {listing.imageUrl ? (
                       <img src={listing.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
                       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Store size={22} color="#3d4947" />
+                        <Store size={22} color="var(--sb-border-strong, #BEC9BA)" />
                       </div>
                     )}
                     {/* Status overlay */}
@@ -259,17 +254,17 @@ export const MyListingsPage: React.FC = () => {
 
                   {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#879391', marginBottom: 4 }}>
+                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--sb-text-muted, #7A847A)', marginBottom: 4 }}>
                       {listing.category}
                     </p>
-                    <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 15, color: '#e5e2e1', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 15, color: 'var(--sb-text-primary, #182018)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {listing.title}
                     </h3>
-                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391' }}>
+                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)' }}>
                       {listing.quantity} {listing.unit} remaining
                     </p>
                     {listing.status === 'expiry_unlisted' && (
-                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#ffb4ab', marginTop: 4 }}>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-danger, #A65C55)', marginTop: 4 }}>
                         This product was automatically unlisted because it remained unsold for 15+ days and now has less than 11 days until expiry.
                       </p>
                     )}
@@ -278,10 +273,10 @@ export const MyListingsPage: React.FC = () => {
                   {/* Value */}
                   <div style={{ textAlign: 'right', minWidth: 120 }}>
                     <p style={S.label}>Value</p>
-                    <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: '#e5e2e1', marginTop: 4 }}>
+                    <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--sb-text-primary, #182018)', marginTop: 4 }}>
                       ₹{(listing.quantity * listing.pricePerUnit).toLocaleString('en-IN')}
                     </p>
-                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#879391' }}>
+                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)' }}>
                       (₹{listing.pricePerUnit}/{listing.unit})
                     </p>
                   </div>
@@ -295,19 +290,19 @@ export const MyListingsPage: React.FC = () => {
                           display: 'inline-flex', alignItems: 'center', gap: 4,
                           padding: '3px 8px', borderRadius: 4,
                           fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
-                          color: '#ffb4ab', background: 'rgba(255,180,171,0.12)', border: '1px solid rgba(255,180,171,0.25)',
+                          color: 'var(--sb-danger, #A65C55)', background: 'rgba(166,92,85,0.12)', border: '1px solid rgba(166,92,85,0.28)',
                         }}>
                           <AlertTriangle size={11} /> Auto Unlisted
                         </span>
                         {days !== null && (
-                          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: '#bcc9c6', marginTop: 3 }}>
+                          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', marginTop: 3 }}>
                             {days <= 0 ? 'Expired' : `${days} days left`}
                           </p>
                         )}
                       </div>
                     ) : (
                       days !== null && (
-                        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: days <= 7 ? '#f6b351' : '#bcc9c6', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: days <= 7 ? 'var(--sb-warning, #B88A45)' : 'var(--sb-text-secondary, #4F5A51)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
                           {days <= 7 && <AlertTriangle size={12} />}
                           {days <= 0 ? 'Expired' : `${days} days left`}
                         </p>
@@ -352,3 +347,4 @@ export const MyListingsPage: React.FC = () => {
     </div>
   );
 };
+export default MyListingsPage;

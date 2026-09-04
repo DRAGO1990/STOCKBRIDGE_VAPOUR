@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Package,
   TrendingUp,
@@ -7,7 +7,6 @@ import {
   Flame,
   Calendar,
   Plus,
-  Edit2,
   Trash2,
   History,
   CheckCircle2,
@@ -15,10 +14,7 @@ import {
   Loader2,
   ArrowRight,
   Sparkles,
-  Info,
   Layers,
-  Store,
-  ShieldAlert,
 } from 'lucide-react';
 import api from '../lib/api';
 import type {
@@ -238,24 +234,33 @@ export const InventoryPage: React.FC = () => {
   );
 
   return (
-    <div style={{ background: '#131313', minHeight: '100vh', color: '#e5e2e1', paddingBottom: 80 }}>
+    <div style={{ background: 'var(--sb-background, #F7F7F2)', minHeight: '100vh', color: 'var(--sb-text-primary, #182018)', paddingBottom: 80 }}>
       {/* Header Bar */}
-      <div style={{ background: '#1c1b1b', borderBottom: '1px solid #3d4947', padding: '32px 24px' }}>
-        <div style={{ maxWidth: 1240, margin: '0 auto' }}>
+      <div style={{ background: 'var(--sb-surface, #FFFFFF)', borderBottom: '1px solid var(--sb-border, #D8E0D5)', padding: '36px 24px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 6, background: 'rgba(107,216,203,0.12)', border: '1px solid rgba(107,216,203,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <TrendingUp size={20} color="#6bd8cb" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{
+                  width: 38, height: 38, borderRadius: 6,
+                  background: 'var(--sb-primary-pale, #EAF1E7)',
+                  border: '1px solid var(--sb-primary-soft, #DCE8D8)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <TrendingUp size={20} color="var(--sb-primary, #6F8F69)" />
                 </div>
-                <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 24, color: '#e5e2e1', margin: 0 }}>
+                <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 26, color: 'var(--sb-text-primary, #182018)', margin: 0, letterSpacing: '-0.01em' }}>
                   Smart Inventory Risk Predictor
                 </h1>
-                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', background: 'rgba(107,216,203,0.15)', color: '#6bd8cb', padding: '3px 8px', borderRadius: 4, border: '1px solid rgba(107,216,203,0.3)' }}>
-                  Mathematical Forecasting
+                <span style={{
+                  fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+                  background: 'var(--sb-primary-pale, #EAF1E7)', color: 'var(--sb-primary, #6F8F69)',
+                  padding: '3px 8px', borderRadius: 4, border: '1px solid var(--sb-primary-soft, #DCE8D8)',
+                }}>
+                  LWMA Forecasting
                 </span>
               </div>
-              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#879391', margin: 0, maxWidth: 680 }}>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-secondary, #4F5A51)', margin: 0, maxWidth: 680 }}>
                 Track store sales and stock levels. StockBridge uses weighted sales velocity to predict dead-stock risk before high urgency begins, recommending timely liquidation.
               </p>
             </div>
@@ -304,39 +309,48 @@ export const InventoryPage: React.FC = () => {
           </div>
 
           {/* Quick Metrics Bar */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginTop: 24 }}>
-            <div style={{ background: '#222222', border: '1px solid #3d4947', borderRadius: 6, padding: '14px 18px' }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: 1,
+            background: 'var(--sb-border, #D8E0D5)',
+            borderRadius: 8,
+            overflow: 'hidden',
+            marginTop: 28,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+          }}>
+            <div style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '18px 20px' }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Tracked Batches
               </span>
-              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 24, fontWeight: 700, color: '#e5e2e1', margin: '4px 0 0' }}>
+              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--sb-text-primary, #182018)', margin: '6px 0 0' }}>
                 {summary.totalBatches}
               </p>
             </div>
 
-            <div style={{ background: '#222222', border: '1px solid #3d4947', borderRadius: 6, padding: '14px 18px' }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: '#ffb4ab', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <AlertTriangle size={12} color="#ffb4ab" /> Batches at Risk
+            <div style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '18px 20px' }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--sb-danger, #A65C55)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <AlertTriangle size={12} color="var(--sb-danger, #A65C55)" /> Batches at Risk
               </span>
-              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 24, fontWeight: 700, color: '#ffb4ab', margin: '4px 0 0' }}>
+              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--sb-danger, #A65C55)', margin: '6px 0 0' }}>
                 {summary.atRiskCount}
               </p>
             </div>
 
-            <div style={{ background: '#222222', border: '1px solid #3d4947', borderRadius: 6, padding: '14px 18px' }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: '#f6b351', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Flame size={12} color="#f6b351" /> High Urgency Window
+            <div style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '18px 20px' }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--sb-warning, #B88A45)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <Flame size={12} color="var(--sb-warning, #B88A45)" /> High Urgency Window
               </span>
-              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 24, fontWeight: 700, color: '#f6b351', margin: '4px 0 0' }}>
+              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--sb-warning, #B88A45)', margin: '6px 0 0' }}>
                 {summary.highUrgencyCount}
               </p>
             </div>
 
-            <div style={{ background: '#222222', border: '1px solid #3d4947', borderRadius: 6, padding: '14px 18px' }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: '#6bd8cb', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '18px 20px' }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--sb-primary, #6F8F69)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Est. Value at Risk
               </span>
-              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 24, fontWeight: 700, color: '#6bd8cb', margin: '4px 0 0' }}>
+              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--sb-primary, #6F8F69)', margin: '6px 0 0' }}>
                 ₹{summary.totalStockValueAtRisk.toLocaleString('en-IN')}
               </p>
             </div>
@@ -345,17 +359,37 @@ export const InventoryPage: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '32px 24px' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
         {/* Alerts */}
         {error && (
-          <div style={{ background: 'rgba(255,180,171,0.1)', border: '1px solid rgba(255,180,171,0.3)', borderRadius: 6, padding: '12px 16px', color: '#ffb4ab', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            background: 'rgba(166,92,85,0.08)',
+            border: '1px solid rgba(166,92,85,0.25)',
+            borderRadius: 6,
+            padding: '12px 16px',
+            color: 'var(--sb-danger, #A65C55)',
+            marginBottom: 24,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}>
             <AlertTriangle size={16} />
             <span style={{ fontSize: 13 }}>{error}</span>
           </div>
         )}
 
         {successMsg && (
-          <div style={{ background: 'rgba(107,216,203,0.1)', border: '1px solid rgba(107,216,203,0.3)', borderRadius: 6, padding: '12px 16px', color: '#6bd8cb', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            background: 'var(--sb-primary-pale, #EAF1E7)',
+            border: '1px solid var(--sb-primary-soft, #DCE8D8)',
+            borderRadius: 6,
+            padding: '12px 16px',
+            color: 'var(--sb-primary, #6F8F69)',
+            marginBottom: 24,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}>
             <CheckCircle2 size={16} />
             <span style={{ fontSize: 13 }}>{successMsg}</span>
           </div>
@@ -365,88 +399,88 @@ export const InventoryPage: React.FC = () => {
         {recommendations.length > 0 && (
           <div style={{ marginBottom: 40 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <Sparkles size={20} color="#6bd8cb" />
-              <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: '#e5e2e1', margin: 0 }}>
+              <Sparkles size={20} color="var(--sb-primary, #6F8F69)" />
+              <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>
                 Smart Inventory Insights & Recommended Actions
               </h2>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16 }}>
               {recommendations.map((batch) => {
                 const pred = batch.prediction!;
                 return (
                   <div
                     key={batch.id}
                     style={{
-                      background: '#1c1b1b',
-                      border: `1px solid ${pred.riskLevel === 'HIGH' ? 'rgba(255,180,171,0.4)' : '#6bd8cb'}`,
+                      background: 'var(--sb-surface, #FFFFFF)',
+                      border: `1px solid ${pred.riskLevel === 'HIGH' ? 'rgba(166,92,85,0.35)' : 'var(--sb-border, #D8E0D5)'}`,
                       borderRadius: 8,
                       padding: 24,
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
                     }}
                   >
                     <div>
                       {/* Top Badges */}
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           {batch.category} {batch.batchNumber ? `· Batch ${batch.batchNumber}` : ''}
                         </span>
                         <div style={{ display: 'flex', gap: 6 }}>
                           <span style={{
                             fontSize: 10, fontWeight: 700, textTransform: 'uppercase', padding: '2px 8px', borderRadius: 4,
-                            background: pred.riskLevel === 'HIGH' ? 'rgba(255,180,171,0.15)' : 'rgba(246,179,81,0.15)',
-                            color: pred.riskLevel === 'HIGH' ? '#ffb4ab' : '#f6b351',
-                            border: `1px solid ${pred.riskLevel === 'HIGH' ? 'rgba(255,180,171,0.3)' : 'rgba(246,179,81,0.3)'}`,
+                            background: pred.riskLevel === 'HIGH' ? 'rgba(166,92,85,0.1)' : 'rgba(184,138,69,0.1)',
+                            color: pred.riskLevel === 'HIGH' ? 'var(--sb-danger, #A65C55)' : 'var(--sb-warning, #B88A45)',
+                            border: `1px solid ${pred.riskLevel === 'HIGH' ? 'rgba(166,92,85,0.25)' : 'rgba(184,138,69,0.25)'}`,
                           }}>
                             {pred.riskLevel} Risk
                           </span>
                           <span style={{
                             fontSize: 10, fontWeight: 600, textTransform: 'uppercase', padding: '2px 8px', borderRadius: 4,
-                            background: 'rgba(135,147,145,0.12)', color: '#bcc9c6', border: '1px solid rgba(135,147,145,0.25)',
+                            background: 'var(--sb-surface-soft, #F2F6EF)', color: 'var(--sb-text-secondary, #4F5A51)', border: '1px solid var(--sb-border, #D8E0D5)',
                           }}>
                             {pred.confidence} Confidence
                           </span>
                         </div>
                       </div>
 
-                      <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: '#e5e2e1', margin: '0 0 16px' }}>
+                      <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--sb-text-primary, #182018)', margin: '0 0 16px' }}>
                         {batch.productName}
                       </h3>
 
                       {/* Key Forecast Metrics */}
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
-                        <div style={{ background: '#262626', padding: '10px 12px', borderRadius: 4, border: '1px solid #3d4947' }}>
-                          <span style={{ fontSize: 10, color: '#879391', textTransform: 'uppercase' }}>Current Stock</span>
-                          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: '#e5e2e1', margin: '2px 0 0' }}>
+                        <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', padding: '10px 12px', borderRadius: 6, border: '1px solid var(--sb-border, #D8E0D5)' }}>
+                          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase' }}>Current Stock</span>
+                          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--sb-text-primary, #182018)', margin: '3px 0 0' }}>
                             {batch.currentQuantity} {batch.unit}
                           </p>
                         </div>
-                        <div style={{ background: '#262626', padding: '10px 12px', borderRadius: 4, border: '1px solid #3d4947' }}>
-                          <span style={{ fontSize: 10, color: '#879391', textTransform: 'uppercase' }}>Avg Daily Sales</span>
-                          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: '#6bd8cb', margin: '2px 0 0' }}>
+                        <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', padding: '10px 12px', borderRadius: 6, border: '1px solid var(--sb-border, #D8E0D5)' }}>
+                          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase' }}>Avg Daily Sales</span>
+                          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--sb-primary, #6F8F69)', margin: '3px 0 0' }}>
                             {pred.averageDailySales} {batch.unit}/day
                           </p>
                         </div>
-                        <div style={{ background: '#262626', padding: '10px 12px', borderRadius: 4, border: '1px solid #3d4947' }}>
-                          <span style={{ fontSize: 10, color: '#879391', textTransform: 'uppercase' }}>Expiry Countdown</span>
-                          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: '#e5e2e1', margin: '2px 0 0' }}>
+                        <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', padding: '10px 12px', borderRadius: 6, border: '1px solid var(--sb-border, #D8E0D5)' }}>
+                          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase' }}>Expiry Countdown</span>
+                          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--sb-text-primary, #182018)', margin: '3px 0 0' }}>
                             {pred.daysUntilExpiry} days left
                           </p>
                         </div>
-                        <div style={{ background: '#262626', padding: '10px 12px', borderRadius: 4, border: '1px solid #3d4947' }}>
-                          <span style={{ fontSize: 10, color: '#879391', textTransform: 'uppercase' }}>High Urgency In</span>
-                          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: pred.daysUntilHighUrgency === 0 ? '#ffb4ab' : '#f6b351', margin: '2px 0 0' }}>
+                        <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', padding: '10px 12px', borderRadius: 6, border: '1px solid var(--sb-border, #D8E0D5)' }}>
+                          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase' }}>High Urgency In</span>
+                          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: pred.daysUntilHighUrgency === 0 ? 'var(--sb-danger, #A65C55)' : 'var(--sb-warning, #B88A45)', margin: '3px 0 0' }}>
                             {pred.daysUntilHighUrgency === 0 ? 'Active Now' : `${pred.daysUntilHighUrgency} days`}
                           </p>
                         </div>
                       </div>
 
                       {/* Explainable Reasoning */}
-                      <div style={{ background: 'rgba(107,216,203,0.06)', border: '1px solid rgba(107,216,203,0.2)', borderRadius: 6, padding: '12px 14px', marginBottom: 18 }}>
-                        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#bcc9c6', lineHeight: 1.5, margin: 0 }}>
+                      <div style={{ background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)', borderRadius: 6, padding: '12px 14px', marginBottom: 18 }}>
+                        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-secondary, #4F5A51)', lineHeight: 1.5, margin: 0 }}>
                           {pred.reason}
                         </p>
                       </div>
@@ -460,10 +494,10 @@ export const InventoryPage: React.FC = () => {
                         className="stitch-btn-primary"
                         style={{
                           width: '100%',
-                          padding: '12px 16px',
+                          padding: '11px 16px',
                           borderRadius: 4,
                           fontSize: 13,
-                          fontWeight: 700,
+                          fontWeight: 600,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -486,8 +520,8 @@ export const InventoryPage: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Layers size={18} color="#6bd8cb" />
-              <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: '#e5e2e1', margin: 0 }}>
+              <Layers size={18} color="var(--sb-primary, #6F8F69)" />
+              <h2 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>
                 Store Inventory Batches
               </h2>
             </div>
@@ -495,16 +529,16 @@ export const InventoryPage: React.FC = () => {
 
           {loading ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 0', gap: 12 }}>
-              <Loader2 size={24} color="#6bd8cb" className="animate-spin" />
-              <span style={{ fontSize: 14, color: '#879391' }}>Loading store inventory batches...</span>
+              <Loader2 size={24} color="var(--sb-primary, #6F8F69)" className="animate-spin" />
+              <span style={{ fontSize: 14, color: 'var(--sb-text-secondary, #4F5A51)' }}>Loading store inventory batches...</span>
             </div>
           ) : batches.length === 0 ? (
-            <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: '60px 24px', textAlign: 'center' }}>
-              <Package size={36} color="#879391" style={{ margin: '0 auto 12px' }} />
-              <h3 style={{ fontFamily: 'Sora, sans-serif', fontSize: 16, color: '#e5e2e1', margin: '0 0 6px' }}>
+            <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, padding: '60px 24px', textAlign: 'center' }}>
+              <Package size={36} color="var(--sb-text-muted, #7A847A)" style={{ margin: '0 auto 12px' }} />
+              <h3 style={{ fontFamily: 'Sora, sans-serif', fontSize: 16, color: 'var(--sb-text-primary, #182018)', margin: '0 0 6px' }}>
                 No store inventory batches tracked yet
               </h3>
-              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: '#879391', maxWidth: 460, margin: '0 auto 20px' }}>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)', maxWidth: 460, margin: '0 auto 20px' }}>
                 Add your physical store inventory batches to begin automatic risk forecasting and get early liquidation recommendations.
               </p>
               <button
@@ -517,17 +551,17 @@ export const InventoryPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, overflowX: 'auto' }}>
+            <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, overflowX: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 900 }}>
                 <thead>
-                  <tr style={{ background: '#222222', borderBottom: '1px solid #3d4947' }}>
-                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Product</th>
-                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Current Stock</th>
-                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expiry Date</th>
-                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sales Velocity</th>
-                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Risk Level</th>
-                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Forecast Status</th>
-                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Actions</th>
+                  <tr style={{ background: 'var(--sb-surface-soft, #F2F6EF)', borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
+                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Product</th>
+                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Current Stock</th>
+                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expiry Date</th>
+                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sales Velocity</th>
+                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Risk Level</th>
+                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Forecast Status</th>
+                    <th style={{ padding: '12px 16px', fontSize: 11, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -535,52 +569,52 @@ export const InventoryPage: React.FC = () => {
                     const pred = batch.prediction;
                     const expiryStr = batch.expiryDate ? batch.expiryDate.split('T')[0] : 'N/A';
                     return (
-                      <tr key={batch.id} style={{ borderBottom: '1px solid #2a2a2a', transition: 'background 0.15s' }}>
+                      <tr key={batch.id} style={{ borderBottom: '1px solid var(--sb-border, #D8E0D5)', transition: 'background 0.15s' }}>
                         <td style={{ padding: '14px 16px' }}>
-                          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 14, color: '#e5e2e1', margin: 0 }}>
+                          <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 14, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>
                             {batch.productName}
                           </p>
-                          <span style={{ fontSize: 11, color: '#879391' }}>
+                          <span style={{ fontSize: 11, color: 'var(--sb-text-muted, #7A847A)' }}>
                             {batch.category} {batch.batchNumber ? `· Batch ${batch.batchNumber}` : ''}
                           </span>
                         </td>
                         <td style={{ padding: '14px 16px' }}>
-                          <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 14, color: '#e5e2e1' }}>
+                          <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 14, color: 'var(--sb-text-primary, #182018)' }}>
                             {batch.currentQuantity}
                           </span>{' '}
-                          <span style={{ fontSize: 12, color: '#879391' }}>{batch.unit}</span>
+                          <span style={{ fontSize: 12, color: 'var(--sb-text-muted, #7A847A)' }}>{batch.unit}</span>
                         </td>
                         <td style={{ padding: '14px 16px' }}>
-                          <p style={{ fontSize: 13, color: '#e5e2e1', margin: 0 }}>{expiryStr}</p>
-                          <span style={{ fontSize: 11, color: (pred?.daysUntilExpiry ?? 0) <= 25 ? '#ffb4ab' : '#879391' }}>
+                          <p style={{ fontSize: 13, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>{expiryStr}</p>
+                          <span style={{ fontSize: 11, color: (pred?.daysUntilExpiry ?? 0) <= 25 ? 'var(--sb-danger, #A65C55)' : 'var(--sb-text-muted, #7A847A)' }}>
                             {pred?.daysUntilExpiry !== null ? `${pred?.daysUntilExpiry} days left` : ''}
                           </span>
                         </td>
                         <td style={{ padding: '14px 16px' }}>
-                          <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 13, color: '#6bd8cb' }}>
+                          <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 13, color: 'var(--sb-primary, #6F8F69)' }}>
                             {pred?.averageDailySales ?? 0} {batch.unit}/day
                           </span>
-                          <span style={{ display: 'block', fontSize: 10, color: '#879391' }}>
+                          <span style={{ display: 'block', fontSize: 10, color: 'var(--sb-text-muted, #7A847A)' }}>
                             {pred?.historyDaysCount ? `Based on ${pred.historyDaysCount}d history` : 'No logs yet'}
                           </span>
                         </td>
                         <td style={{ padding: '14px 16px' }}>
                           <span style={{
                             fontSize: 10, fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 4,
-                            background: pred?.riskLevel === 'HIGH' ? 'rgba(255,180,171,0.15)' : pred?.riskLevel === 'MEDIUM' ? 'rgba(246,179,81,0.15)' : 'rgba(107,216,203,0.15)',
-                            color: pred?.riskLevel === 'HIGH' ? '#ffb4ab' : pred?.riskLevel === 'MEDIUM' ? '#f6b351' : '#6bd8cb',
-                            border: `1px solid ${pred?.riskLevel === 'HIGH' ? 'rgba(255,180,171,0.3)' : pred?.riskLevel === 'MEDIUM' ? 'rgba(246,179,81,0.3)' : 'rgba(107,216,203,0.3)'}`,
+                            background: pred?.riskLevel === 'HIGH' ? 'rgba(166,92,85,0.1)' : pred?.riskLevel === 'MEDIUM' ? 'rgba(184,138,69,0.1)' : 'var(--sb-primary-pale, #EAF1E7)',
+                            color: pred?.riskLevel === 'HIGH' ? 'var(--sb-danger, #A65C55)' : pred?.riskLevel === 'MEDIUM' ? 'var(--sb-warning, #B88A45)' : 'var(--sb-primary, #6F8F69)',
+                            border: `1px solid ${pred?.riskLevel === 'HIGH' ? 'rgba(166,92,85,0.25)' : pred?.riskLevel === 'MEDIUM' ? 'rgba(184,138,69,0.25)' : 'var(--sb-primary-soft, #DCE8D8)'}`,
                           }}>
                             {pred?.riskLevel || 'LOW'}
                           </span>
                         </td>
                         <td style={{ padding: '14px 16px' }}>
                           {pred?.shouldRecommendListing ? (
-                            <span style={{ fontSize: 12, color: '#ffb4ab', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span style={{ fontSize: 12, color: 'var(--sb-danger, #A65C55)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
                               <AlertTriangle size={13} /> Recommend {pred.recommendedListingQuantity} on marketplace
                             </span>
                           ) : (
-                            <span style={{ fontSize: 12, color: '#879391' }}>
+                            <span style={{ fontSize: 12, color: 'var(--sb-text-muted, #7A847A)' }}>
                               {pred?.confidence === 'insufficient' ? 'Need more history' : 'On pace to clear'}
                             </span>
                           )}
@@ -622,7 +656,7 @@ export const InventoryPage: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleDeleteBatch(batch.id, batch.productName)}
-                              style={{ background: 'transparent', border: 'none', color: '#ffb4ab', opacity: 0.7, padding: 6, cursor: 'pointer' }}
+                              style={{ background: 'transparent', border: 'none', color: 'var(--sb-danger, #A65C55)', opacity: 0.7, padding: 6, cursor: 'pointer' }}
                               title="Delete Batch"
                             >
                               <Trash2 size={14} />
@@ -641,27 +675,27 @@ export const InventoryPage: React.FC = () => {
 
       {/* Modal 1: Add Store Batch */}
       {isAddModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
-          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, width: '100%', maxWidth: 520, padding: 28, position: 'relative' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(24,32,24,0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+          <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, width: '100%', maxWidth: 520, padding: 28, position: 'relative', boxShadow: '0 16px 40px rgba(0,0,0,0.12)' }}>
             <button
               type="button"
               onClick={() => setIsAddModalOpen(false)}
-              style={{ position: 'absolute', top: 20, right: 20, background: 'transparent', border: 'none', color: '#879391', cursor: 'pointer' }}
+              style={{ position: 'absolute', top: 20, right: 20, background: 'transparent', border: 'none', color: 'var(--sb-text-muted, #7A847A)', cursor: 'pointer' }}
             >
               <X size={20} />
             </button>
 
-            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: '#e5e2e1', margin: '0 0 6px' }}>
+            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--sb-text-primary, #182018)', margin: '0 0 6px' }}>
               Add Store Inventory Batch
             </h3>
-            <p style={{ fontSize: 13, color: '#879391', margin: '0 0 20px' }}>
+            <p style={{ fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)', margin: '0 0 20px' }}>
               Track a private product lot in your physical store for expiry risk prediction.
             </p>
 
             <form onSubmit={handleCreateBatch}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                     Product Name *
                   </label>
                   <input
@@ -670,19 +704,19 @@ export const InventoryPage: React.FC = () => {
                     onChange={(e) => setNewProductName(e.target.value)}
                     placeholder="e.g. Parle-G Gold 100g Biscuits"
                     required
-                    style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                    style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                   />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                       Category *
                     </label>
                     <select
                       value={newCategory}
                       onChange={(e) => setNewCategory(e.target.value)}
-                      style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                      style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                     >
                       {CATEGORIES.map((c) => (
                         <option key={c} value={c}>{c}</option>
@@ -691,7 +725,7 @@ export const InventoryPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                       Batch Number (Optional)
                     </label>
                     <input
@@ -699,14 +733,14 @@ export const InventoryPage: React.FC = () => {
                       value={newBatchNumber}
                       onChange={(e) => setNewBatchNumber(e.target.value)}
                       placeholder="e.g. BATCH-2026-A"
-                      style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                      style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                     />
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                       Initial Stock *
                     </label>
                     <input
@@ -717,18 +751,18 @@ export const InventoryPage: React.FC = () => {
                       onChange={(e) => setNewQuantity(parseFloat(e.target.value) || 0)}
                       placeholder="e.g. 100"
                       required
-                      style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                      style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                       Unit *
                     </label>
                     <select
                       value={newUnit}
                       onChange={(e) => setNewUnit(e.target.value)}
-                      style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                      style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                     >
                       {UNITS.map((u) => (
                         <option key={u} value={u}>{u}</option>
@@ -738,7 +772,7 @@ export const InventoryPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                     Expiry Date *
                   </label>
                   <input
@@ -746,13 +780,13 @@ export const InventoryPage: React.FC = () => {
                     value={newExpiryDate}
                     onChange={(e) => setNewExpiryDate(e.target.value)}
                     required
-                    style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none', colorScheme: 'dark' }}
+                    style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                   />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                       MRP (₹) (Optional)
                     </label>
                     <input
@@ -762,12 +796,12 @@ export const InventoryPage: React.FC = () => {
                       value={newMrp}
                       onChange={(e) => setNewMrp(e.target.value ? parseFloat(e.target.value) : '')}
                       placeholder="e.g. 50"
-                      style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                      style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                       Cost Price (₹) (Optional)
                     </label>
                     <input
@@ -777,7 +811,7 @@ export const InventoryPage: React.FC = () => {
                       value={newCostPrice}
                       onChange={(e) => setNewCostPrice(e.target.value ? parseFloat(e.target.value) : '')}
                       placeholder="e.g. 38"
-                      style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                      style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                     />
                   </div>
                 </div>
@@ -809,27 +843,27 @@ export const InventoryPage: React.FC = () => {
 
       {/* Modal 2: Daily Store Update */}
       {isDailyLogModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
-          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, width: '100%', maxWidth: 480, padding: 28, position: 'relative' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(24,32,24,0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+          <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, width: '100%', maxWidth: 480, padding: 28, position: 'relative', boxShadow: '0 16px 40px rgba(0,0,0,0.12)' }}>
             <button
               type="button"
               onClick={() => setIsDailyLogModalOpen(false)}
-              style={{ position: 'absolute', top: 20, right: 20, background: 'transparent', border: 'none', color: '#879391', cursor: 'pointer' }}
+              style={{ position: 'absolute', top: 20, right: 20, background: 'transparent', border: 'none', color: 'var(--sb-text-muted, #7A847A)', cursor: 'pointer' }}
             >
               <X size={20} />
             </button>
 
-            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: '#e5e2e1', margin: '0 0 6px' }}>
+            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--sb-text-primary, #182018)', margin: '0 0 6px' }}>
               Daily Store Update
             </h3>
-            <p style={{ fontSize: 13, color: '#879391', margin: '0 0 20px' }}>
+            <p style={{ fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)', margin: '0 0 20px' }}>
               Record daily sales and remaining stock to update velocity and risk forecasts.
             </p>
 
             <form onSubmit={handleSaveDailyLog}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                     Product Batch *
                   </label>
                   <select
@@ -840,7 +874,7 @@ export const InventoryPage: React.FC = () => {
                       if (b) setLogRemainingQty(b.currentQuantity);
                     }}
                     required
-                    style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                    style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                   >
                     {batches.map((b) => (
                       <option key={b.id} value={b.id}>
@@ -851,7 +885,7 @@ export const InventoryPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                     Date *
                   </label>
                   <input
@@ -859,13 +893,13 @@ export const InventoryPage: React.FC = () => {
                     value={logDate}
                     onChange={(e) => setLogDate(e.target.value)}
                     required
-                    style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none', colorScheme: 'dark' }}
+                    style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                   />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                       Sold Today *
                     </label>
                     <input
@@ -882,12 +916,12 @@ export const InventoryPage: React.FC = () => {
                         }
                       }}
                       required
-                      style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                      style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                       Remaining Stock *
                     </label>
                     <input
@@ -897,13 +931,13 @@ export const InventoryPage: React.FC = () => {
                       value={logRemainingQty}
                       onChange={(e) => setLogRemainingQty(parseFloat(e.target.value) || 0)}
                       required
-                      style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                      style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: '#879391', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--sb-text-secondary, #4F5A51)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                     Stock Restocked / Added Today (Optional)
                   </label>
                   <input
@@ -920,7 +954,7 @@ export const InventoryPage: React.FC = () => {
                       }
                     }}
                     placeholder="0"
-                    style={{ width: '100%', background: '#262626', border: '1px solid #3d4947', borderRadius: 4, padding: '10px 12px', color: '#e5e2e1', fontSize: 14, outline: 'none' }}
+                    style={{ width: '100%', background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: '10px 12px', color: 'var(--sb-text-primary, #182018)', fontSize: 14, outline: 'none' }}
                   />
                 </div>
 
@@ -951,36 +985,36 @@ export const InventoryPage: React.FC = () => {
 
       {/* Modal 3: History Drawer */}
       {isHistoryModalOpen && selectedBatch && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
-          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, width: '100%', maxWidth: 560, padding: 28, position: 'relative', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(24,32,24,0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+          <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, width: '100%', maxWidth: 560, padding: 28, position: 'relative', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 16px 40px rgba(0,0,0,0.12)' }}>
             <button
               type="button"
               onClick={() => setIsHistoryModalOpen(false)}
-              style={{ position: 'absolute', top: 20, right: 20, background: 'transparent', border: 'none', color: '#879391', cursor: 'pointer' }}
+              style={{ position: 'absolute', top: 20, right: 20, background: 'transparent', border: 'none', color: 'var(--sb-text-muted, #7A847A)', cursor: 'pointer' }}
             >
               <X size={20} />
             </button>
 
-            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: '#e5e2e1', margin: '0 0 4px' }}>
+            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--sb-text-primary, #182018)', margin: '0 0 4px' }}>
               Sales History: {selectedBatch.productName}
             </h3>
-            <p style={{ fontSize: 13, color: '#879391', margin: '0 0 16px' }}>
+            <p style={{ fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)', margin: '0 0 16px' }}>
               Recent daily logs used to calculate weighted sales velocity.
             </p>
 
             {loadingHistory ? (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 0' }}>
-                <Loader2 size={24} color="#6bd8cb" className="animate-spin" />
+                <Loader2 size={24} color="var(--sb-primary, #6F8F69)" className="animate-spin" />
               </div>
             ) : batchHistoryLogs.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '30px 0', color: '#879391', fontSize: 13 }}>
+              <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--sb-text-muted, #7A847A)', fontSize: 13 }}>
                 No daily logs recorded yet for this batch.
               </div>
             ) : (
-              <div style={{ overflowY: 'auto', flex: 1, border: '1px solid #2e2e2e', borderRadius: 6 }}>
+              <div style={{ overflowY: 'auto', flex: 1, border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 6 }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
                   <thead>
-                    <tr style={{ background: '#262626', borderBottom: '1px solid #3d4947', color: '#879391', fontSize: 11, textTransform: 'uppercase' }}>
+                    <tr style={{ background: 'var(--sb-surface-soft, #F2F6EF)', borderBottom: '1px solid var(--sb-border, #D8E0D5)', color: 'var(--sb-text-muted, #7A847A)', fontSize: 11, textTransform: 'uppercase' }}>
                       <th style={{ padding: '10px 14px' }}>Date</th>
                       <th style={{ padding: '10px 14px' }}>Sold</th>
                       <th style={{ padding: '10px 14px' }}>Remaining</th>
@@ -989,11 +1023,11 @@ export const InventoryPage: React.FC = () => {
                   </thead>
                   <tbody>
                     {batchHistoryLogs.map((log) => (
-                      <tr key={log.id} style={{ borderBottom: '1px solid #262626' }}>
-                        <td style={{ padding: '10px 14px', color: '#e5e2e1' }}>{log.date}</td>
-                        <td style={{ padding: '10px 14px', color: '#6bd8cb', fontWeight: 600 }}>{log.soldQuantity} {selectedBatch.unit}</td>
-                        <td style={{ padding: '10px 14px', color: '#e5e2e1' }}>{log.remainingQuantity} {selectedBatch.unit}</td>
-                        <td style={{ padding: '10px 14px', color: log.restockedQuantity > 0 ? '#f6b351' : '#879391' }}>
+                      <tr key={log.id} style={{ borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
+                        <td style={{ padding: '10px 14px', color: 'var(--sb-text-primary, #182018)' }}>{log.date}</td>
+                        <td style={{ padding: '10px 14px', color: 'var(--sb-primary, #6F8F69)', fontWeight: 600 }}>{log.soldQuantity} {selectedBatch.unit}</td>
+                        <td style={{ padding: '10px 14px', color: 'var(--sb-text-primary, #182018)' }}>{log.remainingQuantity} {selectedBatch.unit}</td>
+                        <td style={{ padding: '10px 14px', color: log.restockedQuantity > 0 ? 'var(--sb-warning, #B88A45)' : 'var(--sb-text-muted, #7A847A)' }}>
                           {log.restockedQuantity > 0 ? `+${log.restockedQuantity}` : '—'}
                         </td>
                       </tr>

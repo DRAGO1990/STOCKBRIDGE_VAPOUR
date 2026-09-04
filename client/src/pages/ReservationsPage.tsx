@@ -14,7 +14,7 @@ import { useAuthStore } from '../stores/authStore';
 
 const labelStyle: React.CSSProperties = {
   fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600,
-  letterSpacing: '0.06em', textTransform: 'uppercase', color: '#879391', marginBottom: 4, display: 'block',
+  letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--sb-text-muted, #7A847A)', marginBottom: 4, display: 'block',
 };
 
 export const ReservationsPage: React.FC = () => {
@@ -58,23 +58,23 @@ export const ReservationsPage: React.FC = () => {
   const pendingCount = currentList.filter(r => r.status === 'pending').length;
 
   return (
-    <div style={{ background: '#131313', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--sb-background, #F7F7F2)', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 80px' }}>
 
         {/* ── Header ── */}
         <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32, color: '#e5e2e1', marginBottom: 8, letterSpacing: '-0.01em' }}>
+          <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32, color: 'var(--sb-text-primary, #182018)', marginBottom: 8, letterSpacing: '-0.01em' }}>
             Orders & Reservations
           </h1>
-          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#bcc9c6' }}>
+          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-secondary, #4F5A51)' }}>
             Coordinate handovers, chat with counterparties, and track all trade activity.
           </p>
         </div>
 
-        <hr style={{ border: 'none', borderTop: '1px solid #3d4947', marginBottom: 28 }} />
+        <hr style={{ border: 'none', borderTop: '1px solid var(--sb-border, #D8E0D5)', marginBottom: 28 }} />
 
         {/* ── Tabs ── */}
-        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #3d4947', marginBottom: 24 }}>
+        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--sb-border, #D8E0D5)', marginBottom: 24 }}>
           {([
             { key: 'buying' as const,  label: `Buying (${buyingReservations.length})` },
             { key: 'selling' as const, label: `Selling (${sellingReservations.length})` },
@@ -85,9 +85,9 @@ export const ReservationsPage: React.FC = () => {
               style={{
                 padding: '10px 20px',
                 fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: tab === t.key ? 600 : 400,
-                color: tab === t.key ? '#6bd8cb' : '#bcc9c6',
+                color: tab === t.key ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-secondary, #4F5A51)',
                 background: 'transparent', border: 'none',
-                borderBottom: `2px solid ${tab === t.key ? '#6bd8cb' : 'transparent'}`,
+                borderBottom: `2px solid ${tab === t.key ? 'var(--sb-primary, #6F8F69)' : 'transparent'}`,
                 cursor: 'pointer', marginBottom: -1, transition: 'all 0.12s',
               }}
             >
@@ -99,15 +99,15 @@ export const ReservationsPage: React.FC = () => {
         {/* ── Content ── */}
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 60 }}>
-            <div style={{ width: 32, height: 32, border: '2px solid #3d4947', borderTopColor: '#6bd8cb', borderRadius: '50%' }} className="animate-stitch-spin" />
+            <div style={{ width: 32, height: 32, border: '2px solid var(--sb-border, #D8E0D5)', borderTopColor: 'var(--sb-primary, #6F8F69)', borderRadius: '50%' }} className="animate-stitch-spin" />
           </div>
         ) : currentList.length === 0 ? (
-          <div style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, padding: '60px 24px', textAlign: 'center' }}>
-            <Package size={36} color="#3d4947" style={{ margin: '0 auto 16px', display: 'block' }} />
-            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, color: '#e5e2e1', marginBottom: 8 }}>
+          <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, padding: '60px 24px', textAlign: 'center' }}>
+            <Package size={36} color="var(--sb-border-strong, #BEC9BA)" style={{ margin: '0 auto 16px', display: 'block' }} />
+            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, color: 'var(--sb-text-primary, #182018)', marginBottom: 8 }}>
               {tab === 'buying' ? 'No orders placed yet' : 'No orders received yet'}
             </p>
-            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: '#879391', marginBottom: 20 }}>
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-muted, #7A847A)', marginBottom: 20 }}>
               {tab === 'buying' ? 'Browse the marketplace and reserve a lot.' : 'Buyers will reserve your listed lots.'}
             </p>
             {tab === 'buying' && (
@@ -129,20 +129,20 @@ export const ReservationsPage: React.FC = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }}
-                  style={{ background: '#1c1b1b', border: '1px solid #3d4947', borderRadius: 8, overflow: 'hidden' }}
+                  style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
                 >
                   {/* Card header */}
-                  <div style={{ padding: '16px 20px', borderBottom: '1px solid #3d4947', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                  <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--sb-border, #D8E0D5)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                     <div>
                       <Link
                         to={`/listings/${res.listingId}`}
-                        style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: '#e5e2e1', textDecoration: 'none', transition: 'color 0.15s' }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#6bd8cb'; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#e5e2e1'; }}
+                        style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: 'var(--sb-text-primary, #182018)', textDecoration: 'none', transition: 'color 0.15s' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sb-primary, #6F8F69)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sb-text-primary, #182018)'; }}
                       >
                         {res.listing?.title || 'Surplus Item'}
                       </Link>
-                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#879391', marginTop: 2 }}>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)', marginTop: 2 }}>
                         Reserved {new Date(res.createdAt).toLocaleDateString()} · #SB-{res.id.substring(0, 8).toUpperCase()}
                       </p>
                     </div>
@@ -150,22 +150,22 @@ export const ReservationsPage: React.FC = () => {
                   </div>
 
                   {/* Stats row */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, background: '#3d4947', margin: '0' }}>
-                    <div style={{ background: '#1c1b1b', padding: '14px 20px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, background: 'var(--sb-border, #D8E0D5)', margin: '0' }}>
+                    <div style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '14px 20px' }}>
                       <p style={labelStyle}>Quantity</p>
-                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 15, fontWeight: 600, color: '#e5e2e1' }}>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 15, fontWeight: 600, color: 'var(--sb-text-primary, #182018)' }}>
                         {res.agreedQty} {res.listing?.unit || 'units'}
                       </p>
                     </div>
-                    <div style={{ background: '#1c1b1b', padding: '14px 20px' }}>
+                    <div style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '14px 20px' }}>
                       <p style={labelStyle}>Agreed Value</p>
-                      <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, fontWeight: 700, color: '#6bd8cb' }}>
+                      <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, fontWeight: 700, color: 'var(--sb-primary, #6F8F69)' }}>
                         ₹{res.agreedPrice.toLocaleString('en-IN')}
                       </p>
                     </div>
-                    <div style={{ background: '#1c1b1b', padding: '14px 20px' }}>
+                    <div style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '14px 20px' }}>
                       <p style={labelStyle}>{tab === 'buying' ? 'Seller' : 'Buyer'}</p>
-                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, fontWeight: 600, color: '#e5e2e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {counterparty.businessName || counterparty.name}
                       </p>
                     </div>
@@ -173,10 +173,10 @@ export const ReservationsPage: React.FC = () => {
 
                   {/* Proof photo banner */}
                   {res.proofPhoto && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px', background: 'rgba(107,216,203,0.06)', borderTop: '1px solid rgba(107,216,203,0.15)' }}>
-                      <FileImage size={14} color="#6bd8cb" />
-                      <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: '#6bd8cb', flex: 1 }}>Handover proof on file</span>
-                      <a href={res.proofPhoto} target="_blank" rel="noreferrer" style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700, color: '#6bd8cb', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px', background: 'var(--sb-primary-pale, #EAF1E7)', borderTop: '1px solid var(--sb-primary-soft, #DCE8D8)' }}>
+                      <FileImage size={14} color="var(--sb-primary, #6F8F69)" />
+                      <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-primary, #6F8F69)', flex: 1 }}>Handover proof on file</span>
+                      <a href={res.proofPhoto} target="_blank" rel="noreferrer" style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700, color: 'var(--sb-primary, #6F8F69)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         View Photo
                       </a>
                     </div>
@@ -216,8 +216,8 @@ export const ReservationsPage: React.FC = () => {
                           onClick={() => setActiveRateRes(res)}
                           style={{
                             display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
-                            background: 'rgba(246,179,81,0.1)', border: '1px solid rgba(246,179,81,0.25)',
-                            borderRadius: 4, color: '#f6b351', fontFamily: 'Work Sans, sans-serif',
+                            background: 'rgba(184,138,69,0.1)', border: '1px solid rgba(184,138,69,0.25)',
+                            borderRadius: 4, color: 'var(--sb-warning, #B88A45)', fontFamily: 'Work Sans, sans-serif',
                             fontSize: 12, fontWeight: 600, cursor: 'pointer',
                           }}
                         >
@@ -229,12 +229,12 @@ export const ReservationsPage: React.FC = () => {
                           onClick={() => handleCancel(res.id)}
                           style={{
                             display: 'flex', alignItems: 'center', gap: 5, padding: '8px 16px',
-                            background: 'transparent', border: '1px solid #3d4947',
-                            borderRadius: 4, color: '#879391', fontFamily: 'Work Sans, sans-serif',
+                            background: 'transparent', border: '1px solid var(--sb-border, #D8E0D5)',
+                            borderRadius: 4, color: 'var(--sb-text-muted, #7A847A)', fontFamily: 'Work Sans, sans-serif',
                             fontSize: 12, cursor: 'pointer', transition: 'color 0.12s',
                           }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#ffb4ab'; }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#879391'; }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-danger, #A65C55)'; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-text-muted, #7A847A)'; }}
                         >
                           <X size={13} /> Cancel
                         </button>
