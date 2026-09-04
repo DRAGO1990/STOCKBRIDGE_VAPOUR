@@ -28,6 +28,7 @@ export interface VoiceExtraction {
   category: string;
   quantity: number;
   unit: string;
+  mrp?: number | null;
   pricePerUnit: number;
   expiryDate: string | null;
   urgency: 'low' | 'medium' | 'high';
@@ -343,11 +344,23 @@ function sanitizeExtraction(raw: any, originalTranscript: string = ''): VoiceExt
   }
   finalConfidence = Math.min(0.98, Math.max(0.40, Math.round(finalConfidence * 100) / 100));
 
+  // Parse MRP
+  let mrp: number | null = null;
+  if (raw.mrp !== undefined && raw.mrp !== null) {
+    const parsedMrp = Number(raw.mrp);
+    if (!isNaN(parsedMrp) && parsedMrp > 0) mrp = parsedMrp;
+  }
+  const mrpMatch = (originalTranscript || '').match(/(?:mrp|printed price|chapa hua daam)\s*(?:rs\.?|rupees|₹|:)?\s*(\d+(?:\.\d+)?)/i);
+  if (mrpMatch && !mrp) {
+    mrp = parseFloat(mrpMatch[1]) || null;
+  }
+
   return {
-    title: rawTitle,
+    title,
     category,
     quantity: Math.max(0, Number(raw.quantity) || 0),
     unit,
+    mrp,
     pricePerUnit: Math.max(0, Number(raw.pricePerUnit) || 0),
     expiryDate,
     urgency,
@@ -592,6 +605,15 @@ export function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction 
     missingFields.push('expiryDate');
   }
 
+  // Extract MRP from transcript
+  let mrp: number | null = null;
+  const mrpMatch =
+    lower.match(/(?:mrp|printed price|chapa hua daam|chapa daam|chape huye daam|printed rate)\s*(?:rs\.?|rupees|₹|:)?\s*(\d+(?:\.\d+)?)/i) ||
+    lower.match(/(?:mrp)\s*[:=]?\s*(\d+(?:\.\d+)?)/i);
+  if (mrpMatch) {
+    mrp = parseFloat(mrpMatch[1]) || null;
+  }
+
   // Confidence score
   let confidence = 0.50;
   if (productNoun && productNoun !== 'Surplus Lot') confidence += 0.15;
@@ -607,6 +629,7 @@ export function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction 
     category,
     quantity: quantity || 10,
     unit,
+    mrp,
     pricePerUnit: pricePerUnit || 100,
     expiryDate,
     urgency,

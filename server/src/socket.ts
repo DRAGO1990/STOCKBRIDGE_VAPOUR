@@ -6,6 +6,7 @@ import prisma from './lib/prisma';
 import { AuthPayload } from './middleware/auth';
 
 const userSockets = new Map<string, Set<string>>(); // userId -> Set<socketId>
+let ioInstance: IOServer | null = null;
 
 export function setupSocket(httpServer: HTTPServer) {
   const io = new IOServer(httpServer, {
@@ -15,6 +16,7 @@ export function setupSocket(httpServer: HTTPServer) {
       credentials: true,
     },
   });
+  ioInstance = io;
 
   // Auth middleware
   io.use((socket, next) => {
@@ -120,3 +122,14 @@ export function setupSocket(httpServer: HTTPServer) {
 
   return io;
 }
+
+export function emitNotificationToUser(userId: string, payload: any) {
+  if (!ioInstance) return;
+  const sockets = userSockets.get(userId);
+  if (sockets) {
+    sockets.forEach(socketId => {
+      ioInstance!.to(socketId).emit('notification', payload);
+    });
+  }
+}
+

@@ -92,6 +92,13 @@ export const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
           {status.charAt(0).toUpperCase() + status.slice(1)}
         </Badge>
       );
+    case 'expiry_unlisted':
+      return (
+        <Badge style={{ color: 'var(--sb-danger, #A65C55)', background: 'rgba(166,92,85,0.14)', border: '1px solid rgba(166,92,85,0.28)' }}>
+          <Dot color="var(--sb-danger, #A65C55)" />
+          Auto Unlisted – Expiry Too Close
+        </Badge>
+      );
     case 'suspended':
       return (
         <Badge style={{ color: 'var(--sb-danger, #A65C55)', background: 'rgba(166,92,85,0.12)', border: '1px solid rgba(166,92,85,0.25)' }}>

@@ -1,15 +1,27 @@
+import fs from 'fs';
+import path from 'path';
 import { Router, Request, Response } from 'express';
 import prisma from '../lib/prisma';
+import { config } from '../config';
 import { authMiddleware } from '../middleware/auth';
+import { uploadListingImage, deleteLocalProductImage } from '../middleware/upload';
 import { listingSchema, listingUpdateSchema, matchQuerySchema } from '../validators';
 import { matchListings } from '../services/matchingEngine';
 import { resolveProductImage } from '../lib/productImages';
 import { haversineDistance } from '../lib/haversine';
 import { findLocationByName } from '../config/locations';
+import { getDaysUntilExpiry, calculateUrgency } from '../utils/urgency';
 
 const router = Router();
 
-// Get all active listings with backend location & radius filtering
+export const formatListingResponse = (l: any) => {
+  return {
+    ...l,
+    originalMrp: l.originalMrp ?? null,
+    mrp: l.originalMrp ?? null,
+    imageUrl: l.imageUrl || resolveProductImage(l.title, l.category),
+  };
+};
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { category, search, urgency, sort, lat, lng, radiusKm, city, page = '1', limit = '100' } = req.query;
@@ -31,6 +43,7 @@ router.get('/', async (req: Request, res: Response) => {
       where,
       include: {
         seller: { select: { id: true, name: true, businessName: true, rating: true, lat: true, lng: true, address: true } },
+        invoiceVerification: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -90,7 +103,7 @@ router.get('/', async (req: Request, res: Response) => {
     const paginated = listings.slice((pageNum - 1) * limitNum, pageNum * limitNum);
 
     res.json({
-      listings: paginated,
+      listings: paginated.map(formatListingResponse),
       total,
       page: pageNum,
       totalPages: Math.ceil(total / limitNum),
@@ -116,11 +129,10 @@ router.get('/:id', async (req: Request, res: Response) => {
       res.status(404).json({ error: 'Listing not found' });
       return;
     }
-
-    let enriched: any = listing;
+    let enriched: any = formatListingResponse(listing);
     if (lat && lng && listing.seller) {
       const d = haversineDistance(Number(lat), Number(lng), listing.seller.lat, listing.seller.lng);
-      enriched = { ...listing, distanceKm: Math.round(d * 10) / 10 };
+      enriched = { ...enriched, distanceKm: Math.round(d * 10) / 10 };
     }
 
     res.json(enriched);
@@ -140,7 +152,7 @@ router.get('/my/all', authMiddleware, async (req: Request, res: Response) => {
         _count: { select: { reservations: true } },
       },
     });
-    res.json(listings);
+    res.json(listings.map(formatListingResponse));
   } catch (err) {
     console.error('My listings error:', err);
     res.status(500).json({ error: 'Failed to fetch listings' });
@@ -148,20 +160,75 @@ router.get('/my/all', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // Create listing
-router.post('/', authMiddleware, async (req: Request, res: Response) => {
+router.post('/', authMiddleware, uploadListingImage, async (req: Request, res: Response) => {
+  const uploadedImagePath = req.file ? `/uploads/products/${req.file.filename}` : null;
   try {
-    const data = listingSchema.parse(req.body);
-    const imageUrl = data.imageUrl || resolveProductImage(data.title, data.category);
+    const imageUrl = uploadedImagePath || req.body.imageUrl || resolveProductImage(req.body.title || '', req.body.category || '');
+    const payload = { ...req.body, imageUrl };
+    const data = listingSchema.parse(payload);
+
+    let verifiedOriginalMrp: number | null = data.originalMrp ?? data.mrp ?? null;
+    let verificationId: string | null = null;
+
+    if (data.invoiceVerificationId) {
+      const verification = await prisma.invoiceVerification.findUnique({
+        where: { id: data.invoiceVerificationId },
+      });
+
+      if (!verification || verification.sellerId !== req.user!.userId) {
+        if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+        res.status(400).json({ error: 'Invoice verification record not found or unauthorized.' });
+        return;
+      }
+
+      if (
+        verification.status !== 'VERIFIED' ||
+        !verification.extractedOriginalMrp ||
+        verification.extractedOriginalMrp <= 0
+      ) {
+        if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+        res.status(400).json({
+          error: 'Please upload a valid product invoice to verify the Original MRP before listing.',
+        });
+        return;
+      }
+
+      verifiedOriginalMrp = verification.extractedOriginalMrp;
+      verificationId = verification.id;
+
+      if (data.pricePerUnit > verifiedOriginalMrp) {
+        if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+        res.status(400).json({
+          error: `Selling price (₹${data.pricePerUnit}) cannot exceed the verified Original MRP (₹${verifiedOriginalMrp}).`,
+        });
+        return;
+      }
+    }
+
+    const calculatedUrgency = data.urgency || calculateUrgency(data.expiryDate);
+    const { mrp: _mrp, originalMrp: _origMrp, ...safeData } = data;
+
     const listing = await prisma.listing.create({
       data: {
-        ...data,
+        ...safeData,
+        originalMrp: verifiedOriginalMrp,
+        urgency: calculatedUrgency,
         imageUrl,
+        invoiceVerificationId: verificationId,
         expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
         sellerId: req.user!.userId,
       },
     });
-    res.status(201).json(listing);
+
+    res.status(201).json({
+      ...listing,
+      originalMrp: listing.originalMrp,
+      mrp: listing.originalMrp,
+    });
   } catch (err: any) {
+    if (uploadedImagePath) {
+      deleteLocalProductImage(uploadedImagePath);
+    }
     if (err.name === 'ZodError') {
       res.status(400).json({ error: 'Validation error', details: err.errors });
       return;
@@ -172,24 +239,111 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // Update listing
-router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
+router.put('/:id', authMiddleware, uploadListingImage, async (req: Request, res: Response) => {
+  const uploadedImagePath = req.file ? `/uploads/products/${req.file.filename}` : null;
   try {
     const id = req.params.id as string;
     const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing || listing.sellerId !== req.user!.userId) {
+      if (uploadedImagePath) {
+        deleteLocalProductImage(uploadedImagePath);
+      }
       res.status(403).json({ error: 'Not authorized' });
       return;
     }
-    const data = listingUpdateSchema.parse(req.body);
+
+    const imageUrl = uploadedImagePath || req.body.imageUrl;
+
+    const payload = { ...req.body, ...(imageUrl !== undefined && { imageUrl }) };
+    const data = listingUpdateSchema.parse(payload);
+
+    let verifiedOriginalMrp = listing.originalMrp;
+    let targetVerificationId = listing.invoiceVerificationId;
+
+    if (data.invoiceVerificationId && data.invoiceVerificationId !== listing.invoiceVerificationId) {
+      const verification = await prisma.invoiceVerification.findUnique({
+        where: { id: data.invoiceVerificationId },
+      });
+      if (
+        !verification ||
+        verification.sellerId !== req.user!.userId ||
+        verification.status !== 'VERIFIED' ||
+        !verification.extractedOriginalMrp
+      ) {
+        if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+        res.status(400).json({ error: 'Invalid invoice verification provided.' });
+        return;
+      }
+      verifiedOriginalMrp = verification.extractedOriginalMrp;
+      targetVerificationId = verification.id;
+    }
+
+    const effectivePrice = data.pricePerUnit !== undefined ? data.pricePerUnit : listing.pricePerUnit;
+    if (verifiedOriginalMrp && effectivePrice > verifiedOriginalMrp) {
+      if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+      res.status(400).json({
+        error: `Selling price (₹${effectivePrice}) cannot exceed the verified Original MRP (₹${verifiedOriginalMrp}).`,
+      });
+      return;
+    }
+
+    const updatedExpiry = data.expiryDate !== undefined ? (data.expiryDate ? new Date(data.expiryDate) : null) : listing.expiryDate;
+    const updatedUrgency = calculateUrgency(updatedExpiry);
+    const updatedImage = imageUrl !== undefined ? imageUrl : listing.imageUrl;
+
+    const wantsActivation = req.body.active === true || req.body.status === 'active';
+    const daysRemaining = getDaysUntilExpiry(updatedExpiry);
+
+    if (wantsActivation) {
+      if (daysRemaining === null || daysRemaining < 11) {
+        if (uploadedImagePath) {
+          deleteLocalProductImage(uploadedImagePath);
+        }
+        res.status(400).json({ error: 'This product cannot be relisted because less than 11 days remain until expiry.' });
+        return;
+      }
+    }
+
+    let targetStatus = listing.status;
+    let targetActive = listing.active;
+
+    if (wantsActivation) {
+      targetStatus = 'active';
+      targetActive = true;
+    } else if (listing.status === 'expiry_unlisted' || !listing.active) {
+      if (data.expiryDate && daysRemaining !== null && daysRemaining >= 11) {
+        targetStatus = 'active';
+        targetActive = true;
+      } else {
+        targetStatus = listing.status;
+        targetActive = false;
+      }
+    }
+
+    const { mrp: _mrp, originalMrp: _origMrp, ...safeData } = data;
+
     const updated = await prisma.listing.update({
       where: { id },
       data: {
-        ...data,
-        ...(data.expiryDate !== undefined && { expiryDate: data.expiryDate ? new Date(data.expiryDate) : null }),
+        ...safeData,
+        originalMrp: verifiedOriginalMrp,
+        invoiceVerificationId: targetVerificationId,
+        urgency: updatedUrgency,
+        status: targetStatus,
+        active: targetActive,
+        imageUrl: updatedImage,
+        ...(data.expiryDate !== undefined && { expiryDate: updatedExpiry }),
       },
     });
-    res.json(updated);
+    res.json({
+      ...updated,
+      originalMrp: updated.originalMrp,
+      mrp: updated.originalMrp,
+    });
   } catch (err: any) {
+    if (uploadedImagePath) {
+      deleteLocalProductImage(uploadedImagePath);
+    }
     if (err.name === 'ZodError') {
       res.status(400).json({ error: 'Validation error', details: err.errors });
       return;
@@ -197,6 +351,16 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
     console.error('Update listing error:', err);
     res.status(500).json({ error: 'Failed to update listing' });
   }
+});
+
+// Dedicated product image upload endpoint
+router.post('/upload-image', authMiddleware, uploadListingImage, (req: Request, res: Response) => {
+  if (!req.file) {
+    res.status(400).json({ error: 'No image file provided' });
+    return;
+  }
+  const imageUrl = `/uploads/products/${req.file.filename}`;
+  res.json({ imageUrl });
 });
 
 // Delete/deactivate listing

@@ -31,32 +31,41 @@ model User {
   sentMessages Message[]
   ratingsGiven Rating[]      @relation("RatingFrom")
   ratingsReceived Rating[]   @relation("RatingTo")
+  notifications   Notification[]
+  inventoryBatches    InventoryBatch[]
+  dailyInventoryLogs  DailyInventoryLog[]
+  invoiceVerifications InvoiceVerification[]
 
   @@index([email])
 }
 
 model Listing {
-  id           String   @id @default(uuid())
-  sellerId     String
-  title        String
-  category     String
-  quantity     Float
-  unit         String
-  pricePerUnit Float
-  expiryDate   DateTime?
-  urgency      String   @default("low") // low, medium, high
-  status       String   @default("active") // active, reserved, sold, expired
-  active       Boolean  @default(true)
-  imageUrl     String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                    String               @id @default(uuid())
+  sellerId              String
+  title                 String
+  category              String
+  quantity              Float
+  unit                  String
+  pricePerUnit          Float
+  expiryDate            DateTime?
+  originalMrp           Float?               @map("mrp")
+  imageUrl              String?
+  invoiceVerificationId String?
+  urgency               String               @default("low") // low, medium, high
+  status                String               @default("active") // active, reserved, sold, expired, expiry_unlisted
+  active                Boolean              @default(true)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 
-  seller       User     @relation(fields: [sellerId], references: [id])
-  reservations Reservation[]
+  seller                User                 @relation(fields: [sellerId], references: [id])
+  invoiceVerification   InvoiceVerification? @relation(fields: [invoiceVerificationId], references: [id], onDelete: SetNull)
+  reservations          Reservation[]
+  notifications         Notification[]
 
   @@index([sellerId])
   @@index([category])
   @@index([status])
+  @@index([invoiceVerificationId])
 }
 
 model Reservation {
@@ -111,4 +120,87 @@ model Rating {
 
   @@unique([fromUserId, reservationId])
   @@index([toUserId])
+}
+
+model Notification {
+  id               String          @id @default(uuid())
+  userId           String
+  type             String          @default("LISTING_AUTO_UNLISTED") // "LISTING_AUTO_UNLISTED" | "INVENTORY_RISK_RECOMMENDATION"
+  title            String
+  message          String
+  read             Boolean         @default(false)
+  listingId        String?
+  inventoryBatchId String?
+  createdAt        DateTime        @default(now())
+
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing          Listing?        @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  inventoryBatch   InventoryBatch? @relation(fields: [inventoryBatchId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([inventoryBatchId])
+}
+
+model InventoryBatch {
+  id              String              @id @default(uuid())
+  sellerId        String
+  productName     String
+  category        String
+  batchNumber     String?
+  expiryDate      DateTime
+  currentQuantity Float
+  unit            String
+  mrp             Float?
+  costPrice       Float?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  seller          User                @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  dailyLogs       DailyInventoryLog[]
+  notifications   Notification[]
+
+  @@index([sellerId])
+  @@index([expiryDate])
+}
+
+model DailyInventoryLog {
+  id                String         @id @default(uuid())
+  inventoryBatchId  String
+  sellerId          String
+  date              String         // Format: YYYY-MM-DD
+  soldQuantity      Float          @default(0)
+  remainingQuantity Float          @default(0)
+  restockedQuantity Float          @default(0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  inventoryBatch    InventoryBatch @relation(fields: [inventoryBatchId], references: [id], onDelete: Cascade)
+  seller            User           @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@unique([inventoryBatchId, date])
+  @@index([inventoryBatchId])
+  @@index([sellerId])
+  @@index([date])
+}
+
+model InvoiceVerification {
+  id                   String    @id @default(uuid())
+  sellerId             String
+  invoiceImagePath     String
+  productName          String?
+  extractedOriginalMrp Float?
+  matchedInvoiceItem   String?
+  candidates           String?   // JSON string of candidate items
+  confidence           String?   // high, medium, low
+  status               String    // VERIFIED, MULTIPLE_MATCHES, MRP_NOT_FOUND, INVALID_INVOICE, LOW_CONFIDENCE
+  rawAiResponse        String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  seller               User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  listings             Listing[]
+
+  @@index([sellerId])
+  @@index([status])
 }

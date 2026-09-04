@@ -163,6 +163,18 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               ₹{listing.pricePerUnit.toLocaleString('en-IN')}
               <span style={{ fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', fontWeight: 400 }}> /{listing.unit}</span>
             </p>
+            {(listing.originalMrp || (listing as any).mrp) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
+                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', textDecoration: 'line-through' }}>
+                  ₹{(listing.originalMrp || (listing as any).mrp).toLocaleString('en-IN')}
+                </span>
+                {(listing.originalMrp || (listing as any).mrp) > listing.pricePerUnit && (
+                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 9, fontWeight: 700, color: 'var(--sb-primary, #6F8F69)', background: 'var(--sb-primary-pale, #EAF1E7)', padding: '1px 4px', borderRadius: 2 }}>
+                    {Math.round((((listing.originalMrp || (listing as any).mrp) - listing.pricePerUnit) / (listing.originalMrp || (listing as any).mrp)) * 100)}% OFF
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', padding: '10px 12px' }}>
             <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--sb-text-muted, #7A847A)', marginBottom: 4 }}>Available</p>

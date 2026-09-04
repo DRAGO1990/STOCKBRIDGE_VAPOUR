@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Plus, Search, ChevronDown, Edit, Eye, AlertTriangle, Store,
+  Plus, Search, ChevronDown, Edit, Eye, AlertTriangle, Store, TrendingUp,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../lib/api';
@@ -19,10 +19,11 @@ const TAB_LABELS: { key: FilterTab; label: string }[] = [
 
 const statusStyle = (status: string): React.CSSProperties => {
   switch (status) {
-    case 'active':   return { color: 'var(--sb-primary, #6F8F69)', background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)' };
-    case 'reserved': return { color: 'var(--sb-warning, #B88A45)', background: 'rgba(184,138,69,0.1)', border: '1px solid rgba(184,138,69,0.25)' };
-    case 'sold':     return { color: 'var(--sb-text-muted, #7A847A)', background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)' };
-    default:         return { color: 'var(--sb-warning, #B88A45)', background: 'rgba(184,138,69,0.1)',   border: '1px solid rgba(184,138,69,0.25)' };
+    case 'active':          return { color: 'var(--sb-primary, #6F8F69)', background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)' };
+    case 'reserved':        return { color: 'var(--sb-warning, #B88A45)', background: 'rgba(184,138,69,0.1)', border: '1px solid rgba(184,138,69,0.25)' };
+    case 'sold':            return { color: 'var(--sb-text-muted, #7A847A)', background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)' };
+    case 'expiry_unlisted': return { color: 'var(--sb-danger, #A65C55)', background: 'rgba(166,92,85,0.12)', border: '1px solid rgba(166,92,85,0.28)' };
+    default:                return { color: 'var(--sb-warning, #B88A45)', background: 'rgba(184,138,69,0.1)',   border: '1px solid rgba(184,138,69,0.25)' };
   }
 };
 
@@ -31,7 +32,7 @@ export const MyListingsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<FilterTab>('all');
   const [search, setSearch] = useState('');
-  const [sortOpen, setSortOpen] = useState(false);
+  const [, setSortOpen] = useState(false);
 
   const fetchListings = () => {
     setLoading(true);
@@ -42,14 +43,10 @@ export const MyListingsPage: React.FC = () => {
 
   useEffect(() => { fetchListings(); }, []);
 
-  const handleDeactivate = async (id: string) => {
-    if (!confirm('Deactivate this listing?')) return;
-    try { await api.delete(`/listings/${id}`); fetchListings(); } catch { /* noop */ }
-  };
-
   const activeCount   = listings.filter(l => l.status === 'active' && l.active).length;
   const reservedCount = listings.filter(l => l.status === 'reserved').length;
   const soldCount     = listings.filter(l => l.status === 'sold').length;
+  const unlistedCount = listings.filter(l => l.status === 'expiry_unlisted').length;
   const totalValue    = listings.reduce((s, l) => s + l.quantity * l.pricePerUnit, 0);
 
   const expiringCount = listings.filter(l => {
@@ -65,7 +62,7 @@ export const MyListingsPage: React.FC = () => {
     if (tab === 'sold')      return l.status === 'sold';
     if (tab === 'attention') {
       const days = l.expiryDate ? Math.ceil((new Date(l.expiryDate).getTime() - Date.now()) / 86400000) : 999;
-      return days <= 7 || l.status === 'reserved';
+      return days <= 7 || l.status === 'reserved' || l.status === 'expiry_unlisted';
     }
     return true;
   });
@@ -88,23 +85,33 @@ export const MyListingsPage: React.FC = () => {
               Manage your listed inventory, track reservations and see what needs attention.
             </p>
           </div>
-          <Link
-            to="/create-listing"
-            className="stitch-btn-primary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 20px', textDecoration: 'none', borderRadius: 4 }}
-          >
-            <Plus size={16} /> List New Stock
-          </Link>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Link
+              to="/inventory"
+              className="stitch-btn-ghost"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', textDecoration: 'none', borderRadius: 4 }}
+            >
+              <TrendingUp size={16} color="var(--sb-primary, #6F8F69)" /> Smart Inventory
+            </Link>
+            <Link
+              to="/create-listing"
+              className="stitch-btn-primary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 20px', textDecoration: 'none', borderRadius: 4 }}
+            >
+              <Plus size={16} /> List New Stock
+            </Link>
+          </div>
         </div>
 
         <hr style={{ border: 'none', borderTop: '1px solid var(--sb-border, #D8E0D5)', marginBottom: 28 }} />
 
-        {/* ── Stats row: strictly 4 KPI cards filling available width ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', marginBottom: 28 }}>
+        {/* ── Stats row ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', marginBottom: 28 }}>
           {[
             { label: 'Active Listings',    value: activeCount,                               color: 'var(--sb-primary, #6F8F69)' },
             { label: 'Reserved',           value: reservedCount,                             color: 'var(--sb-warning, #B88A45)' },
             { label: 'Sold / Completed',   value: soldCount,                                 color: 'var(--sb-text-muted, #7A847A)' },
+            ...(unlistedCount > 0 ? [{ label: 'Auto Unlisted', value: unlistedCount, color: 'var(--sb-danger, #A65C55)' }] : []),
             { label: 'Total Listed Value', value: `₹${totalValue.toLocaleString('en-IN')}`, color: 'var(--sb-primary, #6F8F69)' },
           ].map(stat => (
             <div key={stat.label} style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '20px 20px 24px' }}>
@@ -114,6 +121,22 @@ export const MyListingsPage: React.FC = () => {
               </p>
             </div>
           ))}
+          {/* Needs Attention cell */}
+          {(expiringCount > 0 || unlistedCount > 0) && (
+            <div style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '20px 20px 24px', gridColumn: 'span 1' }}>
+              <p style={{ ...S.label, color: 'var(--sb-warning, #B88A45)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <AlertTriangle size={10} /> Needs Attention
+              </p>
+              <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-secondary, #4F5A51)' }}>
+                    {unlistedCount > 0 ? `${unlistedCount} auto-unlisted` : `${expiringCount} listings expiring soon`}
+                  </span>
+                  <button onClick={() => setTab('attention')} style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: 'var(--sb-primary, #6F8F69)', letterSpacing: '0.05em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>Review</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Filter Tabs + Search ── */}
@@ -224,7 +247,7 @@ export const MyListingsPage: React.FC = () => {
                       letterSpacing: '0.06em', textTransform: 'uppercase',
                       ...statusStyle(listing.status),
                     }}>
-                      {listing.status}
+                      {listing.status === 'expiry_unlisted' ? 'Auto Unlisted' : listing.status}
                     </div>
                   </div>
 
@@ -239,6 +262,11 @@ export const MyListingsPage: React.FC = () => {
                     <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)' }}>
                       {listing.quantity} {listing.unit} remaining
                     </p>
+                    {listing.status === 'expiry_unlisted' && (
+                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-danger, #A65C55)', marginTop: 4 }}>
+                        This product was automatically unlisted because it remained unsold for 15+ days and now has less than 11 days until expiry.
+                      </p>
+                    )}
                   </div>
 
                   {/* Value */}
@@ -255,11 +283,29 @@ export const MyListingsPage: React.FC = () => {
                   {/* Status + days */}
                   <div style={{ minWidth: 140 }}>
                     <p style={S.label}>Status</p>
-                    {days !== null && (
-                      <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: days <= 7 ? 'var(--sb-warning, #B88A45)' : 'var(--sb-text-secondary, #4F5A51)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                        {days <= 7 && <AlertTriangle size={12} />}
-                        {days <= 0 ? 'Expired' : `${days} days left`}
-                      </p>
+                    {listing.status === 'expiry_unlisted' ? (
+                      <div style={{ marginTop: 4 }}>
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          padding: '3px 8px', borderRadius: 4,
+                          fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                          color: 'var(--sb-danger, #A65C55)', background: 'rgba(166,92,85,0.12)', border: '1px solid rgba(166,92,85,0.28)',
+                        }}>
+                          <AlertTriangle size={11} /> Auto Unlisted
+                        </span>
+                        {days !== null && (
+                          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', marginTop: 3 }}>
+                            {days <= 0 ? 'Expired' : `${days} days left`}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      days !== null && (
+                        <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: days <= 7 ? 'var(--sb-warning, #B88A45)' : 'var(--sb-text-secondary, #4F5A51)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                          {days <= 7 && <AlertTriangle size={12} />}
+                          {days <= 0 ? 'Expired' : `${days} days left`}
+                        </p>
+                      )
                     )}
                   </div>
 
@@ -272,7 +318,16 @@ export const MyListingsPage: React.FC = () => {
                     >
                       <Eye size={13} /> View Listing
                     </Link>
-                    {listing.status !== 'sold' && (
+                    {listing.status === 'expiry_unlisted' ? (
+                      <Link
+                        to={`/create-listing?edit=${listing.id}`}
+                        className="stitch-btn-primary"
+                        style={{ padding: '7px 14px', fontSize: 12, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}
+                        title="Update expiry date to 11+ days to relist"
+                      >
+                        <Edit size={13} /> Edit Expiry to Relist
+                      </Link>
+                    ) : listing.status !== 'sold' && (
                       <Link
                         to={`/create-listing?edit=${listing.id}`}
                         className="stitch-btn-primary"
@@ -291,3 +346,4 @@ export const MyListingsPage: React.FC = () => {
     </div>
   );
 };
+export default MyListingsPage;

@@ -2,20 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Bell,
-  User as UserIcon,
   Menu,
   X,
   MapPin,
-  ChevronDown,
   LogOut,
-  Settings,
   Store,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuthStore } from '../stores/authStore';
 import api from '../lib/api';
+import { useAuthStore } from '../stores/authStore';
 import { useLocationStore } from '../stores/locationStore';
 import { SUPPORTED_LOCATIONS } from '../config/locations';
+import { connectSocket } from '../lib/socket';
+import type { Notification } from '../types';
+import { ChevronDown } from 'lucide-react';
 
 const DEMO_ACCOUNTS = [
   { name: 'Rajesh (Mumbai Wholesale)',  email: 'seller.mumbai@demo.com',    initials: 'MU' },
@@ -49,8 +49,20 @@ export const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [cityMenuOpen, setCityMenuOpen] = useState(false);
+  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [switching, setSwitching] = useState(false);
+
+  const fetchNotifications = async () => {
+    if (!user) return;
+    try {
+      const res = await api.get('/notifications');
+      setNotifications(res.data.notifications || []);
+      setUnreadNotificationsCount(res.data.unreadCount || 0);
+    } catch { /* silent */ }
+  };
 
   useEffect(() => {
     if (user) {
@@ -67,8 +79,25 @@ export const Navbar: React.FC = () => {
       } catch { /* silent */ }
     };
     fetchUnread();
-    const iv = setInterval(fetchUnread, 10000);
+    fetchNotifications();
+    const iv = setInterval(() => {
+      fetchUnread();
+      fetchNotifications();
+    }, 15000);
     return () => clearInterval(iv);
+  }, [user]);
+
+  // Real-time socket notification listener
+  useEffect(() => {
+    if (!user) return;
+    const socket = connectSocket();
+    const handleSocketNotification = () => {
+      fetchNotifications();
+    };
+    socket.on('notification', handleSocketNotification);
+    return () => {
+      socket.off('notification', handleSocketNotification);
+    };
   }, [user]);
 
   // Close menus on route change
@@ -76,7 +105,24 @@ export const Navbar: React.FC = () => {
     setMobileOpen(false);
     setUserMenuOpen(false);
     setCityMenuOpen(false);
+    setNotificationMenuOpen(false);
   }, [location.pathname, location.search]);
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await api.patch(`/notifications/${id}/read`);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+      setUnreadNotificationsCount(prev => Math.max(0, prev - 1));
+    } catch { /* silent */ }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await api.patch('/notifications/read-all');
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadNotificationsCount(0);
+    } catch { /* silent */ }
+  };
 
   const handleQuickSwitch = async (email: string) => {
     setSwitching(true);
@@ -95,12 +141,13 @@ export const Navbar: React.FC = () => {
 
   const navLinks: NavLink[] = user
     ? [
-        { name: 'How It Works', path: '/how-it-works' },
-        { name: 'Market',       path: '/marketplace' },
-        { name: 'Sell Stock',   path: '/create-listing' },
-        { name: 'My Stock',     path: '/my-listings',    authOnly: true },
-        { name: 'Orders',       path: '/reservations',   authOnly: true, badge: unreadCount },
-        { name: 'Admin Portal', path: '/admin',           adminOnly: true },
+        { name: 'How It Works',     path: '/how-it-works' },
+        { name: 'Market',           path: '/marketplace' },
+        { name: 'Sell Stock',       path: '/create-listing' },
+        { name: 'My Stock',         path: '/my-listings',    authOnly: true },
+        { name: 'Smart Inventory',  path: '/inventory',      authOnly: true },
+        { name: 'Orders',           path: '/reservations',   authOnly: true, badge: unreadCount },
+        { name: 'Admin Portal',     path: '/admin',          adminOnly: true },
       ]
     : [
         { name: 'How It Works', path: '/how-it-works' },
@@ -129,7 +176,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-8">
           {/* ── Brand Logo ── */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            {/* Stitch-style square icon */}
+
             <div style={{
               width: 32, height: 32,
               background: 'var(--sb-surface-soft, #F2F6EF)',
@@ -289,33 +336,154 @@ export const Navbar: React.FC = () => {
             </div>
           )}
 
-          {/* Bell (shown only when logged in) */}
+
+
+          {/* Bell & Notifications Dropdown */}
           {user && (
-            <button
-              style={{
-                width: 36, height: 36,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'transparent',
-                border: '1px solid var(--sb-border, #D8E0D5)',
-                borderRadius: 18,
-                color: 'var(--sb-text-secondary, #4F5A51)',
-                cursor: 'pointer',
-                position: 'relative',
-                transition: 'border-color 0.15s, color 0.15s',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-text-primary, #182018)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-text-secondary, #4F5A51)'; }}
-            >
-              <Bell size={16} />
-              {unreadCount > 0 && (
-                <span style={{
-                  position: 'absolute', top: 6, right: 6,
-                  width: 7, height: 7,
-                  borderRadius: '50%',
-                  background: 'var(--sb-primary, #6F8F69)',
-                }} />
-              )}
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => {
+                  setNotificationMenuOpen(v => !v);
+                  setUserMenuOpen(false);
+                }}
+                title="Notifications"
+                style={{
+                  width: 36, height: 36,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: notificationMenuOpen ? 'var(--sb-surface-soft, #F2F6EF)' : 'transparent',
+                  border: '1px solid var(--sb-border, #D8E0D5)',
+                  borderRadius: 18,
+                  color: notificationMenuOpen ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-secondary, #4F5A51)',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'border-color 0.15s, color 0.15s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-text-primary, #182018)'; }}
+                onMouseLeave={e => {
+                  if (!notificationMenuOpen) (e.currentTarget as HTMLButtonElement).style.color = 'var(--sb-text-secondary, #4F5A51)';
+                }}
+              >
+                <Bell size={16} />
+                {unreadNotificationsCount > 0 && (
+                  <span style={{
+                    position: 'absolute', top: -2, right: -2,
+                    background: 'var(--sb-danger, #A65C55)',
+                    color: '#FFFFFF',
+                    fontSize: 9, fontWeight: 700,
+                    borderRadius: 10,
+                    minWidth: 16, height: 16,
+                    padding: '0 4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: '1px solid var(--sb-surface, #FFFFFF)',
+                  }}>
+                    {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                  </span>
+                )}
+              </button>
+
+              <AnimatePresence>
+                {notificationMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    style={{
+                      position: 'absolute', right: 0, top: 'calc(100% + 8px)',
+                      width: 340,
+                      background: 'var(--sb-surface, #FFFFFF)',
+                      border: '1px solid var(--sb-border, #D8E0D5)',
+                      borderRadius: 8,
+                      boxShadow: '0 12px 28px rgba(0,0,0,0.12)',
+                      zIndex: 100,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {/* Dropdown Header */}
+                    <div style={{
+                      padding: '12px 16px',
+                      borderBottom: '1px solid var(--sb-border, #D8E0D5)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      background: 'var(--sb-surface-soft, #F2F6EF)',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700, color: 'var(--sb-text-primary, #182018)' }}>
+                          Notifications
+                        </span>
+                        {unreadNotificationsCount > 0 && (
+                          <span style={{
+                            background: 'rgba(166,92,85,0.12)', color: 'var(--sb-danger, #A65C55)',
+                            border: '1px solid rgba(166,92,85,0.25)',
+                            fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10,
+                          }}>
+                            {unreadNotificationsCount} new
+                          </span>
+                        )}
+                      </div>
+                      {unreadNotificationsCount > 0 && (
+                        <button
+                          onClick={handleMarkAllRead}
+                          style={{
+                            background: 'none', border: 'none',
+                            fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                            color: 'var(--sb-primary, #6F8F69)', cursor: 'pointer', padding: 0,
+                          }}
+                        >
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Notification List */}
+                    <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                      {notifications.length === 0 ? (
+                        <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--sb-text-muted, #7A847A)', fontFamily: 'Work Sans, sans-serif', fontSize: 13 }}>
+                          No notifications yet
+                        </div>
+                      ) : (
+                        notifications.map(n => (
+                          <div
+                            key={n.id}
+                            onClick={() => {
+                              if (!n.read) handleMarkAsRead(n.id);
+                              if (n.listingId) {
+                                setNotificationMenuOpen(false);
+                                navigate('/my-listings');
+                              }
+                            }}
+                            style={{
+                              padding: '12px 16px',
+                              borderBottom: '1px solid var(--sb-border, #D8E0D5)',
+                              background: n.read ? 'transparent' : 'rgba(111,143,105,0.05)',
+                              cursor: 'pointer',
+                              display: 'flex', gap: 10,
+                              transition: 'background 0.15s',
+                            }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'var(--sb-surface-soft, #F2F6EF)'; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = n.read ? 'transparent' : 'rgba(111,143,105,0.05)'; }}
+                          >
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: n.read ? 'transparent' : 'var(--sb-primary, #6F8F69)', marginTop: 6, flexShrink: 0 }} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 12, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', marginBottom: 2 }}>
+                                {n.title}
+                              </p>
+                              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-secondary, #4F5A51)', lineHeight: 1.4, marginBottom: 4 }}>
+                                {n.message}
+                              </p>
+                              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, color: 'var(--sb-text-muted, #7A847A)' }}>
+                                {new Date(n.createdAt).toLocaleDateString('en-IN', {
+                                  day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )}
 
           {/* User / Auth */}

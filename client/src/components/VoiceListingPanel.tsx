@@ -331,6 +331,7 @@ export interface ExtractedFields {
   category: string;
   quantity: number;
   unit: string;
+  mrp?: number | null;
   pricePerUnit: number;
   expiryDate: string;
   urgency: 'low' | 'medium' | 'high';
@@ -530,6 +531,14 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       pricePerUnit = parseFloat(priceMatch[1]) || 10;
     }
 
+    let mrp: number | null = null;
+    const mrpMatch =
+      lower.match(/(?:mrp|printed price|chapa hua daam|chapa daam|chape huye daam|printed rate)\s*(?:rs\.?|rupees|₹|:)?\s*(\d+(?:\.\d+)?)/i) ||
+      lower.match(/(?:mrp)\s*[:=]?\s*(\d+(?:\.\d+)?)/i);
+    if (mrpMatch) {
+      mrp = parseFloat(mrpMatch[1]) || null;
+    }
+
     // 3. Category
     let category = 'Groceries';
     if (/bisc?u[i]?ts?|bisk[u|i]?ts?|cookie|rusk|namkeen|chips|bread|cake|bakery|parle|oreo|britannia|sunfeast/i.test(lower)) {
@@ -584,6 +593,7 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       category,
       quantity,
       unit,
+      mrp,
       pricePerUnit,
       expiryDate,
       urgency,
@@ -635,6 +645,7 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       category,
       quantity,
       unit,
+      mrp: raw?.mrp ?? fallback.mrp ?? null,
       pricePerUnit,
       expiryDate,
       urgency,

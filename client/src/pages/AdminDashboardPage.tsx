@@ -120,7 +120,7 @@ export const AdminDashboardPage: React.FC = () => {
 
         {/* ── KPI cards ── */}
         {stats && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', marginBottom: 20, boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', marginBottom: 28, boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
             {[
               { icon: <Users size={20} color="var(--sb-primary, #6F8F69)" />, label: 'Total Users',        value: stats.users,        color: 'var(--sb-primary, #6F8F69)' },
               { icon: <Package size={20} color="var(--sb-text-primary, #182018)" />, label: 'Active Listings',  value: stats.listings,     color: 'var(--sb-text-primary, #182018)' },
