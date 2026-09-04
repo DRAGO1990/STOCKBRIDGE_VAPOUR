@@ -9,6 +9,8 @@
     "build:server": "npm --prefix server run build",
     "build:client": "npm --prefix client run build",
     "build": "npm run build:server && npm run build:client",
+    "render:build": "npm --prefix server install && npm --prefix client install && npx --prefix server prisma generate && npx --prefix server prisma db push && npm run build",
+    "start": "node server/dist/index.js",
     "db:seed": "npm --prefix server run db:seed",
     "generate": "npm --prefix server run generate:random",
     "generate:py": "python scripts/random_generator.py",

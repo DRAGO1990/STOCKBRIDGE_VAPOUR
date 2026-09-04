@@ -29,8 +29,32 @@ const server = http.createServer(app);
 setupSocket(server);
 
 // Middleware
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-app.use(cors({ origin: config.clientUrl, credentials: true }));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false,
+  })
+);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (
+        !config.clientUrl ||
+        config.clientUrl === '*' ||
+        origin === config.clientUrl ||
+        origin.endsWith('.onrender.com') ||
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1')
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
 app.use(morgan('short'));
 app.use(express.json());
 app.use(cookieParser());
@@ -53,6 +77,24 @@ app.use('/api/invoices', invoiceRoutes);
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Production SPA static serving (Serves React Vite build for all web pages)
+const clientDistPath = path.resolve(__dirname, '../../client/dist');
+app.use(express.static(clientDistPath));
+
+app.get('*', (req, res, next) => {
+  if (
+    req.path.startsWith('/api') ||
+    req.path.startsWith('/uploads') ||
+    req.path.startsWith('/socket.io')
+  ) {
+    return next();
+  }
+  const indexHtml = path.join(clientDistPath, 'index.html');
+  res.sendFile(indexHtml, (err) => {
+    if (err) next();
+  });
 });
 
 // Auto-expire pending reservations (run every minute)

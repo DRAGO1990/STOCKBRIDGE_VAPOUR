@@ -11,7 +11,8 @@ export function connectSocket(): Socket {
   if (socket?.connected) return socket;
 
   const token = useAuthStore.getState().accessToken;
-  socket = io('/', {
+  const socketUrl = (import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || '/').replace(/\/api\/?$/, '');
+  socket = io(socketUrl, {
     auth: { token },
     transports: ['websocket', 'polling'],
   });
