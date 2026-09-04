@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: stockbridge-vapour
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: npm run render:build
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
