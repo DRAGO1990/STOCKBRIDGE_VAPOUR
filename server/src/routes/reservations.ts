@@ -11,8 +11,8 @@ const uploadDir = path.resolve(config.upload.dir);
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
+  destination: (_req: any, _file: any, cb: any) => cb(null, uploadDir),
+  filename: (_req: any, file: any, cb: any) => cb(null, `${Date.now()}-${file.originalname}`),
 });
 const upload = multer({ storage, limits: { fileSize: config.upload.maxSize } });
 

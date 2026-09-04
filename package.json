@@ -9,7 +9,7 @@
     "build:server": "npm --prefix server run build",
     "build:client": "npm --prefix client run build",
     "build": "npm run build:server && npm run build:client",
-    "render:build": "npm --prefix server install && npm --prefix client install && cd server && npx prisma generate && npx prisma db push && cd .. && npm run build",
+    "render:build": "npm --prefix server install --include=dev && npm --prefix client install --include=dev && cd server && npx prisma generate && npx prisma db push && cd .. && npm run build",
     "start": "node server/dist/index.js",
     "db:seed": "npm --prefix server run db:seed",
     "generate": "npm --prefix server run generate:random",
