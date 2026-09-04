@@ -36,14 +36,38 @@ export interface VoiceExtraction {
   missingFields: string[];
 }
 
+export function getIndianDateString(d: Date = new Date()): string {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  return formatter.format(d);
+}
+
+export function addCalendarDays(baseDateStr: string, days: number): string {
+  const [y, m, d] = baseDateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d + days, 12, 0, 0); // Noon prevents any daylight/DST/timezone rollover
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+export function calculateDaysRemaining(targetDateStr: string, baseDateStr?: string): number {
+  const base = baseDateStr || getIndianDateString();
+  const [y1, m1, d1] = base.split('-').map(Number);
+  const [y2, m2, d2] = targetDateStr.split('-').map(Number);
+  const d1Obj = new Date(y1, m1 - 1, d1, 12, 0, 0);
+  const d2Obj = new Date(y2, m2 - 1, d2, 12, 0, 0);
+  return Math.round((d2Obj.getTime() - d1Obj.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 function buildExtractionPrompt(transcript: string, language: string): string {
   const langName = LANGUAGE_NAMES[language] || 'Hindi / Hinglish / English';
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-  
-  // Default suggested expiry date is 30 days from today (must be at least 10 days)
-  const defaultMinDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-  const defaultExpiryStr = defaultMinDate.toISOString().split('T')[0];
+  const todayStr = getIndianDateString();
+  const defaultMinExpiryStr = addCalendarDays(todayStr, 30);
 
   return `You are an expert AI parser for StockBridge, an Indian B2B surplus inventory and dead stock liquidation marketplace.
 
@@ -55,14 +79,17 @@ SPEECH TRANSCRIPT:
 
 TODAY'S DATE: ${todayStr}
 
-EXTRACTION RULES & DOMAIN KNOWLEDGE:
+CRITICAL FIELD-FIRST EXTRACTION RULES:
 1. "title":
-   - Craft a clean, professional, polished B2B product listing title in standard English with Proper Capitalization.
-   - Include Brand Name (if mentioned), Product Name, Variant/Weight/Size specification, and pack context.
-   - Example 1: If speech says "fortune oil 1 litre 50 packet bacha hai", title should be: "Fortune Sunlite Refined Sunflower Oil 1L Pouch (Lot of 50)"
-   - Example 2: If speech says "25 bori daawat basmati chawal 25kg", title should be: "Daawat Traditional Basmati Rice 25kg Bags (Lot of 25)"
-   - Example 3: If speech says "classmate notebook 200 piece", title should be: "Classmate Single Line Long Notebooks (Lot of 200)"
-   - Do NOT leave raw Hindi/Hinglish phonetic words in title. Translate to professional English terms.
+   - NEVER include conversational starter phrases, seller statements, or filler clauses such as:
+     "mere pass", "mere paas", "hamare paas", "humare paas", "apne paas", "i have", "we have",
+     "jo me", "jo main", "bech sakta hu", "bechna chahte hai", "bechna hai", "sell karna hai",
+     "aur meri", "air meri", "expiry date hai", "urgency level hai".
+   - Extract the PRODUCT NOUN first (e.g. "Biscuit", "Fortune Sunflower Oil", "Basmati Rice", "Classmate Notebook").
+   - Construct title using: PRODUCT + PACK CONTEXT + LOT SIZE.
+   - Example 1: If speech says "mere pass 50 biscuit ke packet h jo me 10rs each me bech skta hu air meri expiry date h 20 din ki aur urgency level h medium", the title MUST BE: "Biscuit Packets (Lot of 50)". DO NOT write "mere pass 50 biscuit ke packet h".
+   - Example 2: If speech says "Hamare paas Fortune sunflower oil 1 litre pouch ke 50 packets surplus bache hain", title should be: "Fortune Sunflower Oil 1L Pouch (Lot of 50)".
+   - Example 3: If speech says "200 boxes of Classmate notebooks", title should be: "Classmate Notebooks (Lot of 200 Boxes)".
 
 2. "category": Must be STRICTLY ONE of:
    - "Groceries" (Rice, Atta, Pulses, Sugar, Cooking Oil, Spices, Grains, Flour)
@@ -79,7 +106,7 @@ EXTRACTION RULES & DOMAIN KNOWLEDGE:
    - "katta", "bori", "thaili", "bora" -> "bags"
    - "peti", "dabba", "khokha", "carton" -> "boxes" or "cartons"
    - "packet", "pauchi", "pouch", "pudiya" -> "packets"
-   - "darjan", "dozen" -> "pieces" (1 dozen = 12 pieces; if user said "5 darjan", quantity is 60 pieces)
+   - "darjan", "dozen" -> "pieces" (1 dozen = 12 pieces)
    - "nag", "piece", "pcs", "piece", "unit" -> "pieces"
    - "kilo", "kg", "kilogram" -> "kg"
    - "litre", "ltr", "l" -> "litres"
@@ -88,38 +115,31 @@ EXTRACTION RULES & DOMAIN KNOWLEDGE:
 
 4. "quantity":
    - Extract the total number as an integer or float > 0.
-   - Understand Indian spoken number words (e.g., "ek"=1, "do"=2, "paanch"=5, "das"=10, "bees"=20, "pachees"=25, "pachaas"=50, "sau"=100, "dedh sau"=150, "do sau"=200, "paanch sau"=500, "hazaar"=1000).
 
 5. "pricePerUnit":
    - Price in Indian Rupees (₹) per single unit.
-   - If a total lot price is quoted (e.g. "sab milake 5000 rupaye" for 50 units), calculate: 5000 / 50 = 100.
-   - If rate per unit is quoted (e.g. "120 rupaye per packet"), pricePerUnit = 120.
+   - If explicit per-unit price is stated (e.g. "10rs each", "10 rupaye each"), pricePerUnit = 10.
+   - If total lot price is quoted, calculate total / quantity.
 
 6. "expiryDate":
    - Must be ISO format YYYY-MM-DD.
    - IMPORTANT: StockBridge requires expiry dates to be AT LEAST 10 DAYS in the future from today (${todayStr}).
-   - Interpret relative phrases: "agle mahine" / "next month" (+30 days), "15 din baad" (+15 days), "2 mahine baad" (+60 days), "6 mahine" (+180 days), "saal ke aakhir tak" (end of year).
-   - If no expiry date is stated or if it is a non-perishable product, set it to "${defaultExpiryStr}" and include "expiryDate" in "missingFields".
+   - If relative days are explicitly spoken (e.g. "20 din" / "20 days"), calculate EXACTLY TODAY (${todayStr}) + 20 days.
+   - If relative months are explicitly spoken (e.g. "2 mahine"), calculate TODAY + 60 days.
+   - If no expiry date is stated or if it is a non-perishable product, set it to "${defaultMinExpiryStr}" and include "expiryDate" in "missingFields".
 
 7. "urgency": Must be EXACTLY ONE of: "low", "medium", "high".
-   - Carefully detect the seller's spoken urgency level:
-     * "high":
-       - High urgency criteria: Expiry MUST be between 10 to 15 days from today (${todayStr}). Used for fast/emergency clearance, distress sales, or immediate liquidation.
-       - Explicit mentions: "urgency level high", "urgency high", "high urgency", "urgency is high", "urgency: high"
-       - Urgency phrases: "urgent", "urgently", "emergency", "immediate", "immediately", "fast clearance", "clearance", "distress sale", "aaj hi bechna hai", "turant bechna hai", "jaldi nikalna hai", "jaldi se", "shop band ho rahi hai", "godown khali karna hai", "short expiry", "10 din", "12 din", "15 din me", "तुरंत", "जल्दी", "शीघ्र", "इमरजेंसी", "अर्जेंट", "तातडीने", "உடனடியாக", "తక్షణమే", "জরুরি", "તરત જ", "ತುರ್ತು", "ഉടൻ", "ਤੁਰੰਤ".
-     * "medium":
-       - Explicit mentions: "urgency level medium", "urgency medium", "medium urgency", "moderate"
-       - Medium phrases: "1-2 weeks", "agle hafte", "next week", "15 din", "20 din", "do hafte", "month end", "mahine ke aakhir", "medium priority", "मध्यम", "साधारण".
-     * "low":
-       - Explicit mentions: "urgency level low", "urgency low", "low urgency"
-       - Low phrases: "no hurry", "aram se", "koi jaldi nahi", "time hai", "fresh stock", "regular stock", "standard liquidation", "3 mahine bache hain", "कम", "आराम से".
+   - EXPLICIT USER-PROVIDED VALUES HAVE ABSOLUTE PRIORITY:
+     * If user explicitly states "urgency level medium", "urgency medium", "medium urgency", or "urgency level h medium", urgency MUST be "medium".
+     * If user explicitly states "urgency level high", "urgency high", "high urgency", "urgent", "turant", urgency MUST be "high".
+     * If user explicitly states "urgency level low", "urgency low", "low urgency", "aram se", urgency MUST be "low".
 
 8. "notes":
-   - Clean summary of condition, packaging state, reasons for surplus, discounts, or special handling mentioned by the seller (e.g., "Outer carton slightly damp, sealed inner packs intact. Ready for bulk dispatch.").
+   - Clean summary of condition, packaging state, reasons for surplus, discounts, or special handling mentioned by the seller.
 
 9. "confidence": Number between 0.0 and 1.0 based on how complete and clear the speech was.
 
-10. "missingFields": Array of field names that were not explicitly mentioned in the speech (e.g. ["expiryDate"]).
+10. "missingFields": Array of field names that were not explicitly mentioned in the speech.
 
 OUTPUT JSON SCHEMA:
 {
@@ -137,7 +157,85 @@ OUTPUT JSON SCHEMA:
 `;
 }
 
-function sanitizeExtraction(raw: any): VoiceExtraction {
+export function resolveDeterministicTitle(
+  rawTitle: string,
+  category: string,
+  quantity: number,
+  unit: string,
+  originalTranscript: string = ''
+): string {
+  const combined = `${rawTitle || ''} ${originalTranscript || ''}`.toLowerCase();
+
+  // 1. Detect Brand
+  let brand = '';
+  if (/parle[- ]?g\b|parle\b/i.test(combined)) brand = 'Parle-G';
+  else if (/britannia\s+good\s+day\b|good\s+day\b/i.test(combined)) brand = 'Britannia Good Day';
+  else if (/britannia\s+marie\s+gold\b|marie\s+gold\b/i.test(combined)) brand = 'Britannia Marie Gold';
+  else if (/britannia\b/i.test(combined)) brand = 'Britannia';
+  else if (/oreo\b/i.test(combined)) brand = 'Oreo';
+  else if (/dark\s+fantasy\b|sunfeast\b/i.test(combined)) brand = 'Sunfeast Dark Fantasy';
+  else if (/bourbon\b/i.test(combined)) brand = 'Bourbon';
+  else if (/monaco\b/i.test(combined)) brand = 'Monaco';
+  else if (/patanjali\b/i.test(combined)) brand = 'Patanjali';
+  else if (/classmate\b/i.test(combined)) brand = 'Classmate';
+  else if (/fortune\b/i.test(combined)) brand = 'Fortune';
+  else if (/haldiram|bikano|balaji/i.test(combined)) brand = 'Haldiram';
+
+  const isBiscuitBrand = ['Parle-G', 'Britannia Good Day', 'Britannia Marie Gold', 'Britannia', 'Oreo', 'Sunfeast Dark Fantasy', 'Bourbon', 'Monaco'].includes(brand);
+
+  // 2. Detect Product Noun
+  let productNoun = '';
+  if (
+    /bisc?u[i]?ts?|bisk[u|i]?ts?|biscute|biskoot|cookie|cookies|rusk|namkeen|chips|bread|cake|bakery|बिस्किट|कुकीज|नमकीन/i.test(combined) ||
+    isBiscuitBrand ||
+    /biscuit|bakery|prepared food/i.test(category || '')
+  ) {
+    if (/cookie|cookies|कुकीज/i.test(combined)) productNoun = brand ? `${brand} Cookies` : 'Cookies';
+    else if (/rusk|रस्क/i.test(combined)) productNoun = brand ? `${brand} Rusk` : 'Rusk';
+    else if (/namkeen|नमकीन/i.test(combined)) productNoun = brand ? `${brand} Namkeen` : 'Namkeen';
+    else if (/chips|चिप्स/i.test(combined)) productNoun = brand ? `${brand} Chips` : 'Chips';
+    else if (/bread|ब्रेड/i.test(combined)) productNoun = brand ? `${brand} Bread` : 'Bread';
+    else if (isBiscuitBrand || /bisc?u[i]?ts?|bisk[u|i]?ts?|biscute|biskoot|बिस्किट/i.test(combined)) {
+      productNoun = brand ? `${brand} Biscuits` : 'Biscuit';
+    } else if (brand) {
+      productNoun = `${brand} Biscuits`;
+    } else {
+      productNoun = 'Biscuit';
+    }
+  } else if (/oil|tel|ghee|rice|chawal|basmati|atta|flour|wheat|gehu|dal|pulses|sugar|cheeni|masala|तेल|चावल|आटा|दाल|चीनी/i.test(combined)) {
+    if (/fortune.*oil|sunflower.*oil/i.test(combined)) productNoun = 'Fortune Sunflower Oil';
+    else if (/oil|tel|तेल/i.test(combined)) productNoun = 'Refined Cooking Oil';
+    else if (/basmati|chawal|rice|चावल/i.test(combined)) productNoun = 'Basmati Rice';
+    else if (/atta|flour|wheat|आटा|गेहूं/i.test(combined)) productNoun = 'Wheat Atta';
+    else if (/dal|pulses|दाल/i.test(combined)) productNoun = 'Pulses / Dal';
+    else if (/sugar|cheeni|चीनी/i.test(combined)) productNoun = 'Refined Sugar';
+    else productNoun = 'Grocery Stock';
+  } else if (/notebook|notebooks|copy|copies|register|pen|pens|paper|stationery|किताब|कॉपी|पेन|कागज/i.test(combined)) {
+    if (/classmate/i.test(combined)) productNoun = 'Classmate Notebooks';
+    else if (/notebook|notebooks|copy|कॉपी/i.test(combined)) productNoun = 'Student Notebooks';
+    else if (/pen|pens|पेन/i.test(combined)) productNoun = 'Ballpoint Pens';
+    else if (/paper|कागज/i.test(combined)) productNoun = 'A4 Paper Reams';
+    else productNoun = 'Office Stationery';
+  } else if (/milk|doodh|juice|tea|chai|coffee|beverage|दूध|जूस|चाय|कॉफी/i.test(combined)) {
+    if (/milk|doodh|दूध/i.test(combined)) productNoun = 'Packaged Milk';
+    else if (/juice|जूस/i.test(combined)) productNoun = 'Fruit Juice';
+    else if (/tea|chai|चाय/i.test(combined)) productNoun = 'Premium Tea';
+    else productNoun = 'Beverages';
+  }
+
+  const capUnit = unit ? unit.charAt(0).toUpperCase() + unit.slice(1) : 'Packets';
+
+  // If a known product identity was found, ALWAYS construct the canonical product title!
+  if (productNoun) {
+    return `${productNoun} ${capUnit} (Lot of ${quantity || 1})`;
+  }
+
+  return 'Surplus Inventory Lot';
+}
+
+export const cleanProductTitle = resolveDeterministicTitle;
+
+function sanitizeExtraction(raw: any, originalTranscript: string = ''): VoiceExtraction {
   // Normalize category
   let category = String(raw.category || 'Groceries');
   if (!VALID_CATEGORIES.includes(category)) {
@@ -153,80 +251,76 @@ function sanitizeExtraction(raw: any): VoiceExtraction {
     unit = match || 'pieces';
   }
 
-  // Normalize urgency
+  // Quantity
+  const quantity = Math.max(1, parseInt(String(raw.quantity), 10) || 1);
+
+  // Price
+  let pricePerUnit = parseFloat(String(raw.pricePerUnit)) || 0;
+  const priceMatch = (originalTranscript || '').match(/(?:₹|rs\.?|rupaye|rupees)\s*(\d+(?:\.\d+)?)/i) ||
+    (originalTranscript || '').match(/(\d+(?:\.\d+)?)\s*(?:rs|rupees|₹|रुपये|रुपए)\s*(?:each|per|\/|में|me)?/i);
+  if (priceMatch) {
+    pricePerUnit = parseFloat(priceMatch[1]) || pricePerUnit;
+  }
+
+  // Deterministic Field-First Title
+  const rawTitle = String(raw.title || '').trim();
+  const title = resolveDeterministicTitle(rawTitle, category, quantity, unit, originalTranscript);
+
+  // Normalize urgency with explicit priority
   let urgency: 'low' | 'medium' | 'high' = 'low';
-  const rawUrgencyStr = String(raw.urgency || '').toLowerCase().trim();
+  const lowerTranscript = (originalTranscript || '').toLowerCase();
   if (
-    rawUrgencyStr === 'high' ||
-    rawUrgencyStr.includes('high') ||
-    rawUrgencyStr.includes('urgent') ||
-    rawUrgencyStr.includes('immediate') ||
-    rawUrgencyStr.includes('emergency') ||
-    rawUrgencyStr.includes('तुरंत') ||
-    rawUrgencyStr.includes('जल्दी') ||
-    rawUrgencyStr.includes('तातडी') ||
-    rawUrgencyStr.includes('உடனடி') ||
-    rawUrgencyStr.includes('అత్యవసర') ||
-    rawUrgencyStr.includes('জরুরি') ||
-    rawUrgencyStr.includes('તરત') ||
-    rawUrgencyStr.includes('ತುರ್ತು')
-  ) {
-    urgency = 'high';
-  } else if (
-    rawUrgencyStr === 'medium' ||
-    rawUrgencyStr.includes('medium') ||
-    rawUrgencyStr.includes('moderate') ||
-    rawUrgencyStr.includes('normal') ||
-    rawUrgencyStr.includes('मध्यम') ||
-    rawUrgencyStr.includes('মাঝারি')
+    /\burgency\s*(?:level)?\s*(?:is|h|hai)?\s*[:=]?\s*medium\b/i.test(lowerTranscript) ||
+    /\bmedium\s*(?:urgency|priority)\b/i.test(lowerTranscript) ||
+    /(?:मीडियम\s*अर्जेंसी|अर्जेंसी\s*(?:लेवल)?\s*मीडियम|मध्यम|साधारण)/i.test(lowerTranscript)
   ) {
     urgency = 'medium';
-  } else {
-    urgency = 'low';
+  } else if (
+    /\burgency\s*(?:level)?\s*(?:is|h|hai)?\s*[:=]?\s*high\b/i.test(lowerTranscript) ||
+    /\bhigh\s*(?:urgency|priority)\b/i.test(lowerTranscript) ||
+    /(?:हाई\s*अर्जेंसी|अर्जेंसी\s*(?:लेवल)?\s*हाई|अत्यंत\s*आवश्यक|तुरंत|जल्दी)/i.test(lowerTranscript)
+  ) {
+    urgency = 'high';
+  } else if (raw.urgency === 'high' || raw.urgency === 'medium') {
+    urgency = raw.urgency;
   }
 
-  // Normalize expiry date (must be >= 10 days in future, and 10 to 15 days for high urgency)
-  const minFutureDate = new Date();
-  minFutureDate.setDate(minFutureDate.getDate() + 10);
-  minFutureDate.setHours(0, 0, 0, 0);
-
-  const maxHighDate = new Date();
-  maxHighDate.setDate(maxHighDate.getDate() + 15);
-  maxHighDate.setHours(23, 59, 59, 999);
-
-  let expiryDate: string | null = null;
+  // Normalize expiry date with Indian calendar arithmetic (no UTC offset shifting!)
+  const todayStr = getIndianDateString();
+  let expiryDate: string = '';
   let hasExplicitExpiry = false;
 
-  if (raw.expiryDate) {
-    const parsed = new Date(raw.expiryDate);
-    if (!isNaN(parsed.getTime())) {
-      if (parsed.getTime() >= minFutureDate.getTime()) {
-        expiryDate = parsed.toISOString().split('T')[0];
-        hasExplicitExpiry = true;
-      } else {
-        // If date provided is too soon (<10 days), set to minimum valid window (10 days)
-        const adjustedDate = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
-        expiryDate = adjustedDate.toISOString().split('T')[0];
-        hasExplicitExpiry = true;
-      }
+  const daysMatch = lowerTranscript.match(/(\d+)\s*(?:din|days|दिन)/i);
+  const weeksMatch = lowerTranscript.match(/(\d+)\s*(?:hafte|weeks|हफ्ते)/i);
+  const monthsMatch = lowerTranscript.match(/(\d+)\s*(?:mahine|months|महीने)/i);
+
+  if (daysMatch) {
+    const days = parseInt(daysMatch[1], 10);
+    expiryDate = addCalendarDays(todayStr, Math.max(10, days));
+    hasExplicitExpiry = true;
+  } else if (weeksMatch) {
+    const weeks = parseInt(weeksMatch[1], 10);
+    expiryDate = addCalendarDays(todayStr, Math.max(10, weeks * 7));
+    hasExplicitExpiry = true;
+  } else if (monthsMatch) {
+    const months = parseInt(monthsMatch[1], 10);
+    expiryDate = addCalendarDays(todayStr, months * 30);
+    hasExplicitExpiry = true;
+  } else if (raw.expiryDate && /^\d{4}-\d{2}-\d{2}$/.test(String(raw.expiryDate))) {
+    const daysDiff = calculateDaysRemaining(String(raw.expiryDate), todayStr);
+    if (daysDiff >= 10) {
+      expiryDate = String(raw.expiryDate);
+      hasExplicitExpiry = true;
+    } else {
+      expiryDate = addCalendarDays(todayStr, 10);
+      hasExplicitExpiry = true;
     }
   }
 
-  if (urgency === 'high') {
-    if (!hasExplicitExpiry) {
-      const defaultHighDate = new Date(Date.now() + 12 * 24 * 60 * 60 * 1000);
-      expiryDate = defaultHighDate.toISOString().split('T')[0];
-    } else if (expiryDate) {
-      const parsed = new Date(expiryDate);
-      if (parsed.getTime() < minFutureDate.getTime()) {
-        expiryDate = minFutureDate.toISOString().split('T')[0];
-      } else if (parsed.getTime() > maxHighDate.getTime()) {
-        expiryDate = maxHighDate.toISOString().split('T')[0];
-      }
-    }
+  if (urgency === 'high' && !hasExplicitExpiry) {
+    expiryDate = addCalendarDays(todayStr, 12);
   } else if (!expiryDate) {
-    const defaultDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    expiryDate = defaultDate.toISOString().split('T')[0];
+    expiryDate = addCalendarDays(todayStr, 30);
   }
 
   const missingFields: string[] = Array.isArray(raw.missingFields) ? raw.missingFields.map(String) : [];
@@ -236,17 +330,15 @@ function sanitizeExtraction(raw: any): VoiceExtraction {
 
   // Calculate dynamic confidence score based on actual field matches
   let calculatedConfidence = 0.50;
-  const rawTitle = String(raw.title || '').trim();
-  if (rawTitle && rawTitle !== 'Surplus Lot') calculatedConfidence += 0.12;
+  if (rawTitle && rawTitle !== 'Surplus Inventory Lot') calculatedConfidence += 0.15;
   if (Number(raw.quantity) > 0) calculatedConfidence += 0.12;
   if (VALID_UNITS.includes(unit)) calculatedConfidence += 0.08;
   if (Number(raw.pricePerUnit) > 0) calculatedConfidence += 0.12;
   if (hasExplicitExpiry) calculatedConfidence += 0.08;
   if (urgency !== 'low' || String(raw.urgency).toLowerCase() === 'low') calculatedConfidence += 0.06;
 
-  // Use provided confidence if valid and varying, otherwise use calculatedConfidence
   let finalConfidence = Number(raw.confidence);
-  if (isNaN(finalConfidence) || finalConfidence <= 0 || finalConfidence === 0.65) {
+  if (isNaN(finalConfidence) || finalConfidence <= 0) {
     finalConfidence = calculatedConfidence;
   }
   finalConfidence = Math.min(0.98, Math.max(0.40, Math.round(finalConfidence * 100) / 100));
@@ -266,21 +358,22 @@ function sanitizeExtraction(raw: any): VoiceExtraction {
 }
 
 /**
- * Robust local fallback parser using regular expressions and heuristics
- * when the AI API is unreachable or unconfigured.
+ * Robust local fallback parser using field-first regular expressions and heuristics
+ * when the AI API is unreachable, timed out, or unconfigured.
  */
-function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
+export function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
   const lower = transcript.toLowerCase();
   const missingFields: string[] = [];
 
-  // Extract quantity
+  // 1. Extract quantity
   let quantity = 0;
-  const qtyMatch = lower.match(/(\d+)\s*(kg|kilo|bag|bori|katta|packet|pauchi|pouch|piece|pcs|box|peti|can|litre|ltr|ream|पैकेट|कट्टे|बोरी|पेटी|डिब्बा|पीस|यूनिट|लीटर|किलो)/i) ||
+  const qtyMatch =
+    lower.match(/(\d+)\s*(?:kg|kilo|bag|bori|katta|packet|pauchi|pouch|piece|pcs|box|peti|can|litre|ltr|ream|carton|packets|boxes|bags|cans|litres|pieces|cartons|reams|पैकेट|कट्टे|बोरी|पेटी|डिब्बा|पीस|यूनिट|लीटर|किलो)/i) ||
     lower.match(/(\d+)/);
+
   if (qtyMatch) {
     quantity = parseInt(qtyMatch[1], 10) || 0;
   } else {
-    // Number words
     if (lower.includes('pachaas') || lower.includes('fifty') || lower.includes('पचास')) quantity = 50;
     else if (lower.includes('sau') || lower.includes('hundred') || lower.includes('सौ')) quantity = 100;
     else if (lower.includes('bees') || lower.includes('twenty') || lower.includes('बीस')) quantity = 20;
@@ -289,90 +382,183 @@ function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
     else missingFields.push('quantity');
   }
 
-  // Extract unit
+  // 2. Extract unit
   let unit = 'packets';
   if (lower.includes('kg') || lower.includes('kilo') || lower.includes('किलो')) unit = 'kg';
-  else if (lower.includes('bori') || lower.includes('katta') || lower.includes('bag') || lower.includes('बोरी') || lower.includes('कट्टा') || lower.includes('कट्टे')) unit = 'bags';
-  else if (lower.includes('peti') || lower.includes('dabba') || lower.includes('box') || lower.includes('पेटी') || lower.includes('डिब्बा') || lower.includes('बॉक्स')) unit = 'boxes';
-  else if (lower.includes('carton') || lower.includes('khokha') || lower.includes('कार्टन') || lower.includes('खोखा')) unit = 'cartons';
-  else if (lower.includes('packet') || lower.includes('pauchi') || lower.includes('pouch') || lower.includes('पैकेट') || lower.includes('पाउच') || lower.includes('पुड़िया')) unit = 'packets';
-  else if (lower.includes('piece') || lower.includes('pcs') || lower.includes('darjan') || lower.includes('nag') || lower.includes('unit') || lower.includes('पीस') || lower.includes('यूनिट') || lower.includes('दर्जन') || lower.includes('नग')) unit = 'pieces';
+  else if (lower.includes('bori') || lower.includes('katta') || lower.includes('bag') || lower.includes('बोरी') || lower.includes('कट्टा')) unit = 'bags';
+  else if (lower.includes('peti') || lower.includes('dabba') || lower.includes('box') || lower.includes('पेटी') || lower.includes('डिब्बा')) unit = 'boxes';
+  else if (lower.includes('carton') || lower.includes('khokha') || lower.includes('कार्टन')) unit = 'cartons';
+  else if (lower.includes('packet') || lower.includes('pauchi') || lower.includes('pouch') || lower.includes('पैकेट') || lower.includes('पाउच')) unit = 'packets';
+  else if (lower.includes('piece') || lower.includes('pcs') || lower.includes('darjan') || lower.includes('nag') || lower.includes('unit') || lower.includes('पीस') || lower.includes('यूनिट') || lower.includes('दर्जन')) unit = 'pieces';
   else if (lower.includes('litre') || lower.includes('ltr') || lower.includes('लीटर')) unit = 'litres';
-  else if (lower.includes('can') || lower.includes('tin') || lower.includes('कैन') || lower.includes('टिन')) unit = 'cans';
+  else if (lower.includes('can') || lower.includes('tin') || lower.includes('कैन')) unit = 'cans';
   else if (lower.includes('ream') || lower.includes('gatta') || lower.includes('rim') || lower.includes('रीम')) unit = 'reams';
 
-  // Extract price
+  // 3. Extract price per unit
   let pricePerUnit = 0;
-  const priceMatch = lower.match(/(?:₹|rs\.?|rupaye|rupees|price|rate|bhav|रुपये|रुपए|प्रति|दर)\s*(\d+(?:\.\d+)?)/i) ||
-    lower.match(/(\d+(?:\.\d+)?)\s*(?:₹|rs\.?|rupaye|rupees|रुपये|रुपए|per|\/|में|me)/i);
+  const priceMatch =
+    lower.match(/(?:₹|rs\.?|rupaye|rupees|price|rate|bhav|रुपये|रुपए)\s*(\d+(?:\.\d+)?)/i) ||
+    lower.match(/(\d+(?:\.\d+)?)\s*(?:rs|rupees|₹|रुपये|रुपए)\s*(?:each|per|\/|में|me)?/i) ||
+    lower.match(/(\d+(?:\.\d+)?)\s*(?:each|per|\/)/i);
+
   if (priceMatch) {
     pricePerUnit = parseFloat(priceMatch[1]) || 0;
   } else {
     missingFields.push('pricePerUnit');
   }
 
-  // Detect category
+  // 4. Detect Category & Core Product Noun (Field-First)
   let category = 'Groceries';
-  if (lower.includes('oil') || lower.includes('rice') || lower.includes('chawal') || lower.includes('atta') || lower.includes('dal') || lower.includes('sugar') || lower.includes('masala') || lower.includes('तेल') || lower.includes('चावल') || lower.includes('आटा') || lower.includes('दाल') || lower.includes('चीनी') || lower.includes('मसाला')) {
-    category = 'Groceries';
-  } else if (lower.includes('milk') || lower.includes('doodh') || lower.includes('juice') || lower.includes('tea') || lower.includes('coffee') || lower.includes('beverage') || lower.includes('दूध') || lower.includes('जूस') || lower.includes('चाय') || lower.includes('कॉफी')) {
-    category = 'Dairy & Beverages';
-  } else if (lower.includes('biscuit') || lower.includes('chips') || lower.includes('namkeen') || lower.includes('bread') || lower.includes('cake') || lower.includes('bakery') || lower.includes('बिस्किट') || lower.includes('चिप्स') || lower.includes('नमकीन') || lower.includes('ब्रेड') || lower.includes('केक') || lower.includes('बेकरी')) {
+  let productNoun = '';
+
+  // Brand detection
+  let brand = '';
+  if (/parle[- ]?g\b|parle\b/i.test(lower)) brand = 'Parle-G';
+  else if (/britannia\s+good\s+day\b|good\s+day\b/i.test(lower)) brand = 'Britannia Good Day';
+  else if (/britannia\s+marie\s+gold\b|marie\s+gold\b/i.test(lower)) brand = 'Britannia Marie Gold';
+  else if (/britannia\b/i.test(lower)) brand = 'Britannia';
+  else if (/oreo\b/i.test(lower)) brand = 'Oreo';
+  else if (/dark\s+fantasy\b|sunfeast\b/i.test(lower)) brand = 'Sunfeast Dark Fantasy';
+  else if (/bourbon\b/i.test(lower)) brand = 'Bourbon';
+  else if (/monaco\b/i.test(lower)) brand = 'Monaco';
+  else if (/patanjali\b/i.test(lower)) brand = 'Patanjali';
+  else if (/classmate\b/i.test(lower)) brand = 'Classmate';
+  else if (/fortune\b/i.test(lower)) brand = 'Fortune';
+  else if (/haldiram|bikano|balaji/i.test(lower)) brand = 'Haldiram';
+
+  const BISCUIT_BRANDS = ['Parle-G', 'Britannia Good Day', 'Britannia Marie Gold', 'Britannia', 'Oreo', 'Sunfeast Dark Fantasy', 'Bourbon', 'Monaco'];
+  const isBiscuitBrand = BISCUIT_BRANDS.includes(brand);
+
+  if (
+    /bisc?u[i]?ts?|bisk[u|i]?ts?|biscute|biskoot|cookie|cookies|rusk|namkeen|chips|bread|cake|bakery|बिस्किट|कुकीज|नमकीन/i.test(lower) ||
+    isBiscuitBrand ||
+    (brand && /biscuit|bakery/i.test(lower))
+  ) {
     category = 'Prepared Food & Bakery';
-  } else if (lower.includes('book') || lower.includes('notebook') || lower.includes('pen') || lower.includes('paper') || lower.includes('stationery') || lower.includes('किताब') || lower.includes('कॉपी') || lower.includes('पेन') || lower.includes('कागज')) {
+    if (/cookie|cookies|कुकीज/i.test(lower)) productNoun = brand ? `${brand} Cookies` : 'Cookies';
+    else if (/rusk|रस्क/i.test(lower)) productNoun = brand ? `${brand} Rusk` : 'Rusk';
+    else if (/namkeen|नमकीन/i.test(lower)) productNoun = brand ? `${brand} Namkeen` : 'Namkeen';
+    else if (/chips|चिप्स/i.test(lower)) productNoun = brand ? `${brand} Chips` : 'Chips';
+    else if (/bread|ब्रेड/i.test(lower)) productNoun = brand ? `${brand} Bread` : 'Bread';
+    else if (isBiscuitBrand || /bisc?u[i]?ts?|bisk[u|i]?ts?|biscute|biskoot|बिस्किट/i.test(lower)) productNoun = brand ? `${brand} Biscuits` : 'Biscuit';
+    else productNoun = brand ? `${brand} Bakery Items` : 'Bakery Items';
+  } else if (/oil|tel|ghee|rice|chawal|basmati|atta|flour|wheat|gehu|dal|pulses|sugar|cheeni|masala|तेल|चावल|आटा|दाल|चीनी/i.test(lower)) {
+    category = 'Groceries';
+    if (/fortune.*oil|sunflower.*oil/i.test(lower)) productNoun = 'Fortune Sunflower Oil';
+    else if (/oil|tel|तेल/i.test(lower)) productNoun = 'Refined Cooking Oil';
+    else if (/basmati|chawal|rice|चावल/i.test(lower)) productNoun = 'Basmati Rice';
+    else if (/atta|flour|wheat|आटा|गेहूं/i.test(lower)) productNoun = 'Wheat Atta';
+    else if (/dal|pulses|दाल/i.test(lower)) productNoun = 'Pulses / Dal';
+    else if (/sugar|cheeni|चीनी/i.test(lower)) productNoun = 'Refined Sugar';
+    else productNoun = 'Grocery Stock';
+  } else if (/notebook|notebooks|copy|copies|register|pen|pens|paper|stationery|किताब|कॉपी|पेन|कागज/i.test(lower)) {
     category = 'Stationery';
-  } else if (lower.includes('cable') || lower.includes('bulb') || lower.includes('battery') || lower.includes('charger') || lower.includes('electronics') || lower.includes('केबल') || lower.includes('बल्ब') || lower.includes('बैटरी') || lower.includes('चार्जर')) {
+    if (/classmate/i.test(lower)) productNoun = 'Classmate Notebooks';
+    else if (/notebook|notebooks|copy|कॉपी/i.test(lower)) productNoun = 'Student Notebooks';
+    else if (/pen|pens|पेन/i.test(lower)) productNoun = 'Ballpoint Pens';
+    else if (/paper|कागज/i.test(lower)) productNoun = 'A4 Paper Reams';
+    else productNoun = 'Office Stationery';
+  } else if (/milk|doodh|juice|tea|chai|coffee|beverage|दूध|जूस|चाय|कॉफी/i.test(lower)) {
+    category = 'Dairy & Beverages';
+    if (/milk|doodh|दूध/i.test(lower)) productNoun = 'Packaged Milk';
+    else if (/juice|जूस/i.test(lower)) productNoun = 'Fruit Juice';
+    else if (/tea|chai|चाय/i.test(lower)) productNoun = 'Premium Tea';
+    else productNoun = 'Beverages';
+  } else if (/cable|bulb|led|battery|charger|electronics|केबल|बल्ब|बैटरी|चार्जर/i.test(lower)) {
     category = 'Electronics';
-  } else if (lower.includes('box') || lower.includes('tape') || lower.includes('pouch') || lower.includes('packing') || lower.includes('packaging') || lower.includes('टेप') || lower.includes('पैकिंग')) {
+    if (/bulb|led|बल्ब/i.test(lower)) productNoun = 'LED Bulbs';
+    else if (/cable|wire|केबल/i.test(lower)) productNoun = 'Charging Cables';
+    else productNoun = 'Electronic Accessories';
+  } else if (/corrugated|box|boxes|tape|pouch|packing|packaging|कार्टन|टेप|पैकिंग/i.test(lower)) {
     category = 'Packaging';
-  } else if (lower.includes('cloth') || lower.includes('shirt') || lower.includes('fabric') || lower.includes('textile') || lower.includes('कपड़ा') || lower.includes('शर्ट') || lower.includes('साड़ी')) {
+    if (/box|boxes|कार्टन/i.test(lower)) productNoun = 'Corrugated Boxes';
+    else if (/tape|टेप/i.test(lower)) productNoun = 'Packing Tape';
+    else productNoun = 'Packaging Materials';
+  } else if (/cloth|shirt|fabric|textile|saree|garment|कपड़ा|शर्ट|साड़ी/i.test(lower)) {
     category = 'Textiles';
-  } else if (lower.includes('pipe') || lower.includes('tool') || lower.includes('screw') || lower.includes('hardware') || lower.includes('पाइप') || lower.includes('हथौड़ा') || lower.includes('स्क्रू')) {
+    if (/shirt|शर्ट/i.test(lower)) productNoun = 'Cotton Shirts';
+    else if (/saree|साड़ी/i.test(lower)) productNoun = 'Sarees';
+    else productNoun = 'Textile Stock';
+  } else if (/pipe|tool|screw|hardware|पाइप|स्क्रू/i.test(lower)) {
     category = 'Hardware';
+    productNoun = 'Hardware Tools';
   }
 
-  // Detect Urgency
+  // If no catalogue product matched, clean conversational fillers from transcript to find product
+  if (!productNoun) {
+    let cleanText = transcript
+      .replace(/[^\w\s\u0900-\u097F]/g, ' ')
+      .replace(/\b(mere|hamare|humare|apne)\s+(pa+s+|paas|pass|pas)\b/gi, ' ')
+      .replace(/\b(jo\s+me|jo\s+main|jo\s+hum|bech\s+skta\s+hu|bech\s+sakta\s+hu|bechna\s+h|bechna\s+hai|sell\s+karna\s+hai)\b/gi, ' ')
+      .replace(/\b(air\s+meri|aur\s+meri|expiry\s+date\s+h|urgency\s+level\s+h|urgency\s+level|urgency\s+h)\b/gi, ' ')
+      .replace(/\b(each|per|rate|price|rupees|rupaye|rs)\b/gi, ' ')
+      .replace(/\b(din|days|mahine|months|hafte|weeks)\b/gi, ' ')
+      .replace(/\b(low|medium|high|कम|मध्यम|जल्दी)\b/gi, ' ')
+      .replace(/\b(ke|ka|ki|k|ko|h|hai|hain|packet|packets)\b/gi, ' ')
+      .replace(/\b\d+\b/g, ' ')
+      .trim();
+
+    const words = cleanText.split(/\s+/).filter(w => w.length > 2);
+    if (words.length > 0) {
+      productNoun = words.slice(0, 3).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    } else {
+      productNoun = 'Surplus Lot';
+      missingFields.push('title');
+    }
+  }
+
+  // Construct Title: PRODUCT + PACK CONTEXT + LOT SIZE
+  const capitalizedUnit = unit.charAt(0).toUpperCase() + unit.slice(1);
+  let title = cleanProductTitle(
+    `${productNoun} ${capitalizedUnit} (Lot of ${quantity || 1})`,
+    category,
+    quantity || 1,
+    unit,
+    transcript
+  );
+
+  // 5. Detect Urgency (Explicit values have priority)
   let urgency: 'low' | 'medium' | 'high' = 'low';
 
-  const hasExplicitLow =
-    /\burgency\s*(?:level|is)?\s*[:=]?\s*low\b/i.test(transcript) ||
-    /\blow\s*(?:urgency|priority)\b/i.test(transcript) ||
-    /(?:लो\s*अर्जेंसी|अर्जेंसी\s*(?:लेवल)?\s*लो|कम\s*प्राथमिकता|कोई\s*जल्दी\s*नहीं|जल्दी\s*नहीं\s*है|आराम\s*से|काफी\s*समय|समय\s*है|धैर्य|हळूहळू|काही\s*घाई\s*नाही|அவசரமில்லை|అత్యవసరం\s*లేదు)/i.test(transcript) ||
-    /\b(koi jaldi nahi|jaldi nahi|jaldi nahi hai|aram se|no hurry|no rush|low urgency|low priority|plenty of time|fresh stock|regular lot)\b/i.test(lower);
-
-  const hasExplicitHigh =
-    /\burgency\s*(?:level|is)?\s*[:=]?\s*high\b/i.test(transcript) ||
-    /\bhigh\s*(?:urgency|priority)\b/i.test(transcript) ||
-    /(?:हाई\s*अर्जेंसी|अर्जेंसी\s*(?:लेवल)?\s*हाई|अत्यंत\s*आवश्यक|तुरंत|जल्दी\s*से\s*जल्दी|जल्दी\s*बेचना|शीघ्र|इमरजेंसी|अर्जेंट|आपातकालीन|तातडीने|तातकाळ|त्वरित|உடனடியாக|அவசரம்|తక్షణమే|అత్యవసరం|জরুরি|তাড়াতাড়ি|તરત|ઝડપથી|ತುರ್ತು|ഉടൻ|ਤੁਰੰਤ)/i.test(transcript) ||
-    /\b(urgent|urgently|emergency|immediate|immediately|turant|aaj hi|kal tak|fast clearance|distress sale|short expiry|khali karna|band ho rahi|fast sale)\b/i.test(lower) ||
-    (/\bjaldi\b/i.test(lower) && !/\b(koi jaldi nahi|jaldi nahi|jaldi nahi hai)\b/i.test(lower));
-
   const hasExplicitMed =
-    /\burgency\s*(?:level|is)?\s*[:=]?\s*medium\b/i.test(transcript) ||
+    /\burgency\s*(?:level)?\s*(?:is|h|hai)?\s*[:=]?\s*medium\b/i.test(transcript) ||
     /\bmedium\s*(?:urgency|priority)\b/i.test(transcript) ||
     /(?:मीडियम\s*अर्जेंसी|अर्जेंसी\s*(?:लेवल)?\s*मीडियम|मध्यम|साधारण|நடுத்தர|మధ్యస్థ|মাঝারি|મધ્યમ)/i.test(transcript) ||
-    /\b(medium|moderate|normal clearance|agle hafte|next week|15 din|20 din|2 hafte|2 weeks|month end|mahine ke aakhir)\b/i.test(lower);
+    /\b(medium|moderate|normal clearance|20 din|do hafte|2 weeks)\b/i.test(lower);
 
-  if (hasExplicitLow) {
-    urgency = 'low';
+  const hasExplicitHigh =
+    /\burgency\s*(?:level)?\s*(?:is|h|hai)?\s*[:=]?\s*high\b/i.test(transcript) ||
+    /\bhigh\s*(?:urgency|priority)\b/i.test(transcript) ||
+    /(?:हाई\s*अर्जेंसी|अर्जेंसी\s*(?:लेवल)?\s*हाई|अत्यंत\s*आवश्यक|तुरंत|जल्दी\s*से\s*जल्दी|इमरजेंसी|अर्जेंट)/i.test(transcript) ||
+    /\b(urgent|urgently|emergency|immediate|immediately|turant|aaj hi|short expiry)\b/i.test(lower);
+
+  const hasExplicitLow =
+    /\burgency\s*(?:level)?\s*(?:is|h|hai)?\s*[:=]?\s*low\b/i.test(transcript) ||
+    /\blow\s*(?:urgency|priority)\b/i.test(transcript) ||
+    /(?:लो\s*अर्जेंसी|अर्जेंसी\s*(?:लेवल)?\s*लो|कम\s*प्राथमिकता|कोई\s*जल्दी\s*नहीं|आराम\s*से)/i.test(transcript) ||
+    /\b(koi jaldi nahi|aram se|no hurry|no rush|low urgency)\b/i.test(lower);
+
+  if (hasExplicitMed) {
+    urgency = 'medium';
   } else if (hasExplicitHigh) {
     urgency = 'high';
-  } else if (hasExplicitMed) {
-    urgency = 'medium';
+  } else if (hasExplicitLow) {
+    urgency = 'low';
   }
 
-  // Parse Expiry Date from transcript
+  // 6. Parse Expiry Date from transcript dynamically using Indian calendar date
   let expiryDate = '';
   let hasExplicitExpiry = false;
+  const todayStr = getIndianDateString();
 
-  // Check ISO format YYYY-MM-DD
+  // Check explicit ISO date: YYYY-MM-DD
   const isoMatch = lower.match(/\b(202[5-9][-/.](?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01]))\b/);
   if (isoMatch) {
     expiryDate = isoMatch[1].replace(/[/.]/g, '-');
     hasExplicitExpiry = true;
   }
 
-  // Check relative timeframes: e.g. "20 din", "2 mahine", "3 months"
+  // Relative days calculation: e.g. "20 din" -> addCalendarDays(todayStr, 20)
   if (!expiryDate) {
     const daysMatch = lower.match(/(\d+)\s*(?:din|days|दिन|दिवस)/i);
     const monthsMatch = lower.match(/(\d+)\s*(?:mahine|months|महीने|माह)/i);
@@ -380,68 +566,35 @@ function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
 
     if (daysMatch) {
       const days = parseInt(daysMatch[1], 10);
-      const target = new Date(Date.now() + Math.max(10, days) * 24 * 60 * 60 * 1000);
-      expiryDate = target.toISOString().split('T')[0];
+      expiryDate = addCalendarDays(todayStr, Math.max(10, days));
       hasExplicitExpiry = true;
     } else if (weeksMatch) {
       const weeks = parseInt(weeksMatch[1], 10);
-      const target = new Date(Date.now() + Math.max(10, weeks * 7) * 24 * 60 * 60 * 1000);
-      expiryDate = target.toISOString().split('T')[0];
+      expiryDate = addCalendarDays(todayStr, Math.max(10, weeks * 7));
       hasExplicitExpiry = true;
     } else if (monthsMatch) {
       const months = parseInt(monthsMatch[1], 10);
-      const target = new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000);
-      expiryDate = target.toISOString().split('T')[0];
+      expiryDate = addCalendarDays(todayStr, months * 30);
       hasExplicitExpiry = true;
     } else if (lower.includes('agle mahine') || lower.includes('next month') || lower.includes('अगले महीने')) {
-      const target = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      expiryDate = target.toISOString().split('T')[0];
+      expiryDate = addCalendarDays(todayStr, 30);
       hasExplicitExpiry = true;
     }
   }
 
   if (urgency === 'high') {
     if (!hasExplicitExpiry) {
-      const defaultHighDate = new Date(Date.now() + 12 * 24 * 60 * 60 * 1000);
-      expiryDate = defaultHighDate.toISOString().split('T')[0];
+      expiryDate = addCalendarDays(todayStr, 12);
       missingFields.push('expiryDate');
-    } else {
-      const parsed = new Date(expiryDate);
-      const minHigh = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
-      const maxHigh = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-      minHigh.setHours(0, 0, 0, 0);
-      maxHigh.setHours(23, 59, 59, 999);
-      if (parsed.getTime() < minHigh.getTime()) {
-        expiryDate = minHigh.toISOString().split('T')[0];
-      } else if (parsed.getTime() > maxHigh.getTime()) {
-        expiryDate = maxHigh.toISOString().split('T')[0];
-      }
     }
   } else if (!expiryDate) {
-    const defaultDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    expiryDate = defaultDate.toISOString().split('T')[0];
+    expiryDate = addCalendarDays(todayStr, 30);
     missingFields.push('expiryDate');
   }
 
-  // Title formatting: Clean capitalized words
-  let title = transcript
-    .replace(/[^\w\s\u0900-\u097F]/g, ' ')
-    .trim()
-    .split(/\s+/)
-    .slice(0, 8)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-
-  if (!title) {
-    title = 'Surplus Lot';
-    missingFields.push('title');
-  } else {
-    title = `${title} (${quantity || 1} ${unit})`;
-  }
-
-  // Dynamic confidence score calculation based on extracted fields
+  // Confidence score
   let confidence = 0.50;
-  if (title && title !== 'Surplus Lot') confidence += 0.12;
+  if (productNoun && productNoun !== 'Surplus Lot') confidence += 0.15;
   if (quantity > 0) confidence += 0.12;
   if (unit) confidence += 0.08;
   if (pricePerUnit > 0) confidence += 0.12;
@@ -457,7 +610,7 @@ function fallbackRuleBasedExtractor(transcript: string): VoiceExtraction {
     pricePerUnit: pricePerUnit || 100,
     expiryDate,
     urgency,
-    notes: 'Parsed from voice input. Please verify lot specifications before publishing.',
+    notes: `Lot of ${quantity || 10} ${unit} offered at ₹${pricePerUnit || 100} per ${unit}. Expiry: ${expiryDate}. Urgency: ${urgency}.`,
     confidence,
     missingFields,
   };
@@ -480,13 +633,23 @@ export async function extractListingFromSpeech(
       generationConfig: {
         temperature: 0.1,
         topP: 0.8,
-        maxOutputTokens: 4096,
+        maxOutputTokens: 1024, // Generous budget so thinking models don't truncate JSON
         responseMimeType: 'application/json',
       },
     });
 
     const prompt = buildExtractionPrompt(transcript, language);
-    const result = await model.generateContent(prompt);
+
+    // Bounded timeout: 7000ms max to prevent indefinite delays
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Gemini extraction timed out after 7000ms')), 7000);
+    });
+
+    const result = (await Promise.race([
+      model.generateContent(prompt),
+      timeoutPromise,
+    ])) as any;
+
     const response = result.response;
     let text = response.text().trim();
 
@@ -497,10 +660,9 @@ export async function extractListingFromSpeech(
     }
 
     const parsed = JSON.parse(text);
-    return sanitizeExtraction(parsed);
+    return sanitizeExtraction(parsed, transcript);
   } catch (err: any) {
-    console.warn('[VoiceService] Gemini extraction failed, using fallback:', err.message);
-    // Fall back to rule-based parser on any API failure so user workflow never breaks
+    console.warn('[VoiceService] Gemini extraction failed/timed out, using rule-based fallback:', err.message);
     const fallback = fallbackRuleBasedExtractor(transcript);
     return fallback;
   }
@@ -510,29 +672,29 @@ export async function generateVoiceoverScript(
   extraction: VoiceExtraction,
   language: string = 'hi-IN'
 ): Promise<{ script: string; language: string; languageName: string }> {
-  const langName = LANGUAGE_NAMES[language] || 'Hindi (in Devanagari script)';
+  const langName = LANGUAGE_NAMES[language] || 'Hindi / Hinglish';
   const totalValue = (extraction.quantity || 0) * (extraction.pricePerUnit || 0);
+
+  const urgencyHindi =
+    extraction.urgency === 'high' ? 'अत्यंत आवश्यक (हाई)' :
+    extraction.urgency === 'medium' ? 'मध्यम (मीडियम)' : 'सामान्य (लो)';
+
+  const urgencyKannada =
+    extraction.urgency === 'high' ? 'ತುರ್ತು' :
+    extraction.urgency === 'medium' ? 'ಮಧ್ಯಮ' : 'ಸಾಮಾನ್ಯ';
+
+  const urgencyPunjabi =
+    extraction.urgency === 'high' ? 'ਜ਼ਰੂਰੀ' :
+    extraction.urgency === 'medium' ? 'ਮੱਧਮ' : 'ਆਮ';
 
   const getFallbackScript = (): string => {
     switch (language) {
       case 'hi-IN':
-        return `नमस्ते! आपकी लिस्टिंग का विवरण: उत्पाद है ${extraction.title}, कुल मात्रा ${extraction.quantity} ${extraction.unit}, भाव ₹${extraction.pricePerUnit} प्रति ${extraction.unit}, कुल मूल्य ₹${totalValue} है, एक्सपायरी तारीख ${extraction.expiryDate || 'मानक अवधि'} है, और तात्कालिकता ${extraction.urgency === 'high' ? 'अत्यंत आवश्यक' : extraction.urgency === 'medium' ? 'मध्यम' : 'सामान्य'} है।`;
-      case 'bn-IN':
-        return `নমস্কার! আপনার লিস্টিং বিবরণ: পণ্য ${extraction.title}, পরিমাণ ${extraction.quantity} ${extraction.unit}, দর ₹${extraction.pricePerUnit} প্রতি ${extraction.unit}, মোট মূল্য ₹${totalValue}, মেয়াদ ${extraction.expiryDate || 'সাধারণ'} এবং অগ্রাধিকার ${extraction.urgency === 'high' ? 'জরুরি' : 'সাধারণ'}।`;
-      case 'mr-IN':
-        return `नमस्कार! आपल्या लिस्टिंगचा तपशील: उत्पादन ${extraction.title}, प्रमाण ${extraction.quantity} ${extraction.unit}, दर ₹${extraction.pricePerUnit} प्रति ${extraction.unit}, एकूण मूल्य ₹${totalValue}, समाप्ती तारीख ${extraction.expiryDate || 'मानक'} आणि निकड ${extraction.urgency === 'high' ? 'तातडीची' : 'सामान्य'} आहे।`;
-      case 'ta-IN':
-        return `வணக்கம்! உங்கள் பட்டியல் விவரங்கள்: தயாரிப்பு ${extraction.title}, அளவு ${extraction.quantity} ${extraction.unit}, விலை ₹${extraction.pricePerUnit} ஒரு ${extraction.unit}க்கு, மொத்த மதிப்பு ₹${totalValue}, காலாவதி தேதி ${extraction.expiryDate || 'வழக்கமான'}, மற்றும் அவசரம் ${extraction.urgency === 'high' ? 'உடனடி' : 'சாதாரண'}।`;
-      case 'te-IN':
-        return `నమస్కారం! మీ లిస్టింగ్ వివరాలు: ఉత్పత్తి ${extraction.title}, పరిమాణం ${extraction.quantity} ${extraction.unit}, ధర ₹${extraction.pricePerUnit} ప్రతి ${extraction.unit}కి, మొత్తం విలువ ₹${totalValue}, గడువు తేదీ ${extraction.expiryDate || 'సాధారణం'}, మరియు అత్యవసరత ${extraction.urgency === 'high' ? 'అత్యవసరం' : 'సాధారణం'}।`;
-      case 'gu-IN':
-        return `નમસ્તે! તમારી લિસ્ટિંગ વિગતો: ઉત્પાદન ${extraction.title}, જથ્થો ${extraction.quantity} ${extraction.unit}, કિંમત ₹${extraction.pricePerUnit} પ્રતિ ${extraction.unit}, કુલ મૂલ્ય ₹${totalValue}, એક્સપાયરી તારીખ ${extraction.expiryDate || 'સામાન્ય'}, અને તાકીદ ${extraction.urgency === 'high' ? 'ખૂબ જરૂરી' : 'સામાન્ય'} છે।`;
+        return `नमस्ते! आपकी लिस्टिंग का विवरण: उत्पाद है ${extraction.title}, कुल मात्रा ${extraction.quantity} ${extraction.unit}, भाव ₹${extraction.pricePerUnit} प्रति ${extraction.unit}, कुल मूल्य ₹${totalValue} है, एक्सपायरी तारीख ${extraction.expiryDate || 'मानक अवधि'} है, और तात्कालिकता ${urgencyHindi} है।`;
       case 'kn-IN':
-        return `ನಮಸ್ಕಾರ! ನಿಮ್ಮ ಲಿಸ್ಟಿಂಗ್ ವಿವರಗಳು: ಉತ್ಪನ್ನ ${extraction.title}, ಪ್ರಮಾಣ ${extraction.quantity} ${extraction.unit}, ಬೆಲೆ ₹${extraction.pricePerUnit} ಪ್ರತಿ ${extraction.unit}ಗೆ, ಒಟ್ಟು ಮೌಲ್ಯ ₹${totalValue}, ಮುಕ್ತಾಯ ದಿನಾಂಕ ${extraction.expiryDate || 'ಸಾಮಾನ್ಯ'}, ಮತ್ತು ತುರ್ತುಸ್ಥಿತಿ ${extraction.urgency === 'high' ? 'ತುರ್ತು' : 'ಸಾಮಾನ್ಯ'}।`;
-      case 'ml-IN':
-        return `നമസ്കാരം! നിങ്ങളുടെ ലിസ്റ്റിംഗ് വിവരങ്ങൾ: ഉൽപ്പന്നം ${extraction.title}, അളവ് ${extraction.quantity} ${extraction.unit}, വില ₹${extraction.pricePerUnit} പ്രതി ${extraction.unit}ന്, ആകെ മൂല്യം ₹${totalValue}, കാലാവധി ${extraction.expiryDate || 'സാധാരണ'}, അടിയന്തിരാവസ്ഥ ${extraction.urgency === 'high' ? 'അടിയന്തിരം' : 'സാധാരണ'}।`;
+        return `ನಮಸ್ಕಾರ! ನಿಮ್ಮ ಲಿಸ್ಟಿಂಗ್ ವಿವರಗಳು: ಉತ್ಪನ್ನ ${extraction.title}, ಪ್ರಮಾಣ ${extraction.quantity} ${extraction.unit}, ಬೆಲೆ ₹${extraction.pricePerUnit} ಪ್ರತಿ ${extraction.unit}ಗೆ, ಒಟ್ಟು ಮೌಲ್ಯ ₹${totalValue}, ಮುಕ್ತಾಯ ದಿನಾಂಕ ${extraction.expiryDate || 'ಸಾಮಾನ್ಯ'}, ಮತ್ತು ತುರ್ತುಸ್ಥಿತಿ ${urgencyKannada} ಆಗಿದೆ।`;
       case 'pa-IN':
-        return `ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਤੁਹਾਡੀ ਲਿਸਟਿੰਗ ਦੇ ਵੇਰਵੇ: ਉਤਪਾਦ ${extraction.title}, ਮਾਤਰਾ ${extraction.quantity} ${extraction.unit}, ਕੀਮਤ ₹${extraction.pricePerUnit} ਪ੍ਰਤੀ ${extraction.unit}, ਕੁੱਲ ਮੁੱਲ ₹${totalValue}, ਮਿਆਦ ਪੁੱਗਣ ਦੀ ਮਿਤੀ ${extraction.expiryDate || 'ਆਮ'}, ਅਤੇ ਜ਼ਰੂਰੀਤਾ ${extraction.urgency === 'high' ? 'ਜ਼ਰੂਰੀ' : 'ਆਮ'} ਹੈ।`;
+        return `ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਤੁਹਾਡੀ ਲਿਸਟਿੰਗ ਦੇ ਵੇਰਵੇ: ਉਤਪਾਦ ${extraction.title}, ਮਾਤਰਾ ${extraction.quantity} ${extraction.unit}, ਕੀਮਤ ₹${extraction.pricePerUnit} ਪ੍ਰਤੀ ${extraction.unit}, ਕੁੱਲ ਮੁੱਲ ₹${totalValue}, ਮਿਆਦ ਪੁੱਗਣ ਦੀ ਮਿਤੀ ${extraction.expiryDate || 'ਆਮ'}, ਅਤੇ ਜ਼ਰੂਰੀਤਾ ${urgencyPunjabi} ਹੈ।`;
       default:
         return `Hello! Here is your listing summary: Product is ${extraction.title}, category is ${extraction.category}, available quantity is ${extraction.quantity} ${extraction.unit} at ₹${extraction.pricePerUnit} per ${extraction.unit}. Total lot valuation is ₹${totalValue}. Expiry date is ${extraction.expiryDate || 'Standard Liquidation'} with ${extraction.urgency} urgency level.`;
     }
@@ -549,14 +711,14 @@ export async function generateVoiceoverScript(
       generationConfig: {
         temperature: 0.2,
         topP: 0.8,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 800,
       },
     });
 
     const prompt = `You are an AI assistant for StockBridge, an Indian B2B surplus inventory marketplace.
 Create a short, natural, warm, and professional audio voiceover script in ${langName} that will be spoken aloud to the merchant so they can verify their listing details.
 
-Listing Data:
+Listing Structured Data:
 - Product Title: ${extraction.title}
 - Category: ${extraction.category}
 - Quantity: ${extraction.quantity} ${extraction.unit}
@@ -566,13 +728,21 @@ Listing Data:
 - Urgency Level: ${extraction.urgency}
 
 Voiceover Instructions:
-1. Write the script strictly in the native script of ${langName} (Devanagari for Hindi/Marathi, Tamil script for Tamil, Telugu script for Telugu, Bengali script for Bengali, Gujarati script for Gujarati, Kannada script for Kannada, Malayalam script for Malayalam, Gurmukhi script for Punjabi, English Latin script for English) so that Text-To-Speech (TTS) synthesizers pronounce every word accurately. Do not write Romanized transliterations.
+1. Write the script strictly in the native script of ${langName} (Devanagari for Hindi, Kannada script for Kannada, Gurmukhi script for Punjabi, Latin script for English) so that Text-To-Speech (TTS) synthesizers pronounce every word accurately.
 2. Read out the product name, quantity with unit, price per unit, total lot value, expiry date, and urgency level clearly.
-3. CRITICAL: DO NOT mention or read out "AI Extracted Notes", special notes, delivery radius, or internal comments. Only speak the product, quantity, unit, price, total value, expiry date, and urgency.
-4. Keep it under 2-3 concise, clear sentences so audio readout is quick (12-16 seconds).
+3. CRITICAL: DO NOT mention internal comments or raw transcripts. Only speak the structured listing details.
+4. Keep it under 2 sentences so audio readout is quick (10-12 seconds).
 5. Return ONLY the plain text voiceover script with no markdown, quotes, asterisks, emojis, or formatting.`;
 
-    const result = await model.generateContent(prompt);
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Voiceover generation timed out')), 4000);
+    });
+
+    const result = (await Promise.race([
+      model.generateContent(prompt),
+      timeoutPromise,
+    ])) as any;
+
     let script = result.response.text().trim();
     script = script.replace(/[*#_~`]/g, '').trim();
     return { script: script || getFallbackScript(), language, languageName: langName };
@@ -581,3 +751,4 @@ Voiceover Instructions:
     return { script: getFallbackScript(), language, languageName: langName };
   }
 }
+

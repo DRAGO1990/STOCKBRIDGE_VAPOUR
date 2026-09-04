@@ -9,6 +9,8 @@ export const registerSchema = z.object({
   lat: z.number().optional().default(0),
   lng: z.number().optional().default(0),
   address: z.string().optional().default(''),
+  idDocumentType: z.enum(['PAN', 'Aadhaar']).optional(),
+  idDocumentNumber: z.string().optional(),
 });
 
 export const loginSchema = z.object({
@@ -22,6 +24,7 @@ export const baseListingSchema = z.object({
   quantity: z.number().positive(),
   unit: z.string().min(1).max(50),
   pricePerUnit: z.number().positive(),
+  imageUrl: z.string().optional().nullable(),
   expiryDate: z
     .string()
     .min(1, 'Expiry date is required')

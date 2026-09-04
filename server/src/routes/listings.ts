@@ -3,16 +3,23 @@ import prisma from '../lib/prisma';
 import { authMiddleware } from '../middleware/auth';
 import { listingSchema, listingUpdateSchema, matchQuerySchema } from '../validators';
 import { matchListings } from '../services/matchingEngine';
+import { resolveProductImage } from '../lib/productImages';
+import { haversineDistance } from '../lib/haversine';
+import { findLocationByName } from '../config/locations';
 
 const router = Router();
 
-// Get all active listings (public browsing)
+// Get all active listings with backend location & radius filtering
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { category, search, page = '1', limit = '20' } = req.query;
-    const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
+    const { category, search, urgency, sort, lat, lng, radiusKm, city, page = '1', limit = '100' } = req.query;
     const where: any = { status: 'active', active: true };
-    if (category) where.category = category as string;
+    if (category && category !== 'all' && category !== 'All Categories') {
+      where.category = category as string;
+    }
+    if (urgency && urgency !== 'all') {
+      where.urgency = urgency as string;
+    }
     if (search) {
       where.OR = [
         { title: { contains: search as string } },
@@ -20,19 +27,74 @@ router.get('/', async (req: Request, res: Response) => {
       ];
     }
 
-    const [listings, total] = await Promise.all([
-      prisma.listing.findMany({
-        where,
-        include: {
-          seller: { select: { id: true, name: true, businessName: true, rating: true, lat: true, lng: true } },
-        },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: parseInt(limit as string),
-      }),
-      prisma.listing.count({ where }),
-    ]);
-    res.json({ listings, total, page: parseInt(page as string), totalPages: Math.ceil(total / parseInt(limit as string)) });
+    let listings = await prisma.listing.findMany({
+      where,
+      include: {
+        seller: { select: { id: true, name: true, businessName: true, rating: true, lat: true, lng: true, address: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Resolve target coordinates (from lat/lng params or city name)
+    let targetLat: number | null = null;
+    let targetLng: number | null = null;
+    if (lat && lng && !isNaN(Number(lat)) && !isNaN(Number(lng))) {
+      targetLat = Number(lat);
+      targetLng = Number(lng);
+    } else if (city) {
+      const loc = findLocationByName(city as string);
+      if (loc) {
+        targetLat = loc.lat;
+        targetLng = loc.lng;
+      }
+    }
+
+    // Backend location calculation & proximity filtering
+    if (targetLat !== null && targetLng !== null) {
+      listings = listings.map(l => {
+        if (l.seller && typeof l.seller.lat === 'number' && typeof l.seller.lng === 'number') {
+          const rawDist = haversineDistance(targetLat!, targetLng!, l.seller.lat, l.seller.lng);
+          const distanceKm = Math.round(rawDist * 10) / 10;
+          return { ...l, distanceKm };
+        }
+        return l;
+      });
+
+      // Filter by radius if finite radius is specified (100km or higher implies "All Distances")
+      if (radiusKm !== undefined) {
+        const rad = Number(radiusKm);
+        if (!isNaN(rad) && rad < 100) {
+          listings = listings.filter((l: any) => typeof l.distanceKm === 'number' && l.distanceKm <= rad);
+        }
+      }
+    }
+
+    // Backend sorting
+    if (sort === 'nearest' && targetLat !== null) {
+      listings.sort((a: any, b: any) => (a.distanceKm ?? 9999) - (b.distanceKm ?? 9999));
+    } else if (sort === 'price_asc') {
+      listings.sort((a, b) => a.pricePerUnit - b.pricePerUnit);
+    } else if (sort === 'price_desc') {
+      listings.sort((a, b) => b.pricePerUnit - a.pricePerUnit);
+    } else if (sort === 'expiry') {
+      listings.sort((a, b) => {
+        if (!a.expiryDate) return 1;
+        if (!b.expiryDate) return -1;
+        return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+      });
+    }
+
+    const total = listings.length;
+    const pageNum = parseInt(page as string, 10) || 1;
+    const limitNum = parseInt(limit as string, 10) || 100;
+    const paginated = listings.slice((pageNum - 1) * limitNum, pageNum * limitNum);
+
+    res.json({
+      listings: paginated,
+      total,
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
+    });
   } catch (err) {
     console.error('Listings error:', err);
     res.status(500).json({ error: 'Failed to fetch listings' });
@@ -43,6 +105,7 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
+    const { lat, lng } = req.query;
     const listing = await prisma.listing.findUnique({
       where: { id },
       include: {
@@ -53,7 +116,14 @@ router.get('/:id', async (req: Request, res: Response) => {
       res.status(404).json({ error: 'Listing not found' });
       return;
     }
-    res.json(listing);
+
+    let enriched: any = listing;
+    if (lat && lng && listing.seller) {
+      const d = haversineDistance(Number(lat), Number(lng), listing.seller.lat, listing.seller.lng);
+      enriched = { ...listing, distanceKm: Math.round(d * 10) / 10 };
+    }
+
+    res.json(enriched);
   } catch (err) {
     console.error('Listing detail error:', err);
     res.status(500).json({ error: 'Failed to fetch listing' });
@@ -81,9 +151,11 @@ router.get('/my/all', authMiddleware, async (req: Request, res: Response) => {
 router.post('/', authMiddleware, async (req: Request, res: Response) => {
   try {
     const data = listingSchema.parse(req.body);
+    const imageUrl = data.imageUrl || resolveProductImage(data.title, data.category);
     const listing = await prisma.listing.create({
       data: {
         ...data,
+        imageUrl,
         expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
         sellerId: req.user!.userId,
       },

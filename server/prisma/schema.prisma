@@ -17,11 +17,14 @@ model User {
   lat          Float    @default(0)
   lng          Float    @default(0)
   address      String   @default("")
-  rating       Float    @default(0)
-  verified     Boolean  @default(false)
-  isAdmin      Boolean  @default(false)
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  rating             Float    @default(0)
+  verified           Boolean  @default(false)
+  verificationStatus String   @default("pending") // pending, under_review, verified, rejected
+  idDocumentType     String?                      // PAN, Aadhaar
+  idDocumentNumber   String?                      // securely stored masked document number
+  isAdmin            Boolean  @default(false)
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
 
   listings     Listing[]
   reservations Reservation[]
@@ -44,6 +47,7 @@ model Listing {
   urgency      String   @default("low") // low, medium, high
   status       String   @default("active") // active, reserved, sold, expired
   active       Boolean  @default(true)
+  imageUrl     String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

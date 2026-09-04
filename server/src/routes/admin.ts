@@ -12,8 +12,22 @@ router.get('/users', async (_req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany({
       select: {
-        id: true, name: true, email: true, phone: true, businessName: true,
-        rating: true, verified: true, active: true, isAdmin: true, createdAt: true,
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        businessName: true,
+        address: true,
+        lat: true,
+        lng: true,
+        rating: true,
+        verified: true,
+        verificationStatus: true,
+        idDocumentType: true,
+        idDocumentNumber: true,
+        active: true,
+        isAdmin: true,
+        createdAt: true,
         _count: { select: { listings: true, reservations: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -45,12 +59,36 @@ router.post('/users/:id/toggle', async (req: Request, res: Response) => {
   }
 });
 
+// Moderate / Update user verification status
+router.post('/users/:id/verify', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { status } = req.body; // 'verified' | 'rejected' | 'under_review' | 'pending'
+    if (!['verified', 'rejected', 'under_review', 'pending'].includes(status)) {
+      res.status(400).json({ error: 'Invalid verification status' });
+      return;
+    }
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: {
+        verificationStatus: status,
+        verified: status === 'verified',
+      },
+    });
+    res.json({ id: updated.id, verificationStatus: updated.verificationStatus, verified: updated.verified });
+  } catch (err) {
+    console.error('Verify user error:', err);
+    res.status(500).json({ error: 'Failed to update user verification' });
+  }
+});
+
 // Get all listings (admin)
 router.get('/listings', async (_req: Request, res: Response) => {
   try {
     const listings = await prisma.listing.findMany({
       include: {
-        seller: { select: { id: true, name: true, email: true } },
+        seller: { select: { id: true, name: true, email: true, businessName: true, address: true } },
       },
       orderBy: { createdAt: 'desc' },
     });

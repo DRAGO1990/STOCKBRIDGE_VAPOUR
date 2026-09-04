@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { voiceParseSchema, SUPPORTED_VOICE_LANGUAGES } from '../validators';
-import { extractListingFromSpeech, generateVoiceoverScript } from '../services/voiceService';
+import { extractListingFromSpeech, generateVoiceoverScript, resolveDeterministicTitle } from '../services/voiceService';
 import { config } from '../config';
 
 const router = Router();
@@ -11,6 +11,15 @@ router.post('/parse', async (req: Request, res: Response) => {
     const data = voiceParseSchema.parse(req.body);
 
     const extraction = await extractListingFromSpeech(data.transcript, data.language);
+
+    // DEFENSE-IN-DEPTH: Enforce deterministic title normalization on outgoing payload
+    extraction.title = resolveDeterministicTitle(
+      extraction.title,
+      extraction.category,
+      extraction.quantity,
+      extraction.unit,
+      data.transcript
+    );
 
     res.json({
       success: true,

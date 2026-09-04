@@ -9,6 +9,9 @@ export interface User {
   address?: string;
   rating?: number;
   verified?: boolean;
+  verificationStatus?: 'pending' | 'under_review' | 'verified' | 'rejected';
+  idDocumentType?: 'PAN' | 'Aadhaar' | null;
+  idDocumentNumber?: string | null;
   isAdmin?: boolean;
   active?: boolean;
   createdAt?: string;

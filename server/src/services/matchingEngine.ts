@@ -252,7 +252,7 @@ export async function matchListings(input: MatchInput): Promise<any[]> {
 
   const avgPrice = listings.reduce((s, l) => s + l.pricePerUnit, 0) / listings.length;
   const hasSearch = Boolean(input.search && input.search.trim().length > 0);
-  const maxDistance = input.maxDistanceKm ? Math.min(50, Number(input.maxDistanceKm)) : 50;
+  const maxDistance = input.maxDistanceKm ? Number(input.maxDistanceKm) : 50;
 
   const scoredListings = listings
     .map((listing) => {
@@ -283,8 +283,8 @@ export async function matchListings(input: MatchInput): Promise<any[]> {
         listing.seller.lng
       );
 
-      // Hard filter: strictly reject any listing exceeding the max distance radius (up to 50 km)
-      if (rawDist > maxDistance) {
+      // Hard filter: reject listings exceeding radius (unless radius >= 100 which represents All Distances)
+      if (maxDistance < 100 && rawDist > maxDistance) {
         return null;
       }
 

@@ -99,8 +99,8 @@ export const MyListingsPage: React.FC = () => {
 
         <hr style={{ border: 'none', borderTop: '1px solid var(--sb-border, #D8E0D5)', marginBottom: 28 }} />
 
-        {/* ── Stats row ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', marginBottom: 28 }}>
+        {/* ── Stats row: strictly 4 KPI cards filling available width ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', marginBottom: 28 }}>
           {[
             { label: 'Active Listings',    value: activeCount,                               color: 'var(--sb-primary, #6F8F69)' },
             { label: 'Reserved',           value: reservedCount,                             color: 'var(--sb-warning, #B88A45)' },
@@ -114,21 +114,6 @@ export const MyListingsPage: React.FC = () => {
               </p>
             </div>
           ))}
-
-          {/* Needs Attention cell */}
-          {expiringCount > 0 && (
-            <div style={{ background: 'var(--sb-surface, #FFFFFF)', padding: '20px 20px 24px', gridColumn: 'span 1' }}>
-              <p style={{ ...S.label, color: 'var(--sb-warning, #B88A45)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <AlertTriangle size={10} /> Needs Attention
-              </p>
-              <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-secondary, #4F5A51)' }}>{expiringCount} listings expiring soon</span>
-                  <button style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: 'var(--sb-primary, #6F8F69)', letterSpacing: '0.05em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer' }}>Review</button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* ── Filter Tabs + Search ── */}

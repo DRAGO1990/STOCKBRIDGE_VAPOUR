@@ -14,6 +14,38 @@ function generateTokens(payload: AuthPayload) {
   return { accessToken, refreshToken };
 }
 
+function maskDocumentNumber(type?: string | null, num?: string | null): string | null {
+  if (!num) return null;
+  const clean = num.replace(/\s+/g, '').toUpperCase();
+  if (clean.length <= 4) return clean;
+  const last4 = clean.slice(-4);
+  if (type === 'Aadhaar' || clean.length === 12) {
+    return `•••• •••• ${last4}`;
+  }
+  return `••••••${last4}`;
+}
+
+function formatUserResponse(user: any) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone || '',
+    businessName: user.businessName || '',
+    lat: user.lat ?? 0,
+    lng: user.lng ?? 0,
+    address: user.address || '',
+    rating: user.rating ?? 0,
+    verified: Boolean(user.verified),
+    verificationStatus: user.verificationStatus || (user.verified ? 'verified' : 'pending'),
+    idDocumentType: user.idDocumentType || null,
+    idDocumentNumber: user.idDocumentNumber || null,
+    isAdmin: Boolean(user.isAdmin),
+    active: user.active !== false,
+    createdAt: user.createdAt,
+  };
+}
+
 // Register
 router.post('/register', async (req: Request, res: Response) => {
   try {
@@ -24,6 +56,10 @@ router.post('/register', async (req: Request, res: Response) => {
       return;
     }
     const passwordHash = await bcrypt.hash(data.password, 12);
+    const maskedDoc = data.idDocumentNumber
+      ? maskDocumentNumber(data.idDocumentType, data.idDocumentNumber)
+      : null;
+
     const user = await prisma.user.create({
       data: {
         name: data.name,
@@ -34,12 +70,17 @@ router.post('/register', async (req: Request, res: Response) => {
         lat: data.lat || 0,
         lng: data.lng || 0,
         address: data.address || '',
+        idDocumentType: data.idDocumentType || null,
+        idDocumentNumber: maskedDoc,
+        verificationStatus: maskedDoc ? 'under_review' : 'pending',
+        verified: false,
       },
     });
+
     const payload: AuthPayload = { userId: user.id, email: user.email, isAdmin: user.isAdmin };
     const tokens = generateTokens(payload);
     res.status(201).json({
-      user: { id: user.id, name: user.name, email: user.email, businessName: user.businessName, isAdmin: user.isAdmin },
+      user: formatUserResponse(user),
       ...tokens,
     });
   } catch (err: any) {
@@ -58,7 +99,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const data = loginSchema.parse(req.body);
     const user = await prisma.user.findUnique({ where: { email: data.email } });
     if (!user || !user.active) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'Invalid credentials or inactive account' });
       return;
     }
     const valid = await bcrypt.compare(data.password, user.passwordHash);
@@ -69,7 +110,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const payload: AuthPayload = { userId: user.id, email: user.email, isAdmin: user.isAdmin };
     const tokens = generateTokens(payload);
     res.json({
-      user: { id: user.id, name: user.name, email: user.email, businessName: user.businessName, isAdmin: user.isAdmin },
+      user: formatUserResponse(user),
       ...tokens,
     });
   } catch (err: any) {
@@ -79,6 +120,78 @@ router.post('/login', async (req: Request, res: Response) => {
     }
     console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Google OAuth Sign-In / Up
+router.post('/google', async (req: Request, res: Response) => {
+  try {
+    const { credential, token, address, lat, lng } = req.body;
+    const idToken = credential || token;
+
+    if (!idToken) {
+      res.status(400).json({ error: 'Google authentication requires a valid Google ID token credential.' });
+      return;
+    }
+
+    let email: string | null = null;
+    let name: string | null = null;
+
+    try {
+      const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
+      if (verifyRes.ok) {
+        const payload: any = await verifyRes.json();
+        email = payload.email;
+        name = payload.name || payload.given_name || email?.split('@')[0] || 'Merchant';
+      } else {
+        res.status(401).json({ error: 'Google OAuth token verification failed. The token may be expired or invalid.' });
+        return;
+      }
+    } catch (tokenErr) {
+      console.warn('Google token verification error:', tokenErr);
+      res.status(502).json({ error: 'Failed to contact Google OAuth servers for verification.' });
+      return;
+    }
+
+    if (!email) {
+      res.status(400).json({ error: 'Could not extract email address from Google ID token.' });
+      return;
+    }
+
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      const dummyPassword = await bcrypt.hash(`google_${Math.random()}_${Date.now()}`, 10);
+      user = await prisma.user.create({
+        data: {
+          name: name || email.split('@')[0],
+          email,
+          passwordHash: dummyPassword,
+          businessName: `${name || 'Merchant'} Enterprises`,
+          address: address || 'Bandra Kurla Complex, Mumbai (MH)',
+          lat: typeof lat === 'number' ? lat : 19.076,
+          lng: typeof lng === 'number' ? lng : 72.877,
+          verified: true,
+          verificationStatus: 'verified',
+        },
+      });
+    }
+
+    if (!user.active) {
+      res.status(403).json({ error: 'Your account has been deactivated. Please contact support.' });
+      return;
+    }
+
+    const payload: AuthPayload = { userId: user.id, email: user.email, isAdmin: user.isAdmin };
+    const tokens = generateTokens(payload);
+
+    res.json({
+      user: formatUserResponse(user),
+      ...tokens,
+    });
+  } catch (err) {
+    console.error('Google auth error:', err);
+    res.status(500).json({ error: 'Google authentication failed' });
   }
 });
 
@@ -109,43 +222,42 @@ router.get('/me', authMiddleware, async (req: Request, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.userId },
-      select: {
-        id: true, name: true, email: true, phone: true, businessName: true,
-        lat: true, lng: true, address: true, rating: true, verified: true,
-        isAdmin: true, createdAt: true,
-      },
     });
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
     }
-    res.json(user);
+    res.json(formatUserResponse(user));
   } catch (err) {
     console.error('Me error:', err);
     res.status(500).json({ error: 'Failed to get user' });
   }
 });
 
-// Update profile
+// Update profile & identity verification
 router.put('/profile', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const { name, phone, businessName, lat, lng, address } = req.body;
+    const { name, phone, businessName, lat, lng, address, idDocumentType, idDocumentNumber } = req.body;
+
+    const dataToUpdate: any = {};
+    if (name) dataToUpdate.name = name;
+    if (phone !== undefined) dataToUpdate.phone = phone;
+    if (businessName !== undefined) dataToUpdate.businessName = businessName;
+    if (lat !== undefined) dataToUpdate.lat = lat;
+    if (lng !== undefined) dataToUpdate.lng = lng;
+    if (address !== undefined) dataToUpdate.address = address;
+
+    if (idDocumentType && idDocumentNumber) {
+      dataToUpdate.idDocumentType = idDocumentType;
+      dataToUpdate.idDocumentNumber = maskDocumentNumber(idDocumentType, idDocumentNumber);
+      dataToUpdate.verificationStatus = 'under_review';
+    }
+
     const user = await prisma.user.update({
       where: { id: req.user!.userId },
-      data: {
-        ...(name && { name }),
-        ...(phone !== undefined && { phone }),
-        ...(businessName !== undefined && { businessName }),
-        ...(lat !== undefined && { lat }),
-        ...(lng !== undefined && { lng }),
-        ...(address !== undefined && { address }),
-      },
-      select: {
-        id: true, name: true, email: true, phone: true, businessName: true,
-        lat: true, lng: true, address: true, rating: true, verified: true, isAdmin: true,
-      },
+      data: dataToUpdate,
     });
-    res.json(user);
+    res.json(formatUserResponse(user));
   } catch (err) {
     console.error('Profile update error:', err);
     res.status(500).json({ error: 'Failed to update profile' });

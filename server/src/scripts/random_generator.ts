@@ -1,59 +1,13 @@
 import prisma from '../lib/prisma';
 import bcrypt from 'bcryptjs';
+import { resolveProductImage } from '../lib/productImages';
+
+import { SUPPORTED_LOCATIONS } from '../config/locations';
 
 // ---------------------------------------------------------------------------
-// Geospatial & Commercial Clusters in India
+// 6 Core Commercial Hubs in India
 // ---------------------------------------------------------------------------
-const CITIES = [
-  {
-    name: 'Mumbai (MH)',
-    lat: 19.076,
-    lng: 72.877,
-    areas: ['Andheri East', 'Bandra Kurla Complex', 'Lower Parel', 'Powai', 'Navi Mumbai MIDC', 'Bhiwandi Logistics Park'],
-  },
-  {
-    name: 'Delhi NCR',
-    lat: 28.613,
-    lng: 77.209,
-    areas: ['Connaught Place', 'Okhla Industrial Area', 'Karol Bagh', 'Gurugram Cyber Hub', 'Noida Sector 62', 'Manesar'],
-  },
-  {
-    name: 'Bangalore (KA)',
-    lat: 12.971,
-    lng: 77.594,
-    areas: ['Peenya Industrial Area', 'Electronic City', 'Whitefield', 'Indiranagar', 'Koramangala', 'Bommasandra'],
-  },
-  {
-    name: 'Hyderabad (TG)',
-    lat: 17.385,
-    lng: 78.486,
-    areas: ['Banjara Hills', 'Jubilee Hills', 'HITEC City', 'Sanathnagar Industrial Estate', 'Cherlapally', 'Madhapur'],
-  },
-  {
-    name: 'Chennai (TN)',
-    lat: 13.082,
-    lng: 80.27,
-    areas: ['Guindy Industrial Estate', 'Ambattur', 'T. Nagar', 'Sriperumbudur', 'Ennore Port Road'],
-  },
-  {
-    name: 'Pune (MH)',
-    lat: 18.52,
-    lng: 73.856,
-    areas: ['Bhosari MIDC', 'Chakan Industrial Belt', 'Hinjawadi Phase 1', 'Hadapsar', 'Pimpri-Chinchwad'],
-  },
-  {
-    name: 'Ahmedabad (GJ)',
-    lat: 23.022,
-    lng: 72.571,
-    areas: ['Sanand GIDC', 'Naroda Industrial Estate', 'Vatva GIDC', 'SG Highway', 'Changodar'],
-  },
-  {
-    name: 'Kolkata (WB)',
-    lat: 22.572,
-    lng: 88.363,
-    areas: ['Salt Lake Sector V', 'Howrah Wholesale Hub', 'Taratala Industrial Area', 'Park Street'],
-  },
-];
+const CITIES = SUPPORTED_LOCATIONS;
 
 const FIRST_NAMES = [
   'Rajesh', 'Priya', 'Amit', 'Suresh', 'Neha', 'Vikram', 'Lakshmi', 'Karthik',
@@ -301,6 +255,11 @@ export async function generate(userCount = 12, listingCount = 24, reservationCou
     const address = `${area}, ${city.name}`;
     const rating = randFloat(3.8, 5.0, 1);
     const verified = Math.random() > 0.25;
+    const idDocType = sample(['PAN', 'Aadhaar']);
+    const idDocNumber = verified
+      ? (idDocType === 'PAN' ? '••••••' + randInt(1000, 9999) : '•••• •••• ' + randInt(1000, 9999))
+      : null;
+    const verificationStatus = verified ? 'verified' : (Math.random() > 0.5 ? 'under_review' : 'pending');
 
     const user = await prisma.user.create({
       data: {
@@ -314,6 +273,9 @@ export async function generate(userCount = 12, listingCount = 24, reservationCou
         address,
         rating,
         verified,
+        verificationStatus,
+        idDocumentType: idDocType,
+        idDocumentNumber: idDocNumber,
         isAdmin: false,
         active: true,
       },
@@ -339,6 +301,7 @@ export async function generate(userCount = 12, listingCount = 24, reservationCou
       ? randInt(10, 15)
       : randInt(catData.expiryDays[0], catData.expiryDays[1]);
     const expiryDate = new Date(Date.now() + expDays * 24 * 60 * 60 * 1000);
+    const imageUrl = resolveProductImage(title, catData.category);
 
     const listing = await prisma.listing.create({
       data: {
@@ -350,6 +313,7 @@ export async function generate(userCount = 12, listingCount = 24, reservationCou
         pricePerUnit,
         urgency,
         expiryDate,
+        imageUrl,
         status: 'active',
         active: true,
       },

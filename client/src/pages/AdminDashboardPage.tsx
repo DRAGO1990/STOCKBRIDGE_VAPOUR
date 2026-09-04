@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Shield, Users, Package, CalendarCheck, CheckCircle, Search, Store, X, MapPin, Phone, Mail, ShieldCheck,
+  Shield, Users, Package, CalendarCheck, CheckCircle, Search, Store, X, MapPin, Phone, Mail, ShieldCheck, Check, AlertCircle, Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../lib/api';
 import type { AdminStats, User, Listing } from '../types';
 import { StatusBadge } from '../components/StatusBadges';
 import { RatingStars } from '../components/RatingStars';
+import { SUPPORTED_LOCATIONS, detectUserLocation } from '../config/locations';
 
 const TH: React.FC<{ children: React.ReactNode; right?: boolean }> = ({ children, right }) => (
   <th style={{
@@ -55,6 +56,18 @@ export const AdminDashboardPage: React.FC = () => {
         setSelectedMerchant(prev => prev ? { ...prev, active: !prev.active } : null);
       }
     } catch { /* noop */ }
+  };
+
+  const verifyUser = async (id: string, status: 'verified' | 'rejected') => {
+    try {
+      await api.post(`/admin/users/${id}/verify`, { status });
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, verificationStatus: status } : u));
+      if (selectedMerchant?.id === id) {
+        setSelectedMerchant(prev => prev ? { ...prev, verificationStatus: status } : null);
+      }
+    } catch (err) {
+      console.error('Failed to verify user', err);
+    }
   };
 
   const toggleListing = async (id: string) => {
@@ -107,7 +120,7 @@ export const AdminDashboardPage: React.FC = () => {
 
         {/* ── KPI cards ── */}
         {stats && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', marginBottom: 28, boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1, background: 'var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', marginBottom: 20, boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
             {[
               { icon: <Users size={20} color="var(--sb-primary, #6F8F69)" />, label: 'Total Users',        value: stats.users,        color: 'var(--sb-primary, #6F8F69)' },
               { icon: <Package size={20} color="var(--sb-text-primary, #182018)" />, label: 'Active Listings',  value: stats.listings,     color: 'var(--sb-text-primary, #182018)' },
@@ -124,6 +137,66 @@ export const AdminDashboardPage: React.FC = () => {
             ))}
           </div>
         )}
+
+        {/* ── Multi-Location Distribution Card ── */}
+        <div style={{
+          background: 'var(--sb-surface, #FFFFFF)',
+          border: '1px solid var(--sb-border, #D8E0D5)',
+          borderRadius: 8,
+          padding: '16px 20px',
+          marginBottom: 28,
+          boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <MapPin size={15} color="var(--sb-primary, #6F8F69)" />
+              <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 600, color: 'var(--sb-text-primary, #182018)' }}>
+                Multi-Hub Commercial Distribution (6 Indian Markets)
+              </span>
+            </div>
+            <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)' }}>
+              Active coverage across wholesale clusters
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
+            {SUPPORTED_LOCATIONS.map(loc => {
+              const count = users.filter(u => detectUserLocation(u.address, u.lat, u.lng).id === loc.id).length;
+              return (
+                <div key={loc.id} style={{
+                  background: 'var(--sb-surface-soft, #F2F6EF)',
+                  border: '1px solid var(--sb-border, #D8E0D5)',
+                  borderRadius: 6,
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                  <div>
+                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>
+                      {loc.shortName}
+                    </p>
+                    <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, color: 'var(--sb-text-muted, #7A847A)', margin: '2px 0 0' }}>
+                      {loc.defaultRadiusKm} km radius
+                    </p>
+                  </div>
+                  <span style={{
+                    fontFamily: 'Sora, sans-serif',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: count > 0 ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-muted, #7A847A)',
+                    background: 'var(--sb-surface, #FFFFFF)',
+                    padding: '2px 8px',
+                    borderRadius: 4,
+                    border: '1px solid var(--sb-border, #D8E0D5)',
+                  }}>
+                    {count}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* ── Table section ── */}
         <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
@@ -172,7 +245,8 @@ export const AdminDashboardPage: React.FC = () => {
                 <thead>
                   <tr>
                     <TH>Merchant / Business</TH>
-                    <TH>Email / Contact</TH>
+                    <TH>Hub Location</TH>
+                    <TH>KYC Verification</TH>
                     <TH>Trust Score</TH>
                     <TH>Lots / Orders</TH>
                     <TH>Status</TH>
@@ -180,65 +254,91 @@ export const AdminDashboardPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((u, i) => (
-                    <motion.tr
-                      key={u.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: i * 0.02 }}
-                      style={{ borderBottom: '1px solid var(--sb-border, #D8E0D5)', cursor: 'pointer' }}
-                      onClick={() => setSelectedMerchant(u)}
-                      onMouseEnter={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'rgba(111,143,105,0.06)'; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'; }}
-                    >
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 34, height: 34, borderRadius: 17, background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700, color: 'var(--sb-primary, #6F8F69)', flexShrink: 0 }}>
-                            {(u.businessName || u.name || 'U').charAt(0).toUpperCase()}
+                  {filteredUsers.map((u, i) => {
+                    const hub = detectUserLocation(u.address, u.lat, u.lng);
+                    const isVerified = u.verificationStatus === 'verified';
+                    const isReview = u.verificationStatus === 'under_review';
+                    return (
+                      <motion.tr
+                        key={u.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: i * 0.02 }}
+                        style={{ borderBottom: '1px solid var(--sb-border, #D8E0D5)', cursor: 'pointer' }}
+                        onClick={() => setSelectedMerchant(u)}
+                        onMouseEnter={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'rgba(111,143,105,0.06)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'; }}
+                      >
+                        <td style={{ padding: '14px 16px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ width: 34, height: 34, borderRadius: 17, background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700, color: 'var(--sb-primary, #6F8F69)', flexShrink: 0 }}>
+                              {(u.businessName || u.name || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>{u.businessName || u.name}</p>
+                              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)', margin: '2px 0 0' }}>{u.name}{u.isAdmin && ' · Admin'}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--sb-text-primary, #182018)', margin: 0 }}>{u.businessName || u.name}</p>
-                            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)', margin: '2px 0 0' }}>{u.name}{u.isAdmin && ' · Admin'}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)' }}>
-                        <p style={{ margin: 0 }}>{u.email}</p>
-                        <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)' }}>{u.phone || 'No phone'}</p>
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                          <RatingStars rating={u.rating || 5} size={12} />
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)' }}>
-                        {u._count?.listings || 0} lots / {u._count?.reservations || 0} orders
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <StatusBadge status={u.active !== false ? 'active' : 'suspended'} />
-                      </td>
-                      <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleUser(u.id);
-                          }}
-                          style={{
-                            padding: '6px 12px', borderRadius: 4,
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            padding: '3px 8px', borderRadius: 4,
+                            fontFamily: 'Work Sans, sans-serif', fontSize: 12, fontWeight: 600,
+                            background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)',
+                            color: 'var(--sb-text-primary, #182018)'
+                          }}>
+                            <MapPin size={11} color="var(--sb-primary, #6F8F69)" /> {hub.shortName}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            padding: '2px 8px', borderRadius: 4,
                             fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
-                            letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer',
-                            border: '1px solid',
-                            ...(u.active !== false
-                              ? { color: 'var(--sb-danger, #A65C55)', borderColor: 'rgba(166,92,85,0.3)', background: 'rgba(166,92,85,0.08)' }
-                              : { color: 'var(--sb-primary, #6F8F69)', borderColor: 'rgba(111,143,105,0.3)', background: 'rgba(111,143,105,0.08)' }
-                            ),
-                          }}
-                        >
-                          {u.active !== false ? 'Suspend' : 'Activate'}
-                        </button>
-                      </td>
-                    </motion.tr>
-                  ))}
+                            textTransform: 'uppercase', letterSpacing: '0.04em',
+                            background: isVerified ? 'var(--sb-primary-pale, #EAF1E7)' : isReview ? '#FFF8EB' : '#F3F4F6',
+                            color: isVerified ? 'var(--sb-primary, #6F8F69)' : isReview ? '#B45309' : '#6B7280',
+                            border: `1px solid ${isVerified ? 'var(--sb-primary-soft, #DCE8D8)' : isReview ? '#FDE68A' : '#E5E7EB'}`,
+                          }}>
+                            {isVerified ? <ShieldCheck size={11} /> : <Clock size={11} />}
+                            {isVerified ? 'Verified' : isReview ? 'Under Review' : 'Pending'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <RatingStars rating={u.rating || 5} size={12} />
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px 16px', fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)' }}>
+                          {u._count?.listings || 0} lots / {u._count?.reservations || 0} orders
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <StatusBadge status={u.active !== false ? 'active' : 'suspended'} />
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleUser(u.id);
+                            }}
+                            style={{
+                              padding: '6px 12px', borderRadius: 4,
+                              fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                              letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer',
+                              border: '1px solid',
+                              ...(u.active !== false
+                                ? { color: 'var(--sb-danger, #A65C55)', borderColor: 'rgba(166,92,85,0.3)', background: 'rgba(166,92,85,0.08)' }
+                                : { color: 'var(--sb-primary, #6F8F69)', borderColor: 'rgba(111,143,105,0.3)', background: 'rgba(111,143,105,0.08)' }
+                              ),
+                            }}
+                          >
+                            {u.active !== false ? 'Suspend' : 'Activate'}
+                          </button>
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -402,6 +502,68 @@ export const AdminDashboardPage: React.FC = () => {
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-primary, #182018)' }}>
                         <MapPin size={14} color="var(--sb-text-muted, #7A847A)" /> {selectedMerchant.address || 'Address unlisted'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* KYC Compliance & Government ID Audit */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <span style={labelStyle}>Government Identity Verification (KYC)</span>
+                    <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 6, padding: 14 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <ShieldCheck size={16} color="var(--sb-primary, #6F8F69)" />
+                          <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600, color: 'var(--sb-text-primary, #182018)' }}>
+                            Document: {selectedMerchant.idDocumentType || 'PAN'}
+                          </span>
+                        </div>
+                        <span style={{
+                          fontSize: 11,
+                          fontFamily: 'Work Sans, sans-serif',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                          padding: '2px 8px',
+                          borderRadius: 4,
+                          background: selectedMerchant.verificationStatus === 'verified' ? 'var(--sb-primary-pale, #EAF1E7)' : selectedMerchant.verificationStatus === 'under_review' ? '#FFF8EB' : '#F3F4F6',
+                          color: selectedMerchant.verificationStatus === 'verified' ? 'var(--sb-primary, #6F8F69)' : selectedMerchant.verificationStatus === 'under_review' ? '#B45309' : '#6B7280',
+                          border: `1px solid ${selectedMerchant.verificationStatus === 'verified' ? 'var(--sb-primary-soft, #DCE8D8)' : selectedMerchant.verificationStatus === 'under_review' ? '#FDE68A' : '#E5E7EB'}`,
+                        }}>
+                          {selectedMerchant.verificationStatus === 'verified' ? 'Verified KYC' : selectedMerchant.verificationStatus === 'under_review' ? 'Under Review' : selectedMerchant.verificationStatus === 'rejected' ? 'Rejected' : 'Pending'}
+                        </span>
+                      </div>
+                      
+                      <div style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)', marginBottom: 12 }}>
+                        Masked Identifier: <strong style={{ fontFamily: 'monospace', fontSize: 14, color: 'var(--sb-text-primary, #182018)' }}>{selectedMerchant.idDocumentNumber || 'No document submitted'}</strong>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          onClick={() => verifyUser(selectedMerchant.id, 'verified')}
+                          disabled={selectedMerchant.verificationStatus === 'verified'}
+                          style={{
+                            padding: '6px 14px', borderRadius: 4,
+                            fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                            letterSpacing: '0.04em', textTransform: 'uppercase', cursor: selectedMerchant.verificationStatus === 'verified' ? 'default' : 'pointer',
+                            background: 'var(--sb-primary, #6F8F69)', color: '#FFFFFF', border: 'none',
+                            opacity: selectedMerchant.verificationStatus === 'verified' ? 0.6 : 1,
+                          }}
+                        >
+                          ✓ Approve KYC
+                        </button>
+                        <button
+                          onClick={() => verifyUser(selectedMerchant.id, 'rejected')}
+                          disabled={selectedMerchant.verificationStatus === 'rejected'}
+                          style={{
+                            padding: '6px 14px', borderRadius: 4,
+                            fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                            letterSpacing: '0.04em', textTransform: 'uppercase', cursor: selectedMerchant.verificationStatus === 'rejected' ? 'default' : 'pointer',
+                            background: 'rgba(166,92,85,0.1)', color: 'var(--sb-danger, #A65C55)', border: '1px solid rgba(166,92,85,0.3)',
+                            opacity: selectedMerchant.verificationStatus === 'rejected' ? 0.6 : 1,
+                          }}
+                        >
+                          ✕ Reject KYC
+                        </button>
                       </div>
                     </div>
                   </div>

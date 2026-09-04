@@ -14,12 +14,23 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 import api from '../lib/api';
+import { useLocationStore } from '../stores/locationStore';
+import { SUPPORTED_LOCATIONS } from '../config/locations';
 
 const DEMO_ACCOUNTS = [
-  { name: 'Rajesh (Distributor)', email: 'rajesh@demo.com', initials: 'RD' },
-  { name: 'Suresh (Retailer)',    email: 'suresh@demo.com',  initials: 'SR' },
-  { name: 'Lakshmi (Supplier)',   email: 'lakshmi@demo.com', initials: 'LS' },
-  { name: 'Admin (System)',       email: 'admin@stockbridge.com', initials: 'AD' },
+  { name: 'Rajesh (Mumbai Wholesale)',  email: 'seller.mumbai@demo.com',    initials: 'MU' },
+  { name: 'Priya (Mumbai Retailer)',    email: 'buyer.mumbai@demo.com',     initials: 'MB' },
+  { name: 'Suresh (Delhi FMCG Hub)',    email: 'seller.delhi@demo.com',     initials: 'DL' },
+  { name: 'Neha (Delhi Retailer)',      email: 'buyer.delhi@demo.com',      initials: 'DB' },
+  { name: 'Lakshmi (Bengaluru Foods)',  email: 'seller.bengaluru@demo.com', initials: 'BL' },
+  { name: 'Karthik (Bengaluru Tech)',   email: 'buyer.bengaluru@demo.com',  initials: 'BB' },
+  { name: 'Fatima (Hyderabad Trader)',  email: 'seller.hyderabad@demo.com', initials: 'HY' },
+  { name: 'Ravi (Hyderabad Depot)',     email: 'buyer.hyderabad@demo.com',  initials: 'HB' },
+  { name: 'Vikram (Pune Supplies)',     email: 'seller.pune@demo.com',      initials: 'PN' },
+  { name: 'Swati (Pune Supermart)',     email: 'buyer.pune@demo.com',       initials: 'PB' },
+  { name: 'Ramanathan (Chennai Link)',  email: 'seller.chennai@demo.com',   initials: 'CH' },
+  { name: 'Ananya (Chennai Stores)',    email: 'buyer.chennai@demo.com',    initials: 'CB' },
+  { name: 'Admin (StockBridge Ops)',    email: 'admin@stockbridge.com',     initials: 'AD' },
 ];
 
 type NavLink = {
@@ -32,12 +43,20 @@ type NavLink = {
 
 export const Navbar: React.FC = () => {
   const { user, logout, login } = useAuthStore();
+  const { activeLocation, setLocation, syncWithUser, radiusKm, resetToUserDefault } = useLocationStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [cityMenuOpen, setCityMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [switching, setSwitching] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      syncWithUser(user.address, user.lat, user.lng);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -56,7 +75,8 @@ export const Navbar: React.FC = () => {
   useEffect(() => {
     setMobileOpen(false);
     setUserMenuOpen(false);
-  }, [location.pathname]);
+    setCityMenuOpen(false);
+  }, [location.pathname, location.search]);
 
   const handleQuickSwitch = async (email: string) => {
     setSwitching(true);
@@ -64,6 +84,7 @@ export const Navbar: React.FC = () => {
       const res = await api.post('/auth/login', { email, password: 'password123' });
       const { user: u, accessToken, refreshToken } = res.data;
       login(u, accessToken, refreshToken);
+      resetToUserDefault(u.address, u.lat, u.lng);
     } catch (e) {
       console.error(e);
     } finally {
@@ -196,23 +217,76 @@ export const Navbar: React.FC = () => {
         <div className="hidden md:flex items-center gap-3">
           {/* Location pill (shown when logged in) */}
           {user && (
-            <button style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              background: 'transparent',
-              border: '1px solid var(--sb-border, #D8E0D5)',
-              borderRadius: 20,
-              padding: '5px 12px',
-              color: 'var(--sb-text-secondary, #4F5A51)',
-              fontFamily: 'Work Sans, sans-serif',
-              fontSize: 12, fontWeight: 500,
-              letterSpacing: '0.03em',
-              cursor: 'pointer',
-              textTransform: 'uppercase',
-              transition: 'border-color 0.15s, color 0.15s',
-            }}>
-              <MapPin size={12} color="var(--sb-primary, #6F8F69)" />
-              Mumbai · Within 25 km
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setCityMenuOpen((prev) => !prev)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: cityMenuOpen ? 'var(--sb-surface-soft, #F2F6EF)' : 'transparent',
+                  border: '1px solid var(--sb-border, #D8E0D5)',
+                  borderRadius: 20,
+                  padding: '5px 12px',
+                  color: 'var(--sb-text-secondary, #4F5A51)',
+                  fontFamily: 'Work Sans, sans-serif',
+                  fontSize: 12, fontWeight: 500,
+                  letterSpacing: '0.03em',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  transition: 'border-color 0.15s, color 0.15s',
+                }}
+              >
+                <MapPin size={12} color="var(--sb-primary, #6F8F69)" />
+                <span>{activeLocation.shortName} · Within {activeLocation.defaultRadiusKm} km</span>
+                <ChevronDown size={12} style={{ transform: cityMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+              </button>
+
+              <AnimatePresence>
+                {cityMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.15 }}
+                    style={{
+                      position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                      width: 220, background: 'var(--sb-surface, #FFFFFF)',
+                      border: '1px solid var(--sb-border, #D8E0D5)',
+                      borderRadius: 8, padding: 6,
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                      zIndex: 100,
+                    }}
+                  >
+                    <div style={{ padding: '6px 10px', fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--sb-text-muted, #7A847A)', borderBottom: '1px solid var(--sb-border, #D8E0D5)', marginBottom: 4 }}>
+                      Select Active Hub
+                    </div>
+                    {SUPPORTED_LOCATIONS.map((loc) => {
+                      const isSelected = activeLocation.id === loc.id;
+                      return (
+                        <button
+                          key={loc.id}
+                          onClick={() => {
+                            setLocation(loc);
+                            setCityMenuOpen(false);
+                            navigate(`/marketplace?city=${encodeURIComponent(loc.name)}`);
+                          }}
+                          style={{
+                            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '8px 10px', background: isSelected ? 'var(--sb-primary-pale, #EAF1E7)' : 'transparent',
+                            border: 'none', borderRadius: 4, cursor: 'pointer', textAlign: 'left',
+                            fontFamily: 'Work Sans, sans-serif', fontSize: 13,
+                            color: isSelected ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-primary, #182018)',
+                            fontWeight: isSelected ? 600 : 400,
+                          }}
+                        >
+                          <span>{loc.name}</span>
+                          <span style={{ fontSize: 11, color: 'var(--sb-text-muted, #7A847A)' }}>{loc.defaultRadiusKm}km</span>
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )}
 
           {/* Bell (shown only when logged in) */}
