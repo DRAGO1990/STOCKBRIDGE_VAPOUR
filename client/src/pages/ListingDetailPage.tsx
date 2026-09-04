@@ -334,6 +334,14 @@ export const ListingDetailPage: React.FC = () => {
                     <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)' }}>Category & Specs</span>
                     <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 500, color: 'var(--sb-text-primary, #182018)' }}>{listing.description || `${listing.category} standard lot`}</span>
                   </div>
+                  {(listing.originalMrp || (listing as any).mrp) && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid var(--sb-surface-soft, #F2F6EF)' }}>
+                      <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)' }}>Original MRP</span>
+                      <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600, color: 'var(--sb-text-primary, #182018)' }}>
+                        ₹{(listing.originalMrp || (listing as any).mrp).toLocaleString('en-IN')} / {listing.unit}
+                      </span>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid var(--sb-surface-soft, #F2F6EF)' }}>
                     <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)' }}>Color / Batch Spec</span>
                     <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 500, color: 'var(--sb-text-primary, #182018)' }}>Commercial Grade</span>
@@ -437,6 +445,18 @@ export const ListingDetailPage: React.FC = () => {
                   <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, fontWeight: 700, color: 'var(--sb-primary, #6F8F69)', margin: '4px 0 0' }}>
                     ₹{listing.pricePerUnit} <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 400, color: 'var(--sb-text-muted, #7A847A)' }}>/{listing.unit}</span>
                   </p>
+                  {(listing.originalMrp || (listing as any).mrp) && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
+                      <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)', textDecoration: 'line-through' }}>
+                        ₹{listing.originalMrp || (listing as any).mrp} MRP
+                      </span>
+                      {(listing.originalMrp || (listing as any).mrp) > listing.pricePerUnit && (
+                        <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 700, color: 'var(--sb-primary, #6F8F69)', background: 'var(--sb-primary-pale, #EAF1E7)', padding: '1px 4px', borderRadius: 2 }}>
+                          {Math.round((((listing.originalMrp || (listing as any).mrp) - listing.pricePerUnit) / (listing.originalMrp || (listing as any).mrp)) * 100)}% OFF
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 6, padding: '12px 14px' }}>

@@ -169,7 +169,6 @@ export interface ExtractedFields {
   quantity: number;
   unit: string;
   pricePerUnit: number;
-  mrp?: number | null;
   expiryDate: string;
   urgency: 'low' | 'medium' | 'high';
   notes: string;
@@ -340,7 +339,6 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
   const extractClientSideFallback = (text: string): ExtractedFields => {
     let quantity = 50;
     let pricePerUnit = 100;
-    let mrp: number | undefined = undefined;
     let unit = 'packets';
     let category = 'Groceries';
 
@@ -355,20 +353,9 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       else if (u.includes('can')) unit = 'cans';
     }
 
-    const mrpMatch = text.match(/(?:mrp|m\.r\.p\.?)\s*(?:rs\.?|rupees|₹|:)?\s*(\d+(?:\.\d+)?)/i);
-    if (mrpMatch) {
-      mrp = parseFloat(mrpMatch[1]);
-    }
-
     const priceMatch = text.match(/(?:rs\.?|rupees|₹|rate|price|selling price|at)\s*(\d+(?:\.\d+)?)/i);
     if (priceMatch) {
       pricePerUnit = parseFloat(priceMatch[1]);
-    }
-
-    if (mrp && pricePerUnit > mrp) {
-      pricePerUnit = Math.round(mrp * 0.8);
-    } else if (!mrp && pricePerUnit) {
-      mrp = Math.round(pricePerUnit * 1.25);
     }
 
     if (/oil|tel|ghee|rice|chawal|dal|wheat|atta|flour|sugar/i.test(text)) {
@@ -388,7 +375,6 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
       quantity,
       unit,
       pricePerUnit,
-      mrp: mrp || 120,
       expiryDate: defaultExpiry,
       urgency,
       notes: text,
@@ -552,7 +538,7 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
         </div>
 
         <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-secondary, #4F5A51)', lineHeight: 1.5, margin: '0 0 20px' }}>
-          Speak naturally in <strong style={{ color: 'var(--sb-primary, #6F8F69)' }}>{currentLang?.nativeName}</strong>. State your product name, lot quantity, price per unit (₹), and expiry date.
+          Speak naturally in <strong style={{ color: 'var(--sb-primary, #6F8F69)' }}>{currentLang?.nativeName}</strong>. State your product name, lot quantity, price per unit (₹), and expiry date. <em>(Original MRP is verified directly from your invoice image in Step 2.)</em>
         </p>
 
         {/* Big Mic Button */}
@@ -800,16 +786,14 @@ export const VoiceListingPanel: React.FC<VoiceListingPanelProps> = ({ onFieldsEx
               </p>
             </div>
 
-            {extraction.mrp && (
-              <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: 12 }}>
-                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Product MRP
-                </span>
-                <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--sb-text-secondary, #4F5A51)', margin: '4px 0 0' }}>
-                  ₹{extraction.mrp} / {extraction.unit}
-                </p>
-              </div>
-            )}
+            <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: 12 }}>
+              <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Original MRP
+              </span>
+              <p style={{ fontFamily: 'Work Sans, sans-serif', fontWeight: 600, fontSize: 13, color: 'var(--sb-primary, #6F8F69)', margin: '4px 0 0' }}>
+                Verified via Invoice
+              </p>
+            </div>
 
             <div style={{ background: 'var(--sb-surface-soft, #F2F6EF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 4, padding: 12 }}>
               <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 10, fontWeight: 600, color: 'var(--sb-text-muted, #7A847A)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>

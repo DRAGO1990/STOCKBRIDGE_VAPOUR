@@ -19,6 +19,7 @@ import adminRoutes from './routes/admin';
 import voiceRoutes from './routes/voice';
 import notificationRoutes from './routes/notifications';
 import inventoryRoutes from './routes/inventory';
+import invoiceRoutes from './routes/invoices';
 import { runAutoExpiryUnlistingCheck } from './services/expiryMonitor';
 
 const app = express();
@@ -34,8 +35,8 @@ app.use(morgan('short'));
 app.use(express.json());
 app.use(cookieParser());
 
-// Static files for uploads
-app.use('/uploads', express.static(path.resolve(config.upload.dir)));
+// Static files for public product images only (Invoices remain private and protected)
+app.use('/uploads/products', express.static(path.resolve(config.upload.dir, 'products')));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -47,6 +48,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/voice', voiceRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/invoices', invoiceRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

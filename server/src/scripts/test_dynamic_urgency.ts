@@ -196,7 +196,7 @@ async function runAll14DynamicUrgencyTests() {
         category: 'Groceries',
         quantity: 50,
         unit: 'packets',
-        mrp: 100,
+        originalMrp: 100,
         pricePerUnit: 80,
         expiryDate: new Date(submittedExpiry),
         urgency: backendComputedUrgency, // Overwritten by backend
@@ -280,6 +280,8 @@ async function runAll14DynamicUrgencyTests() {
     unit: 'packets',
     mrp: 100,
     pricePerUnit: 80,
+    imageUrl: '/uploads/products/test.jpg',
+    invoiceVerificationId: 'test-inv-id',
     expiryDate: date20d,
     // Note: urgency NOT provided by client
   });

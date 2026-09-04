@@ -23,8 +23,11 @@ export const baseListingSchema = z
     category: z.string().min(1).max(100),
     quantity: z.coerce.number().positive(),
     unit: z.string().min(1).max(50),
-    mrp: z.coerce.number().positive({ message: 'MRP must be a positive number' }),
     pricePerUnit: z.coerce.number().positive({ message: 'Selling price must be a positive number' }),
+    originalMrp: z.coerce.number().positive({ message: 'Original MRP must be a positive number' }).optional(),
+    mrp: z.coerce.number().positive({ message: 'Original MRP must be a positive number' }).optional(),
+    invoiceVerificationId: z.string('Please upload the product invoice to verify the Original MRP.').min(1, 'Please upload the product invoice to verify the Original MRP.'),
+    imageUrl: z.string('Product image is required.').min(1, 'Product image is required.'),
     expiryDate: z
       .string()
       .min(1, 'Expiry date is required')
@@ -40,12 +43,20 @@ export const baseListingSchema = z
         { message: 'This product cannot be listed because less than 11 days are remaining until expiry.' }
       ),
     urgency: z.enum(['low', 'medium', 'high']).optional().default('low'),
-    imageUrl: z.string().nullable().optional(),
   })
-  .refine((data) => data.pricePerUnit <= data.mrp, {
-    message: 'Selling price should not be greater than the product MRP.',
-    path: ['pricePerUnit'],
-  });
+  .refine(
+    (data) => {
+      const activeMrp = data.originalMrp ?? data.mrp;
+      if (activeMrp !== undefined) {
+        return data.pricePerUnit <= activeMrp;
+      }
+      return true;
+    },
+    {
+      message: 'Selling price should not be greater than the Original MRP.',
+      path: ['pricePerUnit'],
+    }
+  );
 
 export const listingSchema = baseListingSchema;
 
@@ -55,8 +66,11 @@ export const baseListingUpdateSchema = z
     category: z.string().min(1).max(100),
     quantity: z.coerce.number().positive(),
     unit: z.string().min(1).max(50),
-    mrp: z.coerce.number().positive({ message: 'MRP must be a positive number' }),
     pricePerUnit: z.coerce.number().positive({ message: 'Selling price must be a positive number' }),
+    originalMrp: z.coerce.number().positive({ message: 'Original MRP must be a positive number' }).optional(),
+    mrp: z.coerce.number().positive({ message: 'Original MRP must be a positive number' }).optional(),
+    invoiceVerificationId: z.string().optional(),
+    imageUrl: z.string().nullable().optional(),
     expiryDate: z
       .string()
       .min(1, 'Expiry date is required')
@@ -72,18 +86,18 @@ export const baseListingUpdateSchema = z
         { message: 'This product cannot be listed because less than 11 days are remaining until expiry.' }
       ),
     urgency: z.enum(['low', 'medium', 'high']).optional(),
-    imageUrl: z.string().nullable().optional(),
   })
   .partial()
   .refine(
     (data) => {
-      if (data.mrp !== undefined && data.pricePerUnit !== undefined) {
-        return data.pricePerUnit <= data.mrp;
+      const activeMrp = data.originalMrp ?? data.mrp;
+      if (activeMrp !== undefined && data.pricePerUnit !== undefined) {
+        return data.pricePerUnit <= activeMrp;
       }
       return true;
     },
     {
-      message: 'Selling price should not be greater than the product MRP.',
+      message: 'Selling price should not be greater than the Original MRP.',
       path: ['pricePerUnit'],
     }
   );

@@ -4,26 +4,20 @@ import { Router, Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { config } from '../config';
 import { authMiddleware } from '../middleware/auth';
-import { uploadListingImage } from '../middleware/upload';
+import { uploadListingImage, deleteLocalProductImage } from '../middleware/upload';
 import { listingSchema, listingUpdateSchema, matchQuerySchema } from '../validators';
 import { matchListings } from '../services/matchingEngine';
 import { getDaysUntilExpiry, calculateUrgency } from '../utils/urgency';
 
-const deleteLocalProductImage = (imageUrl?: string | null) => {
-  if (!imageUrl || typeof imageUrl !== 'string') return;
-  if (!imageUrl.startsWith('/uploads/products/')) return;
-  try {
-    const filename = path.basename(imageUrl);
-    const fullPath = path.resolve(config.upload.dir, 'products', filename);
-    if (fs.existsSync(fullPath)) {
-      fs.unlinkSync(fullPath);
-    }
-  } catch (err) {
-    console.error('Failed to clean up product image:', err);
-  }
-};
-
 const router = Router();
+
+const formatListingResponse = (l: any) => {
+  return {
+    ...l,
+    originalMrp: l.originalMrp ?? null,
+    mrp: l.originalMrp ?? null,
+  };
+};
 
 // Get all active listings (public browsing)
 router.get('/', async (req: Request, res: Response) => {
@@ -51,7 +45,12 @@ router.get('/', async (req: Request, res: Response) => {
       }),
       prisma.listing.count({ where }),
     ]);
-    res.json({ listings, total, page: parseInt(page as string), totalPages: Math.ceil(total / parseInt(limit as string)) });
+    res.json({
+      listings: listings.map(formatListingResponse),
+      total,
+      page: parseInt(page as string),
+      totalPages: Math.ceil(total / parseInt(limit as string)),
+    });
   } catch (err) {
     console.error('Listings error:', err);
     res.status(500).json({ error: 'Failed to fetch listings' });
@@ -72,7 +71,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       res.status(404).json({ error: 'Listing not found' });
       return;
     }
-    res.json(listing);
+    res.json(formatListingResponse(listing));
   } catch (err) {
     console.error('Listing detail error:', err);
     res.status(500).json({ error: 'Failed to fetch listing' });
@@ -89,7 +88,7 @@ router.get('/my/all', authMiddleware, async (req: Request, res: Response) => {
         _count: { select: { reservations: true } },
       },
     });
-    res.json(listings);
+    res.json(listings.map(formatListingResponse));
   } catch (err) {
     console.error('My listings error:', err);
     res.status(500).json({ error: 'Failed to fetch listings' });
@@ -98,30 +97,85 @@ router.get('/my/all', authMiddleware, async (req: Request, res: Response) => {
 
 // Create listing
 router.post('/', authMiddleware, uploadListingImage, async (req: Request, res: Response) => {
+  const uploadedImagePath = req.file ? `/uploads/products/${req.file.filename}` : null;
   try {
-    const imageUrl = req.file
-      ? `/uploads/products/${req.file.filename}`
-      : req.body.imageUrl || null;
+    const imageUrl = uploadedImagePath || req.body.imageUrl || null;
 
-    const payload = { ...req.body, ...(imageUrl !== null && { imageUrl }) };
+    if (!imageUrl) {
+      if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+      res.status(400).json({ error: 'Product image is required.' });
+      return;
+    }
+
+    if (!req.body.invoiceVerificationId) {
+      if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+      res.status(400).json({ error: 'Please upload the product invoice to verify the Original MRP.' });
+      return;
+    }
+
+    const payload = { ...req.body, imageUrl };
     const data = listingSchema.parse(payload);
+
+    // Verify Invoice Verification Record (Immutable source of truth for Original MRP)
+    const verification = await prisma.invoiceVerification.findUnique({
+      where: { id: data.invoiceVerificationId },
+    });
+
+    if (!verification || verification.sellerId !== req.user!.userId) {
+      if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+      res.status(400).json({ error: 'Invoice verification record not found or unauthorized.' });
+      return;
+    }
+
+    if (
+      verification.status !== 'VERIFIED' ||
+      !verification.extractedOriginalMrp ||
+      verification.extractedOriginalMrp <= 0
+    ) {
+      if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+      res.status(400).json({
+        error: 'Please upload a valid product invoice to verify the Original MRP before listing.',
+      });
+      return;
+    }
+
+    const verifiedOriginalMrp = verification.extractedOriginalMrp;
+
+    // Strict Backend Price Validation against verified Original MRP
+    if (data.pricePerUnit > verifiedOriginalMrp) {
+      if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+      res.status(400).json({
+        error: `Selling price (₹${data.pricePerUnit}) cannot exceed the verified Original MRP (₹${verifiedOriginalMrp}).`,
+      });
+      return;
+    }
 
     // Backend is single source of truth for urgency:
     const calculatedUrgency = calculateUrgency(data.expiryDate);
 
+    // Exclude any client-supplied mrp/originalMrp from data, bind verified value
+    const { mrp: _mrp, originalMrp: _origMrp, ...safeData } = data;
+
     const listing = await prisma.listing.create({
       data: {
-        ...data,
+        ...safeData,
+        originalMrp: verifiedOriginalMrp,
         urgency: calculatedUrgency,
-        imageUrl: data.imageUrl ?? imageUrl,
+        imageUrl,
+        invoiceVerificationId: verification.id,
         expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
         sellerId: req.user!.userId,
       },
     });
-    res.status(201).json(listing);
+
+    res.status(201).json({
+      ...listing,
+      originalMrp: listing.originalMrp,
+      mrp: listing.originalMrp,
+    });
   } catch (err: any) {
-    if (req.file) {
-      deleteLocalProductImage(`/uploads/products/${req.file.filename}`);
+    if (uploadedImagePath) {
+      deleteLocalProductImage(uploadedImagePath);
     }
     if (err.name === 'ZodError') {
       res.status(400).json({ error: 'Validation error', details: err.errors });
@@ -134,23 +188,52 @@ router.post('/', authMiddleware, uploadListingImage, async (req: Request, res: R
 
 // Update listing
 router.put('/:id', authMiddleware, uploadListingImage, async (req: Request, res: Response) => {
+  const uploadedImagePath = req.file ? `/uploads/products/${req.file.filename}` : null;
   try {
     const id = req.params.id as string;
     const listing = await prisma.listing.findUnique({ where: { id } });
     if (!listing || listing.sellerId !== req.user!.userId) {
-      if (req.file) {
-        deleteLocalProductImage(`/uploads/products/${req.file.filename}`);
+      if (uploadedImagePath) {
+        deleteLocalProductImage(uploadedImagePath);
       }
       res.status(403).json({ error: 'Not authorized' });
       return;
     }
 
-    const imageUrl = req.file
-      ? `/uploads/products/${req.file.filename}`
-      : req.body.imageUrl;
+    const imageUrl = uploadedImagePath || req.body.imageUrl;
 
     const payload = { ...req.body, ...(imageUrl !== undefined && { imageUrl }) };
     const data = listingUpdateSchema.parse(payload);
+
+    let verifiedOriginalMrp = listing.originalMrp;
+    let targetVerificationId = listing.invoiceVerificationId;
+
+    if (data.invoiceVerificationId && data.invoiceVerificationId !== listing.invoiceVerificationId) {
+      const verification = await prisma.invoiceVerification.findUnique({
+        where: { id: data.invoiceVerificationId },
+      });
+      if (
+        !verification ||
+        verification.sellerId !== req.user!.userId ||
+        verification.status !== 'VERIFIED' ||
+        !verification.extractedOriginalMrp
+      ) {
+        if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+        res.status(400).json({ error: 'Invalid invoice verification provided.' });
+        return;
+      }
+      verifiedOriginalMrp = verification.extractedOriginalMrp;
+      targetVerificationId = verification.id;
+    }
+
+    const effectivePrice = data.pricePerUnit !== undefined ? data.pricePerUnit : listing.pricePerUnit;
+    if (verifiedOriginalMrp && effectivePrice > verifiedOriginalMrp) {
+      if (uploadedImagePath) deleteLocalProductImage(uploadedImagePath);
+      res.status(400).json({
+        error: `Selling price (₹${effectivePrice}) cannot exceed the verified Original MRP (₹${verifiedOriginalMrp}).`,
+      });
+      return;
+    }
 
     const updatedExpiry = data.expiryDate !== undefined ? (data.expiryDate ? new Date(data.expiryDate) : null) : listing.expiryDate;
     const updatedUrgency = calculateUrgency(updatedExpiry);
@@ -161,8 +244,8 @@ router.put('/:id', authMiddleware, uploadListingImage, async (req: Request, res:
 
     if (wantsActivation) {
       if (daysRemaining === null || daysRemaining < 11) {
-        if (req.file) {
-          deleteLocalProductImage(`/uploads/products/${req.file.filename}`);
+        if (uploadedImagePath) {
+          deleteLocalProductImage(uploadedImagePath);
         }
         res.status(400).json({ error: 'This product cannot be relisted because less than 11 days remain until expiry.' });
         return;
@@ -185,10 +268,14 @@ router.put('/:id', authMiddleware, uploadListingImage, async (req: Request, res:
       }
     }
 
+    const { mrp: _mrp, originalMrp: _origMrp, ...safeData } = data;
+
     const updated = await prisma.listing.update({
       where: { id },
       data: {
-        ...data,
+        ...safeData,
+        originalMrp: verifiedOriginalMrp,
+        invoiceVerificationId: targetVerificationId,
         urgency: updatedUrgency,
         status: targetStatus,
         active: targetActive,
@@ -196,10 +283,14 @@ router.put('/:id', authMiddleware, uploadListingImage, async (req: Request, res:
         ...(data.expiryDate !== undefined && { expiryDate: updatedExpiry }),
       },
     });
-    res.json(updated);
+    res.json({
+      ...updated,
+      originalMrp: updated.originalMrp,
+      mrp: updated.originalMrp,
+    });
   } catch (err: any) {
-    if (req.file) {
-      deleteLocalProductImage(`/uploads/products/${req.file.filename}`);
+    if (uploadedImagePath) {
+      deleteLocalProductImage(uploadedImagePath);
     }
     if (err.name === 'ZodError') {
       res.status(400).json({ error: 'Validation error', details: err.errors });

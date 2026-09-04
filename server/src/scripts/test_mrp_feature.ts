@@ -59,6 +59,8 @@ async function runMrpTests() {
     unit: 'packets',
     mrp: 100,
     pricePerUnit: 120, // Greater than MRP!
+    imageUrl: '/uploads/products/test.jpg',
+    invoiceVerificationId: 'test-ver-123',
     expiryDate: futureExpiry,
     urgency: 'high',
   });
@@ -66,7 +68,7 @@ async function runMrpTests() {
   if (!priceGreaterThanMrpResult.success) {
     const errorMsg = ((priceGreaterThanMrpResult.error as any).issues || (priceGreaterThanMrpResult.error as any).errors || [])[0]?.message;
     assert(
-      errorMsg === 'Selling price should not be greater than the product MRP.',
+      errorMsg === 'Selling price should not be greater than the Original MRP.',
       'Exact error message matches requirement',
       `Got: "${errorMsg}"`
     );
@@ -80,6 +82,8 @@ async function runMrpTests() {
     unit: 'packets',
     mrp: 150,
     pricePerUnit: 110,
+    imageUrl: '/uploads/products/test.jpg',
+    invoiceVerificationId: 'test-ver-123',
     expiryDate: futureExpiry,
     urgency: 'high',
   });
@@ -93,6 +97,8 @@ async function runMrpTests() {
     unit: 'packets',
     mrp: 150,
     pricePerUnit: 150,
+    imageUrl: '/uploads/products/test.jpg',
+    invoiceVerificationId: 'test-ver-123',
     expiryDate: futureExpiry,
     urgency: 'high',
   });
@@ -167,7 +173,7 @@ async function runMrpTests() {
   assert(riskResultWithMrp !== undefined, 'calculateListingRisk runs successfully with mrp parameter');
   assert(riskResultWithMrp.riskLevel === 'LOW' || riskResultWithMrp.riskLevel === 'MEDIUM', 'Near expiry with reasonable MRP discount evaluates without high/critical risk anomaly', `Got: ${riskResultWithMrp.riskLevel}`);
 
-  // ─── TEST 8: Database Persistence of MRP ───────────────────────────────────────
+  // ─── TEST 8: Database Persistence of Original MRP ─────────────────────────────
   console.log('\n--- 7. Database Persistence ---');
   const createdListing = await prisma.listing.create({
     data: {
@@ -176,23 +182,23 @@ async function runMrpTests() {
       category: 'Groceries',
       quantity: 100,
       unit: 'pieces',
-      mrp: 220,
+      originalMrp: 220,
       pricePerUnit: 140,
       expiryDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
       urgency: 'medium',
     },
   });
 
-  assert(createdListing.mrp === 220, 'Listing saved with mrp: 220 in database', `Fetched MRP: ${createdListing.mrp}`);
+  assert(createdListing.originalMrp === 220, 'Listing saved with originalMrp: 220 in database', `Fetched Original MRP: ${createdListing.originalMrp}`);
 
   const updatedListing = await prisma.listing.update({
     where: { id: createdListing.id },
     data: {
-      mrp: 230,
+      originalMrp: 230,
       pricePerUnit: 135,
     },
   });
-  assert(updatedListing.mrp === 230 && updatedListing.pricePerUnit === 135, 'Listing updated with new MRP and selling price');
+  assert(updatedListing.originalMrp === 230 && updatedListing.pricePerUnit === 135, 'Listing updated with new Original MRP and selling price');
 
   // Clean up created test listing
   await prisma.listing.delete({ where: { id: createdListing.id } });

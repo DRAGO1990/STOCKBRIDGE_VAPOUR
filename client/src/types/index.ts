@@ -27,12 +27,14 @@ export interface Listing {
   quantity: number;
   unit: string;
   pricePerUnit: number;
+  originalMrp?: number | null;
   mrp?: number | null;
   expiryDate?: string | null;
   urgency: 'low' | 'medium' | 'high';
   status: 'active' | 'reserved' | 'sold' | 'expired' | 'expiry_unlisted';
   active: boolean;
   imageUrl?: string | null;
+  invoiceVerificationId?: string | null;
   createdAt: string;
   updatedAt: string;
   distanceKm?: number;
@@ -179,4 +181,27 @@ export interface InventorySummary {
   atRiskCount: number;
   highUrgencyCount: number;
   totalStockValueAtRisk: number;
+}
+
+export interface InvoiceCandidate {
+  product: string;
+  originalMrp: number;
+}
+
+export type InvoiceVerificationStatus =
+  | 'VERIFIED'
+  | 'LOW_CONFIDENCE'
+  | 'MRP_NOT_FOUND'
+  | 'MULTIPLE_MATCHES'
+  | 'INVALID_INVOICE';
+
+export interface InvoiceVerificationResponse {
+  verificationId: string;
+  status: InvoiceVerificationStatus;
+  originalMrp: number | null;
+  matchedProduct: string | null;
+  candidates: InvoiceCandidate[];
+  confidence: 'high' | 'medium' | 'low';
+  reason?: string;
+  message: string;
 }

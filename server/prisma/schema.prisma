@@ -31,34 +31,38 @@ model User {
   notifications   Notification[]
   inventoryBatches    InventoryBatch[]
   dailyInventoryLogs  DailyInventoryLog[]
+  invoiceVerifications InvoiceVerification[]
 
   @@index([email])
 }
 
 model Listing {
-  id           String   @id @default(uuid())
-  sellerId     String
-  title        String
-  category     String
-  quantity     Float
-  unit         String
-  pricePerUnit Float
-  expiryDate   DateTime?
-  mrp          Float?
-  imageUrl     String?
-  urgency      String   @default("low") // low, medium, high
-  status       String   @default("active") // active, reserved, sold, expired, expiry_unlisted
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                    String               @id @default(uuid())
+  sellerId              String
+  title                 String
+  category              String
+  quantity              Float
+  unit                  String
+  pricePerUnit          Float
+  expiryDate            DateTime?
+  originalMrp           Float?               @map("mrp")
+  imageUrl              String?
+  invoiceVerificationId String?
+  urgency               String               @default("low") // low, medium, high
+  status                String               @default("active") // active, reserved, sold, expired, expiry_unlisted
+  active                Boolean              @default(true)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 
-  seller       User     @relation(fields: [sellerId], references: [id])
-  reservations Reservation[]
-  notifications Notification[]
+  seller                User                 @relation(fields: [sellerId], references: [id])
+  invoiceVerification   InvoiceVerification? @relation(fields: [invoiceVerificationId], references: [id], onDelete: SetNull)
+  reservations          Reservation[]
+  notifications         Notification[]
 
   @@index([sellerId])
   @@index([category])
   @@index([status])
+  @@index([invoiceVerificationId])
 }
 
 model Reservation {
@@ -175,4 +179,25 @@ model DailyInventoryLog {
   @@index([inventoryBatchId])
   @@index([sellerId])
   @@index([date])
+}
+
+model InvoiceVerification {
+  id                   String    @id @default(uuid())
+  sellerId             String
+  invoiceImagePath     String
+  productName          String?
+  extractedOriginalMrp Float?
+  matchedInvoiceItem   String?
+  candidates           String?   // JSON string of candidate items
+  confidence           String?   // high, medium, low
+  status               String    // VERIFIED, MULTIPLE_MATCHES, MRP_NOT_FOUND, INVALID_INVOICE, LOW_CONFIDENCE
+  rawAiResponse        String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  seller               User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  listings             Listing[]
+
+  @@index([sellerId])
+  @@index([status])
 }

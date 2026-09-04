@@ -12,6 +12,8 @@ import {
   Package,
   Flame,
   Sparkles,
+  Lock,
+  ShieldCheck,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../lib/api';
@@ -19,6 +21,7 @@ import { useAuthStore } from '../stores/authStore';
 import { VoiceListingPanel } from '../components/VoiceListingPanel';
 import type { ExtractedFields } from '../components/VoiceListingPanel';
 import { ProductImageUpload } from '../components/ProductImageUpload';
+import { InvoiceImageUpload } from '../components/InvoiceImageUpload';
 import { calculateUrgencyFromExpiry, validateExpiryDate, MIN_EXPIRY_DAYS } from '../utils/urgency';
 
 const CATEGORIES = [
@@ -62,6 +65,7 @@ export const CreateListingPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit');
+  const fromInventory = searchParams.get('fromInventory');
   const isEditMode = Boolean(editId);
 
   const user = useAuthStore((s) => s.user);
@@ -71,8 +75,10 @@ export const CreateListingPage: React.FC = () => {
   const [category, setCategory] = useState('Groceries');
   const [quantity, setQuantity] = useState<number>(0);
   const [unit, setUnit] = useState('packets');
-  const [mrp, setMrp] = useState<number>(0);
   const [pricePerUnit, setPrice] = useState<number>(0);
+  const [originalMrp, setOriginalMrp] = useState<number>(0);
+  const [invoiceVerificationId, setInvoiceVerificationId] = useState<string | null>(null);
+  const [verifiedInvoiceItem, setVerifiedInvoiceItem] = useState<string>('');
   const [expiryDate, setExpiry] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -126,7 +132,8 @@ export const CreateListingPage: React.FC = () => {
         if (CATEGORIES.includes(item.category)) setCategory(item.category);
         setQuantity(item.quantity || 0);
         if (UNITS.includes(item.unit)) setUnit(item.unit);
-        setMrp(item.mrp || 0);
+        setOriginalMrp(item.originalMrp ?? item.mrp ?? 0);
+        setInvoiceVerificationId(item.invoiceVerificationId || null);
         setPrice(item.pricePerUnit || 0);
         if (item.expiryDate) {
           setExpiry(item.expiryDate.split('T')[0]);
@@ -143,7 +150,7 @@ export const CreateListingPage: React.FC = () => {
       });
   }, [editId]);
 
-  // Smart Inventory recommendation pre-fill
+  // Smart Inventory recommendation pre-fill (Original MRP is NOT pre-filled as editable text)
   useEffect(() => {
     if (editId) return;
 
@@ -152,7 +159,6 @@ export const CreateListingPage: React.FC = () => {
     const prefillQty = searchParams.get('quantity');
     const prefillUnit = searchParams.get('unit');
     const prefillExpiry = searchParams.get('expiryDate');
-    const prefillMrp = searchParams.get('mrp');
 
     if (prefillTitle) setTitle(prefillTitle);
     if (prefillCategory && CATEGORIES.includes(prefillCategory)) setCategory(prefillCategory);
@@ -162,13 +168,6 @@ export const CreateListingPage: React.FC = () => {
     }
     if (prefillUnit && UNITS.includes(prefillUnit)) setUnit(prefillUnit);
     if (prefillExpiry) setExpiry(prefillExpiry);
-    if (prefillMrp) {
-      const m = parseFloat(prefillMrp);
-      if (!isNaN(m) && m > 0) {
-        setMrp(m);
-        setPrice(Math.round(m * 0.8));
-      }
-    }
   }, [editId, searchParams]);
 
   const handleVoiceFieldsExtracted = (fields: ExtractedFields) => {
@@ -186,7 +185,6 @@ export const CreateListingPage: React.FC = () => {
     if (CATEGORIES.includes(fields.category)) setCategory(fields.category);
     setQuantity(fields.quantity || 0);
     if (UNITS.includes(fields.unit)) setUnit(fields.unit);
-    if (fields.mrp) setMrp(fields.mrp);
     setPrice(fields.pricePerUnit || 0);
     if (fields.expiryDate) {
       setExpiry(fields.expiryDate);
@@ -194,6 +192,19 @@ export const CreateListingPage: React.FC = () => {
     setVoiceAutoFilled(true);
     setMode('manual');
     setError('');
+  };
+
+  const handleInvoiceVerificationSuccess = (verificationId: string, mrp: number, matchedProduct?: string) => {
+    setInvoiceVerificationId(verificationId);
+    setOriginalMrp(mrp);
+    if (matchedProduct) setVerifiedInvoiceItem(matchedProduct);
+    setError('');
+  };
+
+  const handleInvoiceVerificationReset = () => {
+    setInvoiceVerificationId(null);
+    setOriginalMrp(0);
+    setVerifiedInvoiceItem('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -208,18 +219,25 @@ export const CreateListingPage: React.FC = () => {
       return;
     }
 
-    // Validate MRP
-    if (!mrp || mrp <= 0) {
-      setError('Product MRP must be a positive number.');
+    // Validate Invoice Image Verification: Required
+    if (!isEditMode && !invoiceVerificationId) {
+      setError('Please upload the product invoice to verify the Original MRP.');
       return;
     }
 
-    if (pricePerUnit > mrp) {
-      setError(`Selling price (₹${pricePerUnit}) cannot exceed the Product MRP (₹${mrp}).`);
+    // Validate Original MRP is verified
+    if (!originalMrp || originalMrp <= 0) {
+      setError('Please upload the product invoice to verify the Original MRP.');
       return;
     }
 
-    // Validate image: required on create
+    // Validate pricePerUnit <= originalMrp
+    if (pricePerUnit > originalMrp) {
+      setError(`Selling price (₹${pricePerUnit}) cannot exceed the verified Original MRP (₹${originalMrp}).`);
+      return;
+    }
+
+    // Validate product image: required on create
     if (!isEditMode && !imageFile && !imageUrl) {
       const imgMsg = 'Product image is required. Please upload a product photo.';
       setImageError(imgMsg);
@@ -240,7 +258,7 @@ export const CreateListingPage: React.FC = () => {
     try {
       let finalImageUrl = imageUrl;
 
-      // If user uploaded a new image file, upload it
+      // If user uploaded a new product image file, upload it
       if (imageFile) {
         const formData = new FormData();
         formData.append('image', imageFile);
@@ -255,10 +273,11 @@ export const CreateListingPage: React.FC = () => {
         category,
         quantity: Number(quantity),
         unit,
-        mrp: Number(mrp),
+        originalMrp: Number(originalMrp),
         pricePerUnit: Number(pricePerUnit),
         expiryDate: new Date(expiryDate).toISOString(),
         imageUrl: finalImageUrl,
+        invoiceVerificationId,
       };
 
       if (isEditMode && editId) {
@@ -280,8 +299,8 @@ export const CreateListingPage: React.FC = () => {
   };
 
   const totalValue = quantity * pricePerUnit;
-  const discountPercent = mrp > 0 && pricePerUnit > 0 && pricePerUnit <= mrp
-    ? Math.round(((mrp - pricePerUnit) / mrp) * 100)
+  const discountPercent = originalMrp > 0 && pricePerUnit > 0 && pricePerUnit <= originalMrp
+    ? Math.round(((originalMrp - pricePerUnit) / originalMrp) * 100)
     : 0;
 
   if (fetchingListing) {
@@ -309,166 +328,175 @@ export const CreateListingPage: React.FC = () => {
                 fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)',
                 textDecoration: 'none', transition: 'color 0.15s',
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--sb-primary, #6F8F69)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--sb-text-muted, #7A847A)')}
             >
-              <ArrowLeft size={16} /> Cancel & Return to Listing
+              <ArrowLeft size={14} /> Back to listing
             </Link>
           </div>
         )}
 
-        {/* Banner if prefilled from Smart Inventory */}
-        {searchParams.get('fromInventory') && (
-          <div style={{
-            background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
-            borderRadius: 6, padding: '12px 16px', marginBottom: 20,
-            display: 'flex', alignItems: 'center', gap: 10,
-          }}>
-            <Sparkles size={16} color="var(--sb-primary, #6F8F69)" />
-            <span style={{ fontSize: 13, color: 'var(--sb-primary, #6F8F69)', fontFamily: 'Work Sans, sans-serif', fontWeight: 500 }}>
-              Prefilled from Smart Inventory Recommendation. Review lot details and adjust liquidation price before publishing.
-            </span>
-          </div>
-        )}
-
         {/* ── Page Header ── */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <h1 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32, color: 'var(--sb-text-primary, #182018)', margin: 0, letterSpacing: '-0.01em' }}>
-              {isEditMode ? 'Edit Stock Listing' : 'List New Stock'}
-            </h1>
-            {isEditMode && (
-              <span style={{
-                fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700,
-                color: 'var(--sb-primary, #6F8F69)', background: 'var(--sb-primary-pale, #EAF1E7)',
-                border: '1px solid var(--sb-primary-soft, #DCE8D8)', borderRadius: 4, padding: '3px 8px',
-              }}>
-                Editing #{editId?.substring(0, 8).toUpperCase()}
-              </span>
-            )}
-          </div>
-          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-muted, #7A847A)', margin: 0 }}>
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{
+            fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 32,
+            color: 'var(--sb-text-primary, #182018)', marginBottom: 8, letterSpacing: '-0.01em',
+          }}>
+            {isEditMode ? 'Edit Stock Listing' : 'List Surplus Stock'}
+          </h1>
+          <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 14, color: 'var(--sb-text-secondary, #4F5A51)' }}>
             {isEditMode
-              ? 'Update price, quantity, or terms. Existing lot details have been loaded into the form below.'
-              : 'Fill in the details or use voice to quickly create a listing.'}
+              ? 'Update listing details or extend shelf life. Original MRP is verified from your invoice.'
+              : 'Turn your expiring inventory into recovered cash. Original MRP is verified from your invoice image by AI.'}
           </p>
-        </motion.div>
+        </div>
 
-        <hr className="stitch-divider" style={{ marginBottom: 28 }} />
-
-        {/* ── Mode Toggle (Only show on new listing) ── */}
-        {!isEditMode && (
-          <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
-            {([
-              { key: 'manual', label: 'Manual Entry', icon: <Pencil size={14} /> },
-              { key: 'voice', label: 'Voice Input', icon: <Mic size={14} /> },
-            ] as const).map((m) => (
-              <button
-                key={m.key}
-                onClick={() => setMode(m.key)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '9px 18px', borderRadius: 4,
-                  fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600,
-                  border: '1px solid',
-                  cursor: 'pointer', transition: 'all 0.15s',
-                  ...(mode === m.key
-                    ? { background: 'var(--sb-primary-pale, #EAF1E7)', borderColor: 'var(--sb-primary, #6F8F69)', color: 'var(--sb-primary, #6F8F69)' }
-                    : { background: 'transparent', borderColor: 'var(--sb-border, #D8E0D5)', color: 'var(--sb-text-secondary, #4F5A51)' }),
-                }}
-              >
-                {m.icon} {m.label}
-              </button>
-            ))}
+        {/* Smart Inventory Source Notice Banner */}
+        {fromInventory && !isEditMode && (
+          <div style={{
+            background: 'var(--sb-primary-pale, #EAF1E7)',
+            border: '1px solid var(--sb-primary-soft, #DCE8D8)',
+            borderRadius: 6,
+            padding: '12px 16px',
+            marginBottom: 24,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}>
+            <Sparkles size={16} color="var(--sb-primary, #6F8F69)" style={{ flexShrink: 0 }} />
+            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-primary, #6F8F69)', margin: 0, lineHeight: 1.4 }}>
+              Pre-filled from your <strong>Smart Inventory Predictor</strong>. Please upload the product image and invoice to verify the Original MRP.
+            </p>
           </div>
         )}
 
-        {mode === 'voice' && !isEditMode ? (
+        {/* ── Mode Toggle: Voice vs Manual ── */}
+        {!isEditMode && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+            <button
+              type="button"
+              onClick={() => setMode('manual')}
+              style={{
+                flex: 1, padding: '12px 16px', borderRadius: 4,
+                fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600,
+                cursor: 'pointer', transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                background: mode === 'manual' ? 'var(--sb-surface, #FFFFFF)' : 'transparent',
+                color: mode === 'manual' ? 'var(--sb-text-primary, #182018)' : 'var(--sb-text-muted, #7A847A)',
+                border: mode === 'manual' ? '1px solid var(--sb-border, #D8E0D5)' : '1px solid transparent',
+                boxShadow: mode === 'manual' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
+              }}
+            >
+              <Pencil size={15} /> Manual Entry
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('voice')}
+              style={{
+                flex: 1, padding: '12px 16px', borderRadius: 4,
+                fontFamily: 'Work Sans, sans-serif', fontSize: 13, fontWeight: 600,
+                cursor: 'pointer', transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                background: mode === 'voice' ? 'var(--sb-surface, #FFFFFF)' : 'transparent',
+                color: mode === 'voice' ? 'var(--sb-primary, #6F8F69)' : 'var(--sb-text-muted, #7A847A)',
+                border: mode === 'voice' ? '1px solid var(--sb-border, #D8E0D5)' : '1px solid transparent',
+                boxShadow: mode === 'voice' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
+              }}
+            >
+              <Mic size={15} /> Voice Input (Indian Languages)
+            </button>
+          </div>
+        )}
+
+        {/* ── Voice Mode Panel ── */}
+        {mode === 'voice' && !isEditMode && (
           <VoiceListingPanel onFieldsExtracted={handleVoiceFieldsExtracted} />
-        ) : (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        )}
+
+        {/* ── Manual Mode Form ── */}
+        {(mode === 'manual' || isEditMode) && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
             {voiceAutoFilled && (
               <div style={{
-                background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
-                borderRadius: 4, padding: '12px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8,
+                background: 'var(--sb-primary-pale, #EAF1E7)',
+                border: '1px solid var(--sb-primary-soft, #DCE8D8)',
+                borderRadius: 6,
+                padding: '10px 16px',
+                marginBottom: 20,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                color: 'var(--sb-primary, #6F8F69)',
+                fontSize: 13,
               }}>
-                <AlertCircle size={14} color="var(--sb-primary, #6F8F69)" />
-                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-primary, #6F8F69)' }}>
-                  Voice data auto-filled — please review before publishing.
-                </span>
-              </div>
-            )}
-
-            {isEditMode && (
-              <div style={{
-                background: 'var(--sb-primary-pale, #EAF1E7)', border: '1px solid var(--sb-primary-soft, #DCE8D8)',
-                borderRadius: 6, padding: '12px 16px', marginBottom: 20,
-                display: 'flex', alignItems: 'center', gap: 10,
-              }}>
-                <CheckCircle size={16} color="var(--sb-primary, #6F8F69)" />
-                <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-primary, #182018)' }}>
-                  Existing stock details loaded. Modify the price, quantity, or details below and save.
-                </span>
+                <CheckCircle size={15} />
+                <span>Product fields auto-filled from speech. Please upload the product image and invoice image to complete verification.</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit}>
-              <div style={{ background: 'var(--sb-surface, #FFFFFF)', border: '1px solid var(--sb-border, #D8E0D5)', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
-                
-                {/* ── Section: Basics ── */}
+              <div style={{
+                background: 'var(--sb-surface, #FFFFFF)',
+                border: '1px solid var(--sb-border, #D8E0D5)',
+                borderRadius: 8,
+                overflow: 'hidden',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+              }}>
+
+                {/* ── Section 1: Product Information ── */}
                 <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
-                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: 'var(--sb-text-primary, #182018)', marginBottom: 20 }}>
-                    Basics
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: 'var(--sb-text-primary, #182018)', marginBottom: 6 }}>
+                    Product Details
+                  </p>
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)', marginBottom: 20 }}>
+                    Enter product name, category, and quantity available for trade.
                   </p>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                    {/* Title */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div>
-                      <label style={labelStyle}>Listing Title *</label>
+                      <label style={labelStyle}>Product Name *</label>
                       <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         required
-                        placeholder="e.g., 500 Britannia Biscuit Packets (MRP ₹10)"
+                        placeholder="e.g., Britannia 50-50 Maska Chaska Biscuits"
                         style={inputStyle}
                       />
                     </div>
 
-                    {/* Category + Unit */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                       <div>
                         <label style={labelStyle}>Category *</label>
                         <select
                           value={category}
                           onChange={(e) => setCategory(e.target.value)}
-                          style={{ ...inputStyle, cursor: 'pointer' }}
+                          style={inputStyle}
                         >
                           {CATEGORIES.map((c) => (
-                            <option key={c} value={c}>
-                              {c}
-                            </option>
+                            <option key={c} value={c}>{c}</option>
                           ))}
                         </select>
                       </div>
+
                       <div>
-                        <label style={labelStyle}>Unit *</label>
+                        <label style={labelStyle}>Unit of Measurement *</label>
                         <select
                           value={unit}
                           onChange={(e) => setUnit(e.target.value)}
-                          style={{ ...inputStyle, cursor: 'pointer' }}
+                          style={inputStyle}
                         >
                           {UNITS.map((u) => (
-                            <option key={u} value={u}>
-                              {u}
-                            </option>
+                            <option key={u} value={u}>{u}</option>
                           ))}
                         </select>
                       </div>
                     </div>
 
-                    {/* Qty, MRP & Selling Price */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+                    {/* Quantity & Selling Price (NO manual editable MRP input) */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                       <div>
                         <label style={labelStyle}>Quantity Available *</label>
                         <input
@@ -478,19 +506,6 @@ export const CreateListingPage: React.FC = () => {
                           onChange={(e) => setQuantity(Number(e.target.value))}
                           required
                           placeholder="0"
-                          style={inputStyle}
-                        />
-                      </div>
-                      <div>
-                        <label style={labelStyle}>Product MRP (₹) *</label>
-                        <input
-                          type="number"
-                          min="0.01"
-                          step="0.01"
-                          value={mrp || ''}
-                          onChange={(e) => setMrp(Number(e.target.value))}
-                          required
-                          placeholder="e.g. 100"
                           style={inputStyle}
                         />
                       </div>
@@ -506,43 +521,21 @@ export const CreateListingPage: React.FC = () => {
                           placeholder="0.00"
                           style={{
                             ...inputStyle,
-                            borderColor: mrp > 0 && pricePerUnit > mrp ? 'var(--sb-danger, #A65C55)' : 'var(--sb-border, #D8E0D5)',
+                            borderColor: originalMrp > 0 && pricePerUnit > originalMrp ? 'var(--sb-danger, #A65C55)' : 'var(--sb-border, #D8E0D5)',
                           }}
                         />
                       </div>
                     </div>
-
-                    {/* MRP & Discount Helper */}
-                    {mrp > 0 && pricePerUnit > 0 && (
-                      <div style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '10px 14px', borderRadius: 6,
-                        background: pricePerUnit > mrp ? 'rgba(166,92,85,0.08)' : 'var(--sb-primary-pale, #EAF1E7)',
-                        border: `1px solid ${pricePerUnit > mrp ? 'rgba(166,92,85,0.25)' : 'var(--sb-primary-soft, #DCE8D8)'}`,
-                      }}>
-                        <span style={{
-                          fontFamily: 'Work Sans, sans-serif', fontSize: 12,
-                          color: pricePerUnit > mrp ? 'var(--sb-danger, #A65C55)' : 'var(--sb-primary, #6F8F69)', fontWeight: 600,
-                        }}>
-                          {pricePerUnit > mrp
-                            ? `⚠️ Selling price exceeds MRP! Maximum allowed selling price is ₹${mrp}.`
-                            : `Offering ${discountPercent}% discount off MRP (₹${mrp} printed).`}
-                        </span>
-                        <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, color: 'var(--sb-text-muted, #7A847A)' }}>
-                          MRP Rule Enforced
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
 
-                {/* ── Section: Product Image Upload ── */}
+                {/* ── Section 2: Product Image Upload (Public) ── */}
                 <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
                   <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: 'var(--sb-text-primary, #182018)', marginBottom: 6 }}>
                     Product Image *
                   </p>
                   <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)', marginBottom: 16 }}>
-                    Upload a clear photo of your surplus stock or packaging lot (JPG, PNG, WEBP, max 5 MB).
+                    Publicly displayed to buyers in the StockBridge marketplace (JPG, PNG, WEBP, max 5 MB).
                   </p>
                   <ProductImageUpload
                     imageFile={imageFile}
@@ -552,11 +545,81 @@ export const CreateListingPage: React.FC = () => {
                     onImageRemoved={handleImageRemoved}
                     onErrorChange={(err) => setImageError(err)}
                     disabled={loading}
-                    label="Product Image (Required)"
+                    label="Product Image (Buyer-Visible)"
                   />
                 </div>
 
-                {/* ── Section: Expiry Date & Urgency ── */}
+                {/* ── Section 3: Invoice Image & Original MRP Verification (Private) ── */}
+                <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
+                  <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: 'var(--sb-text-primary, #182018)', marginBottom: 6 }}>
+                    Original MRP & Invoice Verification *
+                  </p>
+                  <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 13, color: 'var(--sb-text-muted, #7A847A)', marginBottom: 16 }}>
+                    To prevent false discounts, Original MRP cannot be entered manually. It is automatically verified from your uploaded invoice by AI.
+                  </p>
+
+                  <InvoiceImageUpload
+                    invoiceVerificationId={invoiceVerificationId}
+                    verifiedOriginalMrp={originalMrp}
+                    productName={title}
+                    category={category}
+                    onVerificationSuccess={handleInvoiceVerificationSuccess}
+                    onVerificationReset={handleInvoiceVerificationReset}
+                    disabled={loading}
+                  />
+
+                  {/* Read-Only Original MRP Banner */}
+                  <div style={{ marginTop: 16 }}>
+                    {originalMrp > 0 ? (
+                      <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '14px 18px', borderRadius: 6,
+                        background: pricePerUnit > originalMrp ? 'rgba(166,92,85,0.08)' : 'var(--sb-primary-pale, #EAF1E7)',
+                        border: `1px solid ${pricePerUnit > originalMrp ? 'rgba(166,92,85,0.25)' : 'var(--sb-primary-soft, #DCE8D8)'}`,
+                      }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <ShieldCheck size={16} color="var(--sb-primary, #6F8F69)" />
+                            <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sb-primary, #6F8F69)' }}>
+                              Original MRP (Read-only)
+                            </span>
+                            <span style={{ fontSize: 10, color: 'var(--sb-text-muted, #7A847A)', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                              <Lock size={10} /> Verified
+                            </span>
+                          </div>
+                          <p style={{ fontFamily: 'Sora, sans-serif', fontSize: 22, fontWeight: 700, color: 'var(--sb-text-primary, #182018)', margin: '4px 0 0' }}>
+                            ₹{originalMrp} <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, fontWeight: 400, color: 'var(--sb-text-muted, #7A847A)' }}>per {unit}</span>
+                          </p>
+                          {pricePerUnit > originalMrp ? (
+                            <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-danger, #A65C55)', fontWeight: 600, margin: '6px 0 0' }}>
+                              ⚠️ Selling price (₹{pricePerUnit}) cannot exceed the verified Original MRP (₹{originalMrp}).
+                            </p>
+                          ) : (
+                            pricePerUnit > 0 && (
+                              <p style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-primary, #6F8F69)', fontWeight: 600, margin: '6px 0 0' }}>
+                                Offering {discountPercent}% discount off verified Original MRP.
+                              </p>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{
+                        background: 'var(--sb-surface-soft, #F2F6EF)',
+                        border: '1px dashed var(--sb-border, #D8E0D5)',
+                        borderRadius: 6, padding: '12px 16px',
+                        display: 'flex', alignItems: 'center', gap: 10,
+                      }}>
+                        <Lock size={16} color="var(--sb-text-muted, #7A847A)" />
+                        <span style={{ fontFamily: 'Work Sans, sans-serif', fontSize: 12, color: 'var(--sb-text-muted, #7A847A)' }}>
+                          Original MRP will be automatically locked and displayed here once invoice image is uploaded and verified.
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── Section 4: Expiry Date & Urgency ── */}
                 <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--sb-border, #D8E0D5)' }}>
                   <p style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 16, color: 'var(--sb-text-primary, #182018)', marginBottom: 6 }}>
                     Expiry Date & Urgency
@@ -729,3 +792,5 @@ export const CreateListingPage: React.FC = () => {
     </div>
   );
 };
+
+export default CreateListingPage;
