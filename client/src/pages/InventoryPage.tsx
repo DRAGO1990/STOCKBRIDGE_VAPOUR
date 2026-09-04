@@ -311,7 +311,7 @@ export const InventoryPage: React.FC = () => {
           {/* Quick Metrics Bar */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
             gap: 1,
             background: 'var(--sb-border, #D8E0D5)',
             borderRadius: 8,
